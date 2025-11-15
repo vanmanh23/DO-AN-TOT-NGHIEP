@@ -30,10 +30,6 @@ public class DepartmentService {
     }
 
     public DepartmentDTO createDepartment(DepartmentRequestDTO request) {
-        if (departmentRepository.existsByName(request.getName())) {
-            throw new RuntimeException("Department with name already exists: " + request.getName());
-        }
-
 //        Department department = new Department();
 //        department.setName(request.getName());
 //        department.setLocation(request.getLocation());

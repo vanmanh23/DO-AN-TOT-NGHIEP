@@ -28,12 +28,12 @@ public class PatientService {
         Patient patient = new Patient();
         patient.setID(generateFormCode());
         patient.setName(patientRequestDTO.getName());
-        patient.setAge(patientRequestDTO.getAge());
+//        patient.setAge(patientRequestDTO.getAge());
         patient.setAddress(patientRequestDTO.getAddress());
         patient.setGender(patientRequestDTO.getGender());
         patient.setBirthdate(patientRequestDTO.getBirthdate());
         patient.setPhoneNumber(patientRequestDTO.getPhoneNumber());
-
+        System.out.println("==============="+patient);
         return patientRepository.save(patient);
     }
     @Transactional
@@ -129,9 +129,9 @@ public class PatientService {
         Patient patient = patientRepository.findByPhoneNumber(phonenumber);
         return patient;
     }
-    private void calculateAge(PatientRequestDTO patientRequestDTO) {
-        if (patientRequestDTO.getBirthdate() != null) {
-            patientRequestDTO.setAge(Period.between(patientRequestDTO.getBirthdate(), LocalDate.now()).getYears());
-        }
-    }
+//    private void calculateAge(PatientRequestDTO patientRequestDTO) {
+//        if (patientRequestDTO.getBirthdate() != null) {
+//            patientRequestDTO.setAge(Period.between(patientRequestDTO.getBirthdate(), LocalDate.now()).getYears());
+//        }
+//    }
 }

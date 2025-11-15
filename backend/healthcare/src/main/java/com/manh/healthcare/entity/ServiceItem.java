@@ -3,9 +3,7 @@ package com.manh.healthcare.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -22,13 +20,20 @@ public class ServiceItem {
     private String serviceCode;
     @Column(name = "service_name", nullable = false)
     private String serviceName;
-//    @OneToOne(cascade = CascadeType.ALL)
-//    @JoinColumn(name = "modality_id", referencedColumnName = "id")
-//    private Modalities modalities;
     @Column(name = "unit_price", nullable = false)
     private double unitPrice;
-    @JsonIgnore
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "modality_id", nullable = false)
+    @JsonBackReference  // ← Thêm này (phía child) - Sẽ KHÔNG serialize modality
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Modalities modality;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = true)
+    @JsonBackReference  // ← Thêm này (phía child) - Sẽ KHÔNG serialize order
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Orders order;
 }

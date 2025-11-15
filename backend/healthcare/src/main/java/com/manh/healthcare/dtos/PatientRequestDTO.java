@@ -22,8 +22,8 @@ public class PatientRequestDTO {
     @NotNull(message = "Giới tính không được để trống")
     private EGender gender;
 
-    @NotNull(message = "tuổi không được để trống.")
-    private Integer age;
+//    @NotNull(message = "tuổi không được để trống.")
+//    private Integer age;
 
     @NotBlank(message = "Địa chỉ không được để trống")
     @Size(max = 255, message = "Địa chỉ không quá 255 ký tự")

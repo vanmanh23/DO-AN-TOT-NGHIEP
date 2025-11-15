@@ -64,3 +64,32 @@ export type DiagnoseProps = {
   description: string;
   studyId: string;
 }
+
+// export type ModalitiesProps = {
+//   id: string;
+//   type: string;
+//   manufacturer: string;
+//   model: string;
+//   status: string;
+//   departmentId: string;
+//   department: DepartmentProps;
+//   serviceItems: Set<ServiceItemProps>;
+// }
+// export type ServiceItemProps = {
+//   id: string;
+//   serviceCode: string;
+//   serviceName: string;
+//   // modality: ModalitiesDTO;
+//   unitPrice: number;
+// }
+// export type DepartmentProps = {
+//     id: string;
+//     name: string;
+//     location: string;
+// }
+// export type BaseResponse<T = unknown, E = unknown> = {
+//   isSuccess: boolean;
+//   message: string;
+//   result: T;
+//   errors: E;
+// };

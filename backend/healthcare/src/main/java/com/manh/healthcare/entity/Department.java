@@ -2,9 +2,9 @@ package com.manh.healthcare.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.util.Objects;
 
 @Entity
 @Table(name = "departments")
@@ -21,5 +21,7 @@ public class Department {
     @Column(name = "location", nullable = false)
     private String location;
     @OneToOne(mappedBy = "department")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Modalities modalities;
 }

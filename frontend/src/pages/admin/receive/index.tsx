@@ -1,45 +1,84 @@
-import { Calendar, FileText, Save, Search } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Calendar, FileText, Plus, Save, Search } from "lucide-react";
 import { useState } from "react";
+import orderApis from "../../../apis/orderApis";
+import type { ServiceItem } from "../../../types/order";
 
 export default function Component() {
-    const [patientInfo, setPatientInfo] = useState({
-    patientId: '',
-    patientCode: '',
-    name: '',
-    age: '',
-    dob: '',
-    gender: 'Nam',
-    cccdCode: '',
-    address: '',
-    diagnosis: '',
-    department: 'Khoa CĐHA',
-    note: ''
+  const [patientInfo, setPatientInfo] = useState({
+    patientId: "",
+    patientCode: "",
+    name: "",
+    age: "",
+    dob: "",
+    gender: "Nam",
+    cccdCode: "",
+    address: "",
+    diagnosis: "",
+    department: "Khoa CĐHA",
+    note: "",
   });
 
-  const [services, setServices] = useState<{ id: number; code: string; name: string; type: string; }[]>([]);
-  const [serviceType, setServiceType] = useState('XQuang số hóa');
-  const [selectedService, setSelectedService] = useState('');
+  // const [services, setServices] = useState<ServiceItem[]>([]);
+  const [serviceType, setServiceType] = useState("CT");
+  const [selectedService, setSelectedService] = useState<ServiceItem[]>([]);
+  const [serviceList, setServiceList] = useState<ServiceItem[]>([]);
+  const [currentService, setCurrentService] = useState("");
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setPatientInfo(prev => ({ ...prev, [name]: value }));
+    setPatientInfo((prev) => ({ ...prev, [name]: value }));
   };
+  const handleAddToSelected = () => {
+    if (!currentService || currentService === "-") return;
 
-  const handleAddService = () => {
-    if (selectedService) {
-      setServices(prev => [...prev, {
-        id: Date.now(),
-        code: selectedService,
-        name: `Dịch vụ ${selectedService}`,
-        type: serviceType
-      }]);
-      setSelectedService('');
+    const service = serviceList.find((s) => s.serviceName === currentService);
+    if (
+      service &&
+      !selectedService.find((s) => s.serviceCode === service.serviceCode)
+    ) {
+      setSelectedService([...selectedService, service]);
+      setCurrentService("");
     }
   };
-
-  const handleSave = () => {
-    alert('Lưu yêu cầu thành công!');
+  console.log("selectedService", selectedService);
+  const getAllServices = async () => {
+    try {
+      const response = await orderApis.getByType(serviceType);
+      // if(response && response.result) {
+      //   setServiceList(response.result[0].serviceItems);
+      // }
+      response.result?.forEach((item) => setServiceList(item.serviceItems));
+      return response.result;
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách dịch vụ:", error);
+      return [];
+    }
   };
+  // Sử dụng useQuery
+  const { data, isLoading, error, isError } = useQuery({
+    queryKey: ["modalities", serviceType], // unique key cho query này
+    queryFn: getAllServices, // hàm fetch data
+  });
+
+  // Xử lý loading state
+  if (isLoading) {
+    return <div>Đang tải dữ liệu...</div>;
+  }
+
+  // Xử lý error state
+  if (isError) {
+    return <div>Lỗi: {error.message}</div>;
+  }
+
+  //   if (data && data[0]) {
+  //   setServiceList(data[0]?.serviceItems);
+  // }
+  console.log("setServiceList", serviceList);
+  const handleSave = () => {
+    alert("Lưu yêu cầu thành công!");
+  };
+  console.log("Dữ liệu nhận được từ useQuery:", data);
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Breadcrumb
@@ -85,9 +124,6 @@ export default function Component() {
                       placeholder="TÌM KIẾM MÃ, HỌ TÊN, SỐ BHYT"
                       className="flex-1 border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500"
                     />
-                    <button className="bg-blue-600 text-white px-2 sm:px-4 py-2 rounded hover:bg-blue-700 transition flex-shrink-0">
-                      <Search size={14} className="sm:w-4 sm:h-4" />
-                    </button>
                   </div>
                 </div>
               </div>
@@ -107,7 +143,9 @@ export default function Component() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">Ngày sinh</label>
+                  <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
+                    Ngày sinh
+                  </label>
                   <input
                     type="date"
                     name="dob"
@@ -134,7 +172,9 @@ export default function Component() {
 
               {/* Mã số cccd */}
               <div>
-                <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">Mã số cccd/cmt  <span className="text-red-500">*</span></label>
+                <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
+                  Mã số cccd/cmt <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   name="cccdCode"
@@ -162,14 +202,18 @@ export default function Component() {
               {/* Bác sĩ chỉ định & Khoa chỉ định */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3 md:gap-4">
                 <div>
-                  <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">Bác sĩ chỉ định</label>
+                  <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
+                    Bác sĩ chỉ định
+                  </label>
                   <input
                     type="text"
                     className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">Khoa chỉ định</label>
+                  <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
+                    Khoa chỉ định
+                  </label>
                   <select
                     name="department"
                     value={patientInfo.department}
@@ -185,7 +229,9 @@ export default function Component() {
 
               {/* Lời dặn */}
               <div>
-                <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">Lời dặn</label>
+                <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
+                  Lời dặn
+                </label>
                 <textarea
                   name="note"
                   value={patientInfo.note}
@@ -216,10 +262,10 @@ export default function Component() {
                   onChange={(e) => setServiceType(e.target.value)}
                   className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500"
                 >
-                  <option>XQuang số hóa</option>
-                  <option>CT Scanner</option>
+                  <option>CT</option>
+                  <option>XRAY</option>
                   <option>MRI</option>
-                  <option>Siêu âm</option>
+                  <option>MAMMO</option>
                 </select>
               </div>
 
@@ -228,16 +274,28 @@ export default function Component() {
                 <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
                   Dịch vụ <span className="text-red-500">*</span>
                 </label>
+
                 <div className="flex gap-1 sm:gap-2">
-                  <input
-                    type="text"
-                    value={selectedService}
-                    onChange={(e) => setSelectedService(e.target.value)}
-                    placeholder="Mã dịch vụ"
-                    className="flex-1 border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500"
-                  />
-                  <button className="bg-blue-600 text-white px-2 sm:px-4 py-2 rounded hover:bg-blue-700 transition flex-shrink-0">
-                    <Search size={14} className="sm:w-4 sm:h-4" />
+                  <select
+                    value={currentService}
+                    onChange={(e) => setCurrentService(e.target.value)}
+                    className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500 "
+                  >
+                    <option value="">-- Chọn dịch vụ --</option>
+                    {serviceList.map((service) => (
+                      <option
+                        key={service.serviceCode}
+                        value={service.serviceName}
+                      >
+                        {service.serviceName}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={handleAddToSelected}
+                    className="bg-blue-600 text-white px-2 sm:px-4 py-2 rounded hover:bg-blue-700 transition flex-shrink-0"
+                  >
+                    <Plus size={14} className="sm:w-4 sm:h-4" />
                   </button>
                 </div>
               </div>
@@ -245,10 +303,12 @@ export default function Component() {
               {/* Danh sách dịch vụ */}
               <div className="border-t pt-3 sm:pt-4">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                  <h3 className="text-xs sm:text-sm font-medium">Danh sách dịch vụ</h3>
+                  <h3 className="text-xs sm:text-sm font-medium">
+                    Danh sách dịch vụ
+                  </h3>
                   <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 w-full sm:w-auto">
                     <button
-                      onClick={handleAddService}
+                      // onClick={}
                       className="bg-blue-600 text-white px-3 sm:px-4 py-2 rounded hover:bg-blue-700 transition flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap flex-1 sm:flex-none"
                     >
                       <FileText size={14} className="sm:w-4 sm:h-4" />
@@ -261,24 +321,41 @@ export default function Component() {
                   </div>
                 </div>
 
-                {services.length > 0 ? (
+                {selectedService.length > 0 ? (
                   <div className="border rounded overflow-x-auto">
                     <table className="w-full text-xs sm:text-sm">
                       <thead className="bg-gray-50">
                         <tr>
-                          <th className="text-left px-2 sm:px-4 py-2 border-b">Mã dịch vụ</th>
-                          <th className="text-left px-2 sm:px-4 py-2 border-b">Tên dịch vụ</th>
-                          <th className="text-left px-2 sm:px-4 py-2 border-b">Thao tác</th>
+                          <th className="text-left px-2 sm:px-4 py-2 border-b">
+                            Mã dịch vụ
+                          </th>
+                          <th className="text-left px-2 sm:px-4 py-2 border-b">
+                            Tên dịch vụ
+                          </th>
+                          <th className="text-left px-2 sm:px-4 py-2 border-b">
+                            Thao tác
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
-                        {services.map((service) => (
-                          <tr key={service.id} className="hover:bg-gray-50 transition">
-                            <td className="px-2 sm:px-4 py-2 border-b">{service.code}</td>
-                            <td className="px-2 sm:px-4 py-2 border-b">{service.name}</td>
+                        {selectedService.map((service) => (
+                          <tr
+                            key={service.id}
+                            className="hover:bg-gray-50 transition"
+                          >
+                            <td className="px-2 sm:px-4 py-2 border-b">
+                              {service.serviceCode}
+                            </td>
+                            <td className="px-2 sm:px-4 py-2 border-b">
+                              {service.serviceName}
+                            </td>
                             <td className="px-2 sm:px-4 py-2 border-b">
                               <button
-                                onClick={() => setServices(prev => prev.filter(s => s.id !== service.id))}
+                                onClick={() =>
+                                  setSelectedService((prev) =>
+                                    prev.filter((s) => s.id !== service.id)
+                                  )
+                                }
                                 className="text-red-600 hover:text-red-800 transition font-medium"
                               >
                                 Xóa
@@ -314,5 +391,5 @@ export default function Component() {
         </div>
       </div>
     </div>
-  )
+  );
 }

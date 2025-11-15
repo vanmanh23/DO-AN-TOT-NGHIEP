@@ -1,13 +1,14 @@
 package com.manh.healthcare.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Entity;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Table(name = "orders")
@@ -24,9 +25,6 @@ public class Orders {
     private EPriority priority;
 
     @Enumerated(EnumType.STRING)
-    private EModality modality;
-
-    @Enumerated(EnumType.STRING)
     private EOrderStatus status;
 
     @Column(name = "created_at", nullable = false)
@@ -40,8 +38,16 @@ public class Orders {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id", nullable = false)
+    @JsonBackReference
     private Patient patient;  // quan hệ tới Patient
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "study_id", referencedColumnName = "id")
-    private Study studies;
+
+//    @OneToOne(cascade = CascadeType.ALL)
+//    @JoinColumn(name = "study_id", referencedColumnName = "order_id")
+//    private Study studies;
+
+    @JsonManagedReference
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ServiceItem> serviceItems;
 }

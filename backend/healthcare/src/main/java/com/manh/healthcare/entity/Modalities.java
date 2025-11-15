@@ -2,10 +2,9 @@ package com.manh.healthcare.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -25,11 +24,17 @@ public class Modalities {
     private String model;
     @Enumerated(EnumType.STRING)
     private EStatusModality status;
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "department_id", referencedColumnName = "department_id")
     private Department department;
-//    @OneToOne(mappedBy = "modalities")
-//    private ServiceItem serviceItem;
+
+    @JsonManagedReference  // ← Thêm này (phía parent)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "modality", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ServiceItem> serviceItems;
+
 }

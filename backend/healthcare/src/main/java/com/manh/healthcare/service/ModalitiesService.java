@@ -14,6 +14,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -40,7 +41,6 @@ public class ModalitiesService {
     }
 
     public List<ModalitiesDTO> getModalitiesByType(EModality type) {
-        System.out.println( modalitiesRepository.findByType(type));
         return modalitiesRepository.findByType(type).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
@@ -68,6 +68,7 @@ public class ModalitiesService {
         modality.setModel(request.getModel());
         modality.setStatus(request.getStatus());
         modality.setDepartment(department);
+        modality.setServiceItems(new HashSet<>());
 
         Modalities savedModality = modalitiesRepository.save(modality);
         return convertToDTO(savedModality);
@@ -104,10 +105,10 @@ public class ModalitiesService {
         dto.setManufacturer(modality.getManufacturer());
         dto.setModel(modality.getModel());
         dto.setStatus(modality.getStatus());
-//        Set<ServiceItemResponseDTO> serviceItemResponseDTOS = modality.getServiceItems().stream()
-//                        .map(item -> modelMapper.map(item, ServiceItemResponseDTO.class))
-//                        .collect(Collectors.toSet());;
-//        dto.setServiceItems(serviceItemResponseDTOS);
+        Set<ServiceItemResponseDTO> serviceItemResponseDTOS = modality.getServiceItems().stream()
+                        .map(item -> modelMapper.map(item, ServiceItemResponseDTO.class))
+                        .collect(Collectors.toSet());;
+        dto.setServiceItems(serviceItemResponseDTOS);
 
         if (modality.getDepartment() != null) {
             dto.setDepartmentId(modality.getDepartment().getId());
