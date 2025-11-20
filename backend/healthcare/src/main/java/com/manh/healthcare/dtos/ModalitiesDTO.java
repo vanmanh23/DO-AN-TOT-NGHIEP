@@ -19,5 +19,5 @@ public class ModalitiesDTO {
     private EStatusModality status;
     private String departmentId;
     private DepartmentDTO department;
-    private Set<ServiceItemResponseDTO> serviceItems;
+//    private Set<ServiceItemResponseDTO> serviceItems;
 }

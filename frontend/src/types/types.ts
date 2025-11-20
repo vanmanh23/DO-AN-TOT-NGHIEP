@@ -6,7 +6,7 @@
 // };
 export type PatientProps = {
     name: string;
-    patientID: string;
+    id: string;
     gender: string;
     birthdate: Date;
     // studies: StudyProps[];

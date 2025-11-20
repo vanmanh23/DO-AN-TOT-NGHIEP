@@ -25,4 +25,6 @@ public class OrderCreateRequest {
     private String studyId;
 
     private Set<String> serviceItemIds; // Danh sách ID của ServiceItem
+
+    private String doctorId;
 }

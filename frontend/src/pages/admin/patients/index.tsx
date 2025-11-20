@@ -1,29 +1,34 @@
 import { useEffect, useState } from "react";
-import type { PatientProps } from "../../../types/types";
-import SearchPatient from "./_components/SearchPatient";
 import { Skeleton } from "../../../components/ui/skeleton";
-import PatientsRender from "./_components/PatientsRender";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../../store/store";
 import { setOption } from "../../../features/navbarsection/navbarSection";
 import patientApi from "../../../apis/patientApis";
+import SearchPatient from "./_components/SearchPatient";
+import PatientsRender from "./_components/PatientsRender";
+import type { PatientResponse } from "../../../types/order";
 
 export default function Component() {
-  const [patients, setPatients] = useState<PatientProps[]>([]);
+  const [patients, setPatients] = useState<PatientResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [formValues, setFormValues] = useState<{
     patientName: string;
-    sex: string;
-  }>({ patientName: "", sex: "" });
+    patientGender: string;
+    patientIdInput: string;
+  }>({ patientName: "", patientGender: "", patientIdInput: "" });
   const [searchValues, setSearchValues] = useState<{
     patientName: string;
-    sex: string;
-  }>({ patientName: "", sex: "" });
+    patientGender: string;
+    patientIdInput: string;
+  }>({ patientName: "", patientGender: "",  patientIdInput: "" });
   const patientNameValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormValues({ ...formValues, patientName: e.target.value });
   };
-  const sexValue = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setFormValues({ ...formValues, sex: e.target.value });
+  const patientGender = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFormValues({ ...formValues, patientGender: e.target.value });
+  };
+    const patientIdInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormValues({ ...formValues, patientIdInput: e.target.value });
   };
   const dispatch = useDispatch<AppDispatch>();
   const handleSearch = () => {
@@ -32,7 +37,8 @@ export default function Component() {
   const handleReset = () => {
     setSearchValues({
       patientName: "",
-      sex: "",
+      patientGender: "",
+      patientIdInput: "",
     });
   };
   useEffect(() => {
@@ -55,10 +61,11 @@ export default function Component() {
       <div>
         <SearchPatient
           patientNameValue={patientNameValue}
-          sexValue={sexValue}
           handleSearch={handleSearch}
           patientNumber={patients.length}
           handleReset={handleReset}
+          patientType={patientGender}
+          findById={patientIdInput}
         />
       </div>
       <div>
@@ -75,7 +82,8 @@ export default function Component() {
         ) : (
           <PatientsRender
             patientName={searchValues.patientName}
-            sex={searchValues.sex}
+            sex={searchValues.patientGender}
+            findById={searchValues.patientIdInput}
           />
         )}
       </div>

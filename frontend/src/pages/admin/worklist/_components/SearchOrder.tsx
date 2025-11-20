@@ -4,32 +4,33 @@ import { useState } from "react";
 export type patientSearch = {
   patientNameValue: (e: React.ChangeEvent<HTMLInputElement>) => void;
   patientType: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  findById: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  orderId: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSearch: () => void;
-  patientNumber?: number;
+  ordersNumber?: number;
   handleReset: () => void;
 };
-export default function SearchPatient({
+export default function SearchOrder({
   patientNameValue,
   patientType,
   handleSearch,
-  findById,
-  patientNumber,
+  orderId,
+  ordersNumber,
   handleReset,
 }: patientSearch) {
   const [found, setFound] = useState(false);
   const resetClick = () => {
+    handleReset();
+    // handleSearch();
     // (document.getElementById("patientName") as HTMLInputElement)!.value = "";
-    // (document.getElementById("gender") as HTMLSelectElement).value = "";
-    // (document.getElementById("patient_id") as HTMLInputElement)!.value = "";
+    // (document.getElementById("patient_type") as HTMLSelectElement).value = "";
+    // (document.getElementById("order_id") as HTMLInputElement).value = "";
     const patientNameEl = document.getElementById("patientName") as HTMLInputElement | null;
-    const genderEl = document.getElementById("gender") as HTMLSelectElement | null;
-    const patientIdEl = document.getElementById("patient_id") as HTMLInputElement | null;
+    const patient_typeEl = document.getElementById("patient_type") as HTMLSelectElement | null;
+    const orderIdEl = document.getElementById("order_id") as HTMLInputElement | null;
     
     if (patientNameEl) patientNameEl.value = "";
-    if (genderEl) genderEl.value = "";
-    if (patientIdEl) patientIdEl.value = "";
-    handleReset();
+    if (patient_typeEl) patient_typeEl.value = "";
+    if (orderIdEl) orderIdEl.value = "";
     setFound(false);
   };
   const searchClick = () => {
@@ -40,17 +41,17 @@ export default function SearchPatient({
     <div className="w-full flex md:flex-row flex-col justify-between">
       <div>
         <h3 className="md:text-xl text-xs font-semibold">
-          All patient: ({patientNumber})
+          All Orders: ({ordersNumber})
         </h3>
       </div>
       <div className="flex md:flex-row flex-col md:items-center items-end gap-2 md:h-8 h-full ">
         <div className="flex flex-row items-center h-full gap-2 pl-2 border-slate-200 rounded-md border">
           <Search className="text-secondary" size={16} />
           <input
-            id="patient_id"
+            id="order_id"
             type="text"
-            placeholder="Search by patient ID"
-            onChange={(e) => findById(e)}
+            placeholder="Search by order ID"
+            onChange={(e) => orderId(e)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 searchClick();
@@ -80,10 +81,12 @@ export default function SearchPatient({
           id="patient_type"
           className="w-full px-3 py-1 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         >
-          <option value="" className="text-gray-400">Patient gender</option>
-          <option value="M">Male</option>
-          <option value="F">Female</option>
-          <option value="O">Others</option>
+          <option value="" className="text-gray-400">Patient type</option>
+          <option value="OUTPATIENT">Outpatient</option>
+          <option value="INPATIENT">Inpatient</option>
+          <option value="EMERGENCY">Emergency</option>
+          <option value="VIP">Vip</option>
+          <option value="FOLLOW UP">Follow up</option>
         </select>
         <button
           onClick={searchClick}

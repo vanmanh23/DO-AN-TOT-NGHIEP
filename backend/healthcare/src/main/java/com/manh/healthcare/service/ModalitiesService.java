@@ -105,10 +105,10 @@ public class ModalitiesService {
         dto.setManufacturer(modality.getManufacturer());
         dto.setModel(modality.getModel());
         dto.setStatus(modality.getStatus());
-        Set<ServiceItemResponseDTO> serviceItemResponseDTOS = modality.getServiceItems().stream()
-                        .map(item -> modelMapper.map(item, ServiceItemResponseDTO.class))
-                        .collect(Collectors.toSet());;
-        dto.setServiceItems(serviceItemResponseDTOS);
+//        Set<ServiceItemResponseDTO> serviceItemResponseDTOS = modality.getServiceItems().stream()
+//                        .map(item -> modelMapper.map(item, ServiceItemResponseDTO.class))
+//                        .collect(Collectors.toSet());;
+//        dto.setServiceItems(serviceItemResponseDTOS);
 
         if (modality.getDepartment() != null) {
             dto.setDepartmentId(modality.getDepartment().getId());

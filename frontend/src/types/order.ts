@@ -10,6 +10,7 @@ export interface ServiceItem {
   serviceCode: string;
   serviceName: string;
   unitPrice: number;
+  modality: Modality;
 }
 
 export interface Modality {
@@ -20,25 +21,51 @@ export interface Modality {
   status: string;
   departmentId: string;
   department: Department;
-  serviceItems: ServiceItem[];
+  // serviceItems: ServiceItem[];
 }
 // Patient Types
 export interface Patient {
   name: string;
   birthdate: string;
-  gender: 'M' | 'F' | 'O';
+  gender: "M" | "F" | "O";
   address: string;
   phoneNumber: string;
 }
 
 export interface PatientResponse {
-  name: string;
-  birthdate: string;
+  id: string;
+  patientName: string;
+  patientBirthDate: string;
   gender: string;
   address: string;
   phoneNumber: string;
+  age: number;
 }
 
+export interface Order {
+  patientId?: "";
+  priority: "ROUTINE";
+  status: "NEW";
+  studyId?: "";
+  scheduledAt: "";
+  serviceItemIds?: string[];
+  completedAt?: "";
+}
+
+export interface OrderResponse {
+  orderId: string;
+  priority: string;
+  status: string;
+  createdAt: string;        // ISO datetime string
+  scheduledAt: string | null;
+  completedAt: string | null;
+  patientId: string;
+  patientBirthday: string;
+  patientName: string;
+  patient?: PatientResponse;
+  studyId: string | null;
+  serviceItems: ServiceItem[];
+}
 // // Modality Types
 // export interface Department {
 //   id: string;

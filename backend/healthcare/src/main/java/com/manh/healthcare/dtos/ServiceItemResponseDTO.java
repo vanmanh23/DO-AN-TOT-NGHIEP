@@ -13,4 +13,5 @@ public class ServiceItemResponseDTO {
     private String serviceName;
 //    private ModalitiesDTO modality;
     private Double unitPrice;
+    private ModalitiesDTO modality;
 }

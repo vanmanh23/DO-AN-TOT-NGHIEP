@@ -36,7 +36,7 @@ public class PatientController {
      */
     @GetMapping
     public ResponseEntity<BaseResponse> getAllPatients() {
-        List<Patient> patients = patientService.getAllPatients();
+        List<PatientResponseDTO> patients = patientService.getAllPatients();
         BaseResponse response = BaseResponse.createSuccessResponse("patient.success.getAll", patients);
         return ResponseEntity.status(200).body(response);
     }
@@ -48,7 +48,7 @@ public class PatientController {
     @GetMapping("/{id}")
     public ResponseEntity<BaseResponse> getPatientById(@PathVariable String id) {
         Optional<Patient> patient = patientService.getPatientById(id);
-        BaseResponse response = BaseResponse.createSuccessResponse("patient.success.findById");
+        BaseResponse response = BaseResponse.createSuccessResponse("patient.success.findById", patient);
         return ResponseEntity.status(200).body(response);
     }
 

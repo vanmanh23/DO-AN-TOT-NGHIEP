@@ -2,9 +2,11 @@ package com.manh.healthcare.service;
 
 import com.manh.healthcare.dtos.*;
 import com.manh.healthcare.entity.*;
+import com.manh.healthcare.repository.DoctorRepository;
 import com.manh.healthcare.repository.OrderRepository;
 import com.manh.healthcare.repository.PatientRepository;
 import com.manh.healthcare.repository.ServiceItemRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +25,10 @@ public class OrderService {
     private OrderRepository orderRepository;
     @Autowired
     private PatientRepository patientRepository;
+    @Autowired
+    private DoctorRepository doctorRepository;
+    @Autowired
+    private ModelMapper modelMapper;
 //    @Autowired
 //    private StudyRepository studyRepository;
     @Autowired
@@ -68,7 +74,11 @@ public class OrderService {
 //                    .orElseThrow(() -> new RuntimeException("Study không tồn tại với ID: " + request.getStudyId()));
 //            order.setStudies(study);
 //        }
-
+        if (request.getDoctorId() != null) {
+            Doctor doctor = doctorRepository.findById(request.getDoctorId())
+                    .orElseThrow(() -> new RuntimeException("doctor không tồn tại với ID: " + request.getDoctorId()));
+            order.setDoctor(doctor);
+        }
         // Add service items nếu có
         if (request.getServiceItemIds() != null && !request.getServiceItemIds().isEmpty()) {
             Set<ServiceItem> serviceItems = new HashSet<>();
@@ -137,24 +147,34 @@ public class OrderService {
         dto.setCreatedAt(order.getCreatedAt());
         dto.setScheduledAt(order.getScheduledAt());
         dto.setCompletedAt(order.getCompletedAt());
-
         if (order.getPatient() != null) {
             dto.setPatientId(order.getPatient().getID());
             dto.setPatientName(order.getPatient().getName());
+            dto.setPatientBirthday(order.getPatient().getBirthdate());
         }
 
 //        if (order.getStudies() != null) {
 //            dto.setStudyId(order.getStudies().getId());
 //        }
+        if (order.getDoctor() != null) {
+            dto.setStudyId(order.getDoctor().getId());
+        }
+
+        if (order.getPatient() != null) {
+            PatientResponseDTO patientResponseDTO = modelMapper.map(order.getPatient(), PatientResponseDTO.class);
+            dto.setPatient(patientResponseDTO);
+        }
 
         if (order.getServiceItems() != null) {
             dto.setServiceItems(order.getServiceItems().stream()
                     .map(item -> {
                         ServiceItemResponseDTO itemDTO = new ServiceItemResponseDTO();
+                        ModalitiesDTO modalitiesDTO = modelMapper.map(item.getModality(), ModalitiesDTO.class);
                         itemDTO.setId(item.getId());
                         itemDTO.setServiceName(item.getServiceName());
                         itemDTO.setServiceCode(item.getServiceCode());
                         itemDTO.setUnitPrice(item.getUnitPrice());
+                        itemDTO.setModality(modalitiesDTO);
                         return itemDTO;
                     })
                     .collect(Collectors.toSet()));

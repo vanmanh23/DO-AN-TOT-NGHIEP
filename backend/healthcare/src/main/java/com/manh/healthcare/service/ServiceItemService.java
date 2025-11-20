@@ -2,6 +2,7 @@ package com.manh.healthcare.service;
 
 import com.manh.healthcare.dtos.ServiceItemRequestDTO;
 import com.manh.healthcare.dtos.ServiceItemResponseDTO;
+import com.manh.healthcare.entity.EModality;
 import com.manh.healthcare.entity.Modalities;
 import com.manh.healthcare.entity.ServiceItem;
 import com.manh.healthcare.exception.DuplicateResourceException;
@@ -43,6 +44,12 @@ public class ServiceItemService {
         ServiceItem savedItem = serviceItemRepository.save(serviceItem);
         ServiceItemResponseDTO serviceItemResponseDTO = modelMapper.map(savedItem, ServiceItemResponseDTO.class);
         return serviceItemResponseDTO;
+    }
+
+    public List<ServiceItemResponseDTO> findByType(EModality type) {
+        List<ServiceItemResponseDTO> res = serviceItemRepository.findByModalityType(type).stream()
+                .map(item -> modelMapper.map(item, ServiceItemResponseDTO.class)).toList();
+        return res;
     }
 
     // Lấy ServiceItem theo ID

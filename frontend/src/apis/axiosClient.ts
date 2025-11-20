@@ -19,14 +19,14 @@ axiosClient.interceptors.request.use((config) => {
 
 axiosClient.interceptors.response.use(
   (response) => response.data,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Ví dụ: tự động logout nếu token hết hạn
-      localStorage.removeItem("access_token");
-      window.location.href = "/login";
-    }
-    return Promise.reject(error);
-  }
+  // (error) => {
+  //   if (error.response?.status === 401) {
+  //     // Ví dụ: tự động logout nếu token hết hạn
+  //     localStorage.removeItem("access_token");
+  //     window.location.href = "/login";
+  //   }
+  //   return Promise.reject(error);
+  // }
 );
 
 export default axiosClient;

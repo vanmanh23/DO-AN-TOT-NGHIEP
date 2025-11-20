@@ -20,5 +20,4 @@ public class OrdersRequestDTO {
     private LocalDateTime completedAt;
     private String studyId;
     private Set<String> serviceItemIds;
-
 }

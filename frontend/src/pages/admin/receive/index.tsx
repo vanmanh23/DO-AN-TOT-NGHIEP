@@ -1,37 +1,45 @@
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, FileText, Plus, Save, Search } from "lucide-react";
-import { useState } from "react";
+import { Calendar, FileText, Plus, Save } from "lucide-react";
+import { useEffect, useState } from "react";
 import orderApis from "../../../apis/orderApis";
-import type { ServiceItem } from "../../../types/order";
+import type { OrderResponse, Patient, ServiceItem } from "../../../types/order";
+import PatientFormInfo from "./_components/PatientFormInfo";
+import patientApi from "../../../apis/patientApis";
+import { toast } from "sonner";
+import { useLocation } from "react-router-dom";
 
+type Props = {
+  orderUpdate?: OrderResponse;
+};
 export default function Component() {
-  const [patientInfo, setPatientInfo] = useState({
-    patientId: "",
-    patientCode: "",
+  const [patientInfo, setPatientInfo] = useState<Patient>({
     name: "",
-    age: "",
-    dob: "",
-    gender: "Nam",
-    cccdCode: "",
+    birthdate: "",
+    gender: "M",
     address: "",
-    diagnosis: "",
-    department: "Khoa CĐHA",
-    note: "",
+    phoneNumber: "",
   });
-
-  // const [services, setServices] = useState<ServiceItem[]>([]);
   const [serviceType, setServiceType] = useState("CT");
   const [selectedService, setSelectedService] = useState<ServiceItem[]>([]);
   const [serviceList, setServiceList] = useState<ServiceItem[]>([]);
   const [currentService, setCurrentService] = useState("");
+  const [patientIdUpdate, setPatientUpdateId] = useState("");
+  const [isUpdate, setIsUpdate] = useState(false);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setPatientInfo((prev) => ({ ...prev, [name]: value }));
-  };
+  const location = useLocation();
+  const state = location.state as Props;
+
+  useEffect(() => {
+    if (state?.orderUpdate?.patientId) {
+      setPatientUpdateId(state.orderUpdate.patientId);
+      setSelectedService(state.orderUpdate.serviceItems || []);
+      setIsUpdate(true);
+    }
+  }, [state?.orderUpdate?.patientId]);
+  console.log("orderUpdate===", state?.orderUpdate);
+
   const handleAddToSelected = () => {
     if (!currentService || currentService === "-") return;
-
     const service = serviceList.find((s) => s.serviceName === currentService);
     if (
       service &&
@@ -41,13 +49,10 @@ export default function Component() {
       setCurrentService("");
     }
   };
-  console.log("selectedService", selectedService);
   const getAllServices = async () => {
     try {
       const response = await orderApis.getByType(serviceType);
-      // if(response && response.result) {
-      //   setServiceList(response.result[0].serviceItems);
-      // }
+      console.log("response serviceList===", response.result);
       response.result?.forEach((item) => setServiceList(item.serviceItems));
       return response.result;
     } catch (error) {
@@ -55,8 +60,8 @@ export default function Component() {
       return [];
     }
   };
-  // Sử dụng useQuery
-  const { data, isLoading, error, isError } = useQuery({
+
+  const { isLoading, error, isError } = useQuery({
     queryKey: ["modalities", serviceType], // unique key cho query này
     queryFn: getAllServices, // hàm fetch data
   });
@@ -70,180 +75,64 @@ export default function Component() {
   if (isError) {
     return <div>Lỗi: {error.message}</div>;
   }
+  const handleSubmit = async () => {
+    try {
+      //  const [patientRes, doctorRes] = await Promise.all([
+      const [patientRes] = await Promise.all([
+        patientApi.create(patientInfo),
+        // api.createDoctor(doctorData)
+      ]);
+      const ids = selectedService.map((s) => s.id);
+      const orderRes = await orderApis.create({
+        patientId: patientRes.result.id,
+        serviceItemIds: ids,
+        priority: "ROUTINE",
+        status: "NEW",
+        scheduledAt: "",
+        completedAt: "",
+      });
 
-  //   if (data && data[0]) {
-  //   setServiceList(data[0]?.serviceItems);
-  // }
-  console.log("setServiceList", serviceList);
-  const handleSave = () => {
-    alert("Lưu yêu cầu thành công!");
+      if (orderRes.success) {
+        toast.success("Tạo phiếu chỉ định thành công!", { duration: 2000, richColors: true } );
+      }
+    } catch (err) {
+      toast.error("Tạo phiếu chỉ định thất bại!");
+      console.log(err);
+    }
   };
-  console.log("Dữ liệu nhận được từ useQuery:", data);
+  const handleUpdate = async () => {
+    try {
+      const [patientRes] = await Promise.all([
+        patientApi.update(patientIdUpdate, patientInfo),
+      ]);
+      const ids = selectedService.map((s) => s.id);
+      const orderRes = await orderApis.update(state?.orderUpdate?.orderId as string, {
+        serviceItemIds: ids,
+        priority: "ROUTINE",
+        status: "NEW",
+        studyId: "",
+        scheduledAt: "",
+        completedAt: "",
+      });
+      if (orderRes.success) {
+        toast.success("update phiếu chỉ định thành công!", { duration: 2000, richColors: true } );
+        window.location.reload();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  console.log("patientInfoccccc===", patientInfo);
+  console.log("serviceList===", serviceList);
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Breadcrumb
-      <div className="bg-white px-6 py-2 border-b text-sm text-gray-600">
-        Trang chủ / Yêu cầu CĐHA / Thêm mới yêu cầu
-      </div> */}
-
-      {/* Success Message
-      <div className="bg-green-500 text-white px-6 py-3 text-center font-medium">
-        Lưu phiếu chỉ định thành công!
-      </div> */}
-
       <div className="p-3 sm:p-4 md:p-6 lg:p-6">
         <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
           {/* Patient Information Section */}
-          <div className="bg-white rounded-lg shadow p-3 sm:p-4 md:p-6">
-            <h2 className="text-base sm:text-lg md:text-lg font-bold mb-3 sm:mb-4 flex items-center gap-2">
-              <span className="text-blue-600 text-lg sm:text-xl">👤</span>
-              <span className="truncate">THÔNG TIN BỆNH NHÂN</span>
-            </h2>
-
-            <div className="space-y-3 sm:space-y-3 md:space-y-4">
-              {/* Kiểu BN & Họ tên */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-3 md:gap-4">
-                <div className="sm:col-span-1">
-                  <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
-                    Kiểu BN <span className="text-red-500">*</span>
-                  </label>
-                  <select className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500">
-                    <option>HIS</option>
-                  </select>
-                </div>
-                <div className="sm:col-span-2">
-                  <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
-                    Họ tên <span className="text-red-500">*</span>
-                  </label>
-                  <div className="flex gap-1 sm:gap-2">
-                    <input
-                      type="text"
-                      name="name"
-                      value={patientInfo.name}
-                      onChange={handleInputChange}
-                      placeholder="TÌM KIẾM MÃ, HỌ TÊN, SỐ BHYT"
-                      className="flex-1 border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Tuổi, Ngày sinh, Giới tính */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
-                <div>
-                  <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
-                    Tuổi <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    name="age"
-                    value={patientInfo.age}
-                    onChange={handleInputChange}
-                    className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
-                    Ngày sinh
-                  </label>
-                  <input
-                    type="date"
-                    name="dob"
-                    value={patientInfo.dob}
-                    onChange={handleInputChange}
-                    className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
-                    Giới tính <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    name="gender"
-                    value={patientInfo.gender}
-                    onChange={handleInputChange}
-                    className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500"
-                  >
-                    <option>Nam</option>
-                    <option>Nữ</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Mã số cccd */}
-              <div>
-                <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
-                  Mã số cccd/cmt <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="cccdCode"
-                  value={patientInfo.cccdCode}
-                  onChange={handleInputChange}
-                  className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500"
-                />
-              </div>
-
-              {/* Địa chỉ */}
-              <div>
-                <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
-                  Địa chỉ <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="address"
-                  value={patientInfo.address}
-                  onChange={handleInputChange}
-                  placeholder="Địa chỉ của bệnh nhân"
-                  className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500"
-                />
-              </div>
-
-              {/* Bác sĩ chỉ định & Khoa chỉ định */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3 md:gap-4">
-                <div>
-                  <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
-                    Bác sĩ chỉ định
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
-                    Khoa chỉ định
-                  </label>
-                  <select
-                    name="department"
-                    value={patientInfo.department}
-                    onChange={handleInputChange}
-                    className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500"
-                  >
-                    <option>Khoa CĐHA</option>
-                    <option>Khoa Nội</option>
-                    <option>Khoa Ngoại</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Lời dặn */}
-              <div>
-                <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
-                  Lời dặn
-                </label>
-                <textarea
-                  name="note"
-                  value={patientInfo.note}
-                  onChange={handleInputChange}
-                  placeholder="Lời dặn cho phiếu chỉ định"
-                  rows={3}
-                  className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500 resize-none"
-                />
-              </div>
-            </div>
-          </div>
-
+          <PatientFormInfo
+            onChange={setPatientInfo}
+            patientIdUpdate={patientIdUpdate}
+          />
           {/* Service Request Section */}
           <div className="bg-white rounded-lg shadow p-3 sm:p-4 md:p-6">
             <h2 className="text-base sm:text-lg md:text-lg font-bold mb-3 sm:mb-4 flex items-center gap-2">
@@ -282,7 +171,7 @@ export default function Component() {
                     className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500 "
                   >
                     <option value="">-- Chọn dịch vụ --</option>
-                    {serviceList.map((service) => (
+                    {serviceList?.map((service) => (
                       <option
                         key={service.serviceCode}
                         value={service.serviceName}
@@ -306,19 +195,36 @@ export default function Component() {
                   <h3 className="text-xs sm:text-sm font-medium">
                     Danh sách dịch vụ
                   </h3>
-                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 w-full sm:w-auto">
-                    <button
-                      // onClick={}
-                      className="bg-blue-600 text-white px-3 sm:px-4 py-2 rounded hover:bg-blue-700 transition flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap flex-1 sm:flex-none"
-                    >
-                      <FileText size={14} className="sm:w-4 sm:h-4" />
-                      LƯU YÊU CẦU
-                    </button>
-                    <button className="bg-green-600 text-white px-3 sm:px-4 py-2 rounded hover:bg-green-700 transition flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap flex-1 sm:flex-none">
-                      <Calendar size={14} className="sm:w-4 sm:h-4" />
-                      LƯU & LẬP LỊCH
-                    </button>
-                  </div>
+                  {isUpdate ? (
+                    <div>
+                      <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 w-full sm:w-auto">
+                        <button
+                          onClick={handleUpdate}
+                          className="bg-blue-600 text-white px-3 sm:px-4 py-2 rounded hover:bg-blue-700 transition flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap flex-1 sm:flex-none"
+                        >
+                          <FileText size={14} className="sm:w-4 sm:h-4" />
+                          UPDATE
+                        </button>
+                        <button className="bg-red-500 text-white px-3 sm:px-4 py-2 rounded hover:bg-green-700 transition flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap flex-1 sm:flex-none">
+                          HỦY
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 w-full sm:w-auto">
+                      <button
+                        onClick={handleSubmit}
+                        className="bg-blue-600 text-white px-3 sm:px-4 py-2 rounded hover:bg-blue-700 transition flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap flex-1 sm:flex-none"
+                      >
+                        <FileText size={14} className="sm:w-4 sm:h-4" />
+                        LƯU YÊU CẦU
+                      </button>
+                      <button className="bg-green-600 text-white px-3 sm:px-4 py-2 rounded hover:bg-green-700 transition flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap flex-1 sm:flex-none">
+                        <Calendar size={14} className="sm:w-4 sm:h-4" />
+                        LƯU & LẬP LỊCH
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {selectedService.length > 0 ? (
@@ -379,7 +285,7 @@ export default function Component() {
         {/* Action Buttons */}
         <div className="mt-4 sm:mt-5 md:mt-6 flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 md:gap-4">
           <button
-            onClick={handleSave}
+            // onClick={}
             className="bg-blue-600 text-white px-4 sm:px-8 py-2.5 sm:py-3 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-1 sm:gap-2 font-medium text-sm sm:text-base"
           >
             <Save size={16} className="sm:w-5 sm:h-5" />

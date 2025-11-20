@@ -1,7 +1,10 @@
 package com.manh.healthcare.controller;
 
+import com.manh.healthcare.dtos.BaseResponse;
+import com.manh.healthcare.dtos.ModalitiesDTO;
 import com.manh.healthcare.dtos.ServiceItemRequestDTO;
 import com.manh.healthcare.dtos.ServiceItemResponseDTO;
+import com.manh.healthcare.entity.EModality;
 import com.manh.healthcare.service.ServiceItemService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +35,12 @@ public class ServiceItemController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/type/{type}")
+    public ResponseEntity<BaseResponse> getModalitiesByType(@PathVariable EModality type) {
+        List<ServiceItemResponseDTO> serviceItems = serviceItemService.findByType(type);
+        BaseResponse baseResponse = BaseResponse.createSuccessResponse("serviceItems.success.findByType", serviceItems);
+        return ResponseEntity.status(HttpStatus.OK).body(baseResponse);
+    }
     // Lấy tất cả ServiceItem
     @GetMapping
     public ResponseEntity<List<ServiceItemResponseDTO>> getAllServiceItems() {

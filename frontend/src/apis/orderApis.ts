@@ -1,14 +1,16 @@
 import axiosClient from "./axiosClient";
-import type { ApiResponse, Modality } from "../types/order";
+import type { ApiResponse, Modality, Order, OrderResponse } from "../types/order";
 
 const orderApis = {
-  getAll: () => axiosClient.get("/modalities"),
+  getAll: (): Promise<ApiResponse<OrderResponse[]>> => axiosClient.get("/orders"),
 
   getByType: (type: string) : Promise<ApiResponse<Modality[]>> => axiosClient.get(`/modalities/type/${type}`),
 
-  // create: (data) => axiosClient.post("/users", data),
-  // update: (id, data) => axiosClient.put(`/users/${id}`, data),
-  // delete: (id) => axiosClient.delete(`/users/${id}`),
+  create: (data: Order) => axiosClient.post("/orders", data),
+
+  update: (id: string, data: Order) => axiosClient.put(`/orders/${id}`, data),
+
+  delete: (id: string) => axiosClient.delete(`/orders/${id}`),
 };
 
 export default orderApis;

@@ -5,6 +5,7 @@ import com.manh.healthcare.dtos.PatientResponseDTO;
 import com.manh.healthcare.entity.Patient;
 import com.manh.healthcare.repository.PatientRepository;
 import jakarta.transaction.Transactional;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,8 +21,14 @@ public class PatientService {
     @Autowired
     private PatientRepository patientRepository;
 
-    public List<Patient> getAllPatients() {
-        return patientRepository.findAll();
+    @Autowired
+    private ModelMapper modelMapper;
+
+    public List<PatientResponseDTO> getAllPatients() {
+        List<Patient> allPatients = patientRepository.findAll();
+        List<PatientResponseDTO> patientResponseDTOS = allPatients.stream()
+                .map(item -> modelMapper.map(item, PatientResponseDTO.class)).toList();
+        return patientResponseDTOS;
     }
     public Patient patientAdmission(PatientRequestDTO patientRequestDTO) {
 
@@ -33,7 +40,6 @@ public class PatientService {
         patient.setGender(patientRequestDTO.getGender());
         patient.setBirthdate(patientRequestDTO.getBirthdate());
         patient.setPhoneNumber(patientRequestDTO.getPhoneNumber());
-        System.out.println("==============="+patient);
         return patientRepository.save(patient);
     }
     @Transactional

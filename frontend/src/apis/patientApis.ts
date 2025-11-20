@@ -1,17 +1,16 @@
 import axiosClient from "./axiosClient";
-import type { PatientProps } from "../types/types";
-import type { ApiResponse } from "../types/order";
+import type { ApiResponse, Patient, PatientResponse } from "../types/order";
 
 const patientApi = {
   // Returns the API shape { result: PatientStudyProps[] } (as your components expect .result)
-  getAll: (): Promise<{ result: PatientProps[] }> =>
-    axiosClient.get("/patients"),
+  getAll: (): Promise<ApiResponse<PatientResponse[]>> => axiosClient.get("/patients"),
 
-  getById: (id: string): Promise<PatientProps> =>
+  getById: (id: string): Promise<ApiResponse<PatientResponse>> =>
     axiosClient.get(`/patients/${id}`),
 
-  create: (data) :  Promise<ApiResponse<PatientResponse>> => axiosClient.post("/users", data),
-  // update: (id, data) => axiosClient.put(`/users/${id}`, data),
+  create: (data: Patient) :  Promise<ApiResponse<PatientResponse>> => axiosClient.post("/patients", data),
+
+  update: (id: string, data: Patient) => axiosClient.put(`/patients/${id}`, data),
   // delete: (id) => axiosClient.delete(`/users/${id}`),
 };
 

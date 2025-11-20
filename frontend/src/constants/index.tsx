@@ -29,6 +29,16 @@ export const menuItems = [
     icon: <FileUser size={18}/>,
   },
   {
+    name: "Orders",
+    link: "/admin/orders",
+    icon: <FileUser size={18}/>,
+  },
+  {
+    name: "Worklist",
+    link: "/admin/worklist",
+    icon: <FileUser size={18}/>,
+  },
+  {
     name: "Studies",
     link: "/admin/studies",
     icon: <Layers size={18}/>,

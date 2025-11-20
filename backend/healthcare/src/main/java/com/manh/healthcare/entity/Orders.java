@@ -45,6 +45,10 @@ public class Orders {
 //    @JoinColumn(name = "study_id", referencedColumnName = "order_id")
 //    private Study studies;
 
+    @OneToOne
+    @JoinColumn(name = "doctor_id")
+    private Doctor doctor;
+
     @JsonManagedReference
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
