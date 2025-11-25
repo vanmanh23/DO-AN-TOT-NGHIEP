@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Table(name = "serviceItems")
@@ -30,10 +31,13 @@ public class ServiceItem {
     @EqualsAndHashCode.Exclude
     private Modalities modality;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = true)
-    @JsonBackReference  // ← Thêm này (phía child) - Sẽ KHÔNG serialize order
+//    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "serviceItems")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private Orders order;
+    @JsonBackReference
+    private Set<Orders> orders;
+//    @JsonBackReference  // ← Thêm này (phía child) - Sẽ KHÔNG serialize order
+//    @JoinColumn(name = "order_id", nullable = true)
+//    private Orders order;
 }

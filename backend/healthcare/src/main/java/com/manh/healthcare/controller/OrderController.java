@@ -57,4 +57,10 @@ public class OrderController {
         orderService.deleteOrder(orderId);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<BaseResponse> findById(@PathVariable String id) {
+        OrderDTO order = orderService.findById(id);
+        BaseResponse baseResponse = BaseResponse.createSuccessResponse("order.success.findById", order);
+        return ResponseEntity.status(HttpStatus.OK).body(baseResponse);
+    }
 }

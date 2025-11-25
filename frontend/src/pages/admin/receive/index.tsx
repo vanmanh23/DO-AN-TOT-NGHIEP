@@ -7,6 +7,7 @@ import PatientFormInfo from "./_components/PatientFormInfo";
 import patientApi from "../../../apis/patientApis";
 import { toast } from "sonner";
 import { useLocation } from "react-router-dom";
+import serviceItemsApis from "../../../apis/serviceItemsApis";
 
 type Props = {
   orderUpdate?: OrderResponse;
@@ -36,7 +37,6 @@ export default function Component() {
       setIsUpdate(true);
     }
   }, [state?.orderUpdate?.patientId]);
-  console.log("orderUpdate===", state?.orderUpdate);
 
   const handleAddToSelected = () => {
     if (!currentService || currentService === "-") return;
@@ -51,16 +51,14 @@ export default function Component() {
   };
   const getAllServices = async () => {
     try {
-      const response = await orderApis.getByType(serviceType);
-      console.log("response serviceList===", response.result);
-      response.result?.forEach((item) => setServiceList(item.serviceItems));
+      const response = await serviceItemsApis.getByType(serviceType);
+      setServiceList(response.result);
       return response.result;
     } catch (error) {
       console.error("Lỗi khi lấy danh sách dịch vụ:", error);
       return [];
     }
   };
-
   const { isLoading, error, isError } = useQuery({
     queryKey: ["modalities", serviceType], // unique key cho query này
     queryFn: getAllServices, // hàm fetch data
@@ -84,12 +82,13 @@ export default function Component() {
       ]);
       const ids = selectedService.map((s) => s.id);
       const orderRes = await orderApis.create({
-        patientId: patientRes.result.id,
+        patientId: patientRes?.result?.id as "",
         serviceItemIds: ids,
         priority: "ROUTINE",
         status: "NEW",
         scheduledAt: "",
         completedAt: "",
+        // doctorId: "",
       });
 
       if (orderRes.success) {
@@ -102,9 +101,14 @@ export default function Component() {
   };
   const handleUpdate = async () => {
     try {
-      const [patientRes] = await Promise.all([
-        patientApi.update(patientIdUpdate, patientInfo),
-      ]);
+      if (patientInfo.name !== ''){
+          const patientUpdate = await patientApi.update(
+                  patientIdUpdate,
+                  patientInfo
+                );
+                console.log("patientUpdate", patientUpdate);
+      }
+      
       const ids = selectedService.map((s) => s.id);
       const orderRes = await orderApis.update(state?.orderUpdate?.orderId as string, {
         serviceItemIds: ids,
@@ -122,8 +126,9 @@ export default function Component() {
       console.log(error);
     }
   };
-  console.log("patientInfoccccc===", patientInfo);
-  console.log("serviceList===", serviceList);
+  const idss = selectedService.map((s) => s.id).join(",");
+  console.log("selectedService", idss);
+    console.log("patientInfo", patientInfo);
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="p-3 sm:p-4 md:p-6 lg:p-6">

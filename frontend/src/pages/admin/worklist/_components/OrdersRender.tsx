@@ -9,6 +9,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../../../../components/ui/dialog";
+import { CircleArrowRight } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 type OrdersProps = {
   patientName?: string;
@@ -28,6 +30,7 @@ export default function OrdersRender({
     isHeadTitle: true,
     isKey: "",
   });
+  const navigate = useNavigate();
   const forcusOnPatients = (orderID: string) => {
     setHeadTableforPatients({
       isHeadTitle: true,
@@ -72,6 +75,9 @@ export default function OrdersRender({
   if (order && typeof getOrdersCount === "function") {
     getOrdersCount(order.length);
   }
+  const proceedToTakeAPhoto = () => {
+    navigate("/admin/worklist/");
+  };
   return (
     <div className="container overflow-x-auto mx-auto w-full flex justify-center">
       <table className="w-full min-w-[600px] table-fixed">
@@ -111,12 +117,12 @@ export default function OrdersRender({
             </tr>
           )}
         </thead>
-        
-          <tbody>
-            {/* Patients */}
-            {order?.map((item: OrderResponse, index: number) => (
-              <React.Fragment>
-                <Dialog>
+
+        <tbody>
+          {/* Patients */}
+          {order?.map((item: OrderResponse, index: number) => (
+            <React.Fragment>
+              <Dialog>
                 <DialogTrigger asChild>
                   <tr
                     key={index}
@@ -176,47 +182,53 @@ export default function OrdersRender({
                   <DialogHeader>
                     <DialogTitle>Thông tin chi tiết ca chụp</DialogTitle>
                   </DialogHeader>
-                  <div className="grid grid-cols-2">
-                      <div className="grid grid-cols-1 w-full h-full">
-                        <p>Ma BN</p>
-                        <p>Ten BN</p>
-                        <p>Nam sinh</p>
-                        <p>Dia chi</p>
-                        <p></p>
-                        <p>ma phieu</p>
-                        <p>ngay nhan phieu</p>
-                        <p>thiet bi</p>
-                        <p>ma dich vu</p>
-                        <p>dich vu</p>
-                        <p></p>
-                      </div>
-                      <div className="grid grid-cols-1 w-full h-full">
-                        <p>{item.patientId}</p>
-                        <p>{item.patientName}</p>
-                        <p>{item.patientBirthday}</p>
-                        <p>{item.patient?.address}</p>
-                        <p></p>
-                        <p>{item.serviceItems?.[0]?.id}</p>
-                        <p>{new Date(item.createdAt).toLocaleString("vi-VN")}</p>
-                        <p>{item.serviceItems?.[0]?.modality?.model}</p>
-                        <p>{item.serviceItems?.[0]?.serviceCode}</p>
-                        <p>{item.serviceItems?.[0]?.serviceName}</p>
-                      </div>
+                  <div className="grid grid-cols-2 ">
+                    <div className="grid grid-cols-1 gap-2 w-full h-full">
+                      <p>Ma BN:</p>
+                      <p>Ten BN:</p>
+                      <p>Nam sinh:</p>
+                      <p>Dia chi:</p>
+                      <p className="py-2"></p>
+                      <p>ma phieu:</p>
+                      <p>ngay nhan phieu:</p>
+                      <p>thiet bi:</p>
+                      <p>ma dich vu:</p>
+                      <p>dich vu:</p>
+                      <p></p>
+                    </div>
+                    <div className="grid grid-cols-1 gap-2 w-full h-full">
+                      <p>{item.patientId}</p>
+                      <p>{item.patientName}</p>
+                      <p>{item.patientBirthday}</p>
+                      <p>{item.patient?.address}</p>
+                      <p className="py-2"></p>
+                      <p>{item.serviceItems?.[0]?.id}</p>
+                      <p>{new Date(item.createdAt).toLocaleString("vi-VN")}</p>
+                      <p>{item.serviceItems?.[0]?.modality?.model}</p>
+                      <p>{item.serviceItems?.[0]?.serviceCode}</p>
+                      <p>{item.serviceItems?.[0]?.serviceName}</p>
+                    </div>
+                  </div>
+                  <div className="cursor-pointer items-center text-blue-600 hover:text-blue-800">
+                    <Link to={`/admin/worklist/${item.orderId}`} className="gap-2 flex flex-row justify-end mt-4">
+                      <p>Vào chụp</p>
+                      <CircleArrowRight />
+                    </Link>
                   </div>
                 </DialogContent>
-                </Dialog>
-              </React.Fragment>
-            ))}
-            {order?.length === 0 && (
-              <React.Fragment>
-                <tr>
-                  <td colSpan={12} className="text-center">
-                    Not found
-                  </td>
-                </tr>
-              </React.Fragment>
-            )}
-          </tbody>
+              </Dialog>
+            </React.Fragment>
+          ))}
+          {order?.length === 0 && (
+            <React.Fragment>
+              <tr>
+                <td colSpan={12} className="text-center">
+                  Not found
+                </td>
+              </tr>
+            </React.Fragment>
+          )}
+        </tbody>
       </table>
     </div>
   );

@@ -24,9 +24,9 @@ export default function PatientListAction({ order }: Props) {
     }
     const handleCancel = async () => {
       try {
-        toast.success("Hủy phiếu chỉ định thành công!", { duration: 2000, richColors: true } );
         await orderApis.delete(order?.orderId as string);
-        window.location.reload();
+        toast.success("Hủy phiếu chỉ định thành công!", { duration: 2000, richColors: true } );
+        // window.location.reload();
       } catch (error) {
         console.log(error);
       }

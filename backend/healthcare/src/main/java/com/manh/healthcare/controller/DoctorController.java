@@ -4,8 +4,10 @@ package com.manh.healthcare.controller;
 import com.manh.healthcare.dtos.BaseResponse;
 import com.manh.healthcare.dtos.DoctorRequestDTO;
 import com.manh.healthcare.dtos.DoctorResponseDTO;
+import com.manh.healthcare.entity.Doctor;
 import com.manh.healthcare.service.DoctorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +31,13 @@ public class DoctorController {
         List<DoctorResponseDTO> doctors = doctorService.findAll();
         BaseResponse baseResponse = BaseResponse.createSuccessResponse("doctor.success.list", doctors);
         return ResponseEntity.ok(baseResponse);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<BaseResponse> getById(@PathVariable String id) {
+        DoctorResponseDTO doctorResponseDTO = doctorService.findById(id);
+        BaseResponse baseResponse = BaseResponse.createSuccessResponse("doctor.success.findById", doctorResponseDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(baseResponse);
     }
 
     @PutMapping("/{id}")

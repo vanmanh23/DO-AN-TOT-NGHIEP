@@ -12,11 +12,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.print.Doc;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -81,62 +79,60 @@ public class OrderService {
         }
         // Add service items nếu có
         if (request.getServiceItemIds() != null && !request.getServiceItemIds().isEmpty()) {
-            Set<ServiceItem> serviceItems = new HashSet<>();
-            for (String itemId : request.getServiceItemIds()) {
-                ServiceItem item = serviceItemRepository.findById(itemId)
-                        .orElseThrow(() -> new RuntimeException("ServiceItem không tồn tại với ID: " + itemId));
-                item.setOrder(order);
-                serviceItems.add(item);
-            }
+            Set<ServiceItem> serviceItems =
+                    new HashSet<>(serviceItemRepository.findAllById(request.getServiceItemIds()));
             order.setServiceItems(serviceItems);
         }
 
         Orders savedOrder = orderRepository.save(order);
         return convertToDTO(savedOrder);
     }
+public OrderDTO updateOrder(String orderId, OrdersRequestDTO request) {
 
-    public OrderDTO updateOrder(String orderId, OrdersRequestDTO request) {
-        Orders order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order không tồn tại với ID: " + orderId));
+    // 1. Tìm order
+    Orders order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
 
-        if (request.getPriority() != null) {
-            order.setPriority(request.getPriority());
-        }
-        if (request.getStatus() != null) {
-            order.setStatus(request.getStatus());
-            // Tự động set completedAt khi status là COMPLETED
-            if (request.getStatus() == EOrderStatus.COMPLETED && order.getCompletedAt() == null) {
-                order.setCompletedAt(LocalDateTime.now());
-            }
-        }
-        if (request.getScheduledAt() != null) {
-            order.setScheduledAt(request.getScheduledAt());
-        }
-        if (request.getCompletedAt() != null) {
-            order.setCompletedAt(request.getCompletedAt());
-        }
+    // 2. Update các field cơ bản
+    order.setPriority(request.getPriority());
+    order.setStatus(request.getStatus());
+    order.setScheduledAt(request.getScheduledAt());
+    order.setCompletedAt(request.getCompletedAt());
+//    order.setStudyId(request.getStudyId());
 
-        if (request.getServiceItemIds() != null) {
-
-            // 1) Xóa item cũ
-            order.getServiceItems().clear();
-            // 2) Lấy item mới từ DB
-            List<ServiceItem> newItems = serviceItemRepository.findAllById(request.getServiceItemIds());
-            // 3) Set quan hệ 2 chiều
-            newItems.forEach(item -> item.setOrder(order));
-            // 4) Thêm lại vào collection
-            order.getServiceItems().addAll(newItems);
-        }
-
-        Orders updatedOrder = orderRepository.save(order);
-        return convertToDTO(updatedOrder);
+    if (request.getDoctorId() != null) {
+        Doctor doctor = doctorRepository.getDoctorById(request.getDoctorId());
+        order.setDoctor(doctor);
     }
+    // 3. Update Service Items
+    if (request.getServiceItemIds() != null) {
+
+        // Lấy danh sách service item mới
+        Set<ServiceItem> newItems =
+                new HashSet<>(serviceItemRepository.findAllById(request.getServiceItemIds()));
+
+        // Gán lại trực tiếp (Hibernate tự clear bảng trung gian)
+        order.setServiceItems(newItems);
+    }
+
+    // 4. Lưu vào DB
+    Orders saved = orderRepository.save(order);
+
+    // 5. Convert sang DTO
+    return convertToDTO(saved);
+}
 
 
     public void deleteOrder(String orderId) {
         Orders order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order không tồn tại với ID: " + orderId));
         orderRepository.delete(order);
+    }
+
+    public OrderDTO findById(String id) {
+        Orders order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order không tồn tại với ID: " + id));
+        return convertToDTO(order);
     }
 
     private OrderDTO convertToDTO(Orders order) {
@@ -157,6 +153,23 @@ public class OrderService {
 //            dto.setStudyId(order.getStudies().getId());
 //        }
         if (order.getDoctor() != null) {
+            DoctorResponseDTO doctorResponseDTO = new DoctorResponseDTO();
+            doctorResponseDTO.setId(order.getDoctor().getId());
+            doctorResponseDTO.setFullName(order.getDoctor().getPerson().getFullName());
+            doctorResponseDTO.setDateOfBirth(order.getDoctor().getPerson().getDateOfBirth());
+            doctorResponseDTO.setGender(order.getDoctor().getPerson().getGender());
+            doctorResponseDTO.setPhoneNumber(order.getDoctor().getPerson().getPhoneNumber());
+            doctorResponseDTO.setEmail(order.getDoctor().getPerson().getEmail());
+            doctorResponseDTO.setAddress(order.getDoctor().getPerson().getAddress());
+            doctorResponseDTO.setDoctorCode(order.getDoctor().getDoctorCode());
+            doctorResponseDTO.setSpecialization(order.getDoctor().getSpecialization());
+            doctorResponseDTO.setDegree(order.getDoctor().getDegree());
+            doctorResponseDTO.setYearsOfExperience(order.getDoctor().getYearsOfExperience());
+            doctorResponseDTO.setClinicRoom(order.getDoctor().getClinicRoom());
+            doctorResponseDTO.setStatus(order.getDoctor().getStatus());
+
+            dto.setDoctor(doctorResponseDTO);
+
             dto.setStudyId(order.getDoctor().getId());
         }
 

@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,7 +30,10 @@ public class DoctorService {
         return allDoctor.stream().map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
-
+    public DoctorResponseDTO findById(String id) {
+        Doctor doctor = doctorRepository.getDoctorById(id);
+        return convertToDTO(doctor);
+    }
     public DoctorResponseDTO createDoctor(DoctorRequestDTO request) {
         Person person = new Person();
         person.setFullName(request.getFullName());

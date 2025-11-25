@@ -2,7 +2,6 @@ package com.manh.healthcare.dtos;
 
 import com.manh.healthcare.entity.EOrderStatus;
 import com.manh.healthcare.entity.EPriority;
-import com.manh.healthcare.entity.Patient;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -23,5 +22,6 @@ public class OrderDTO {
     private String studyId;
     private String doctorId;
     private PatientResponseDTO patient;
+    private DoctorResponseDTO doctor;
     private Set<ServiceItemResponseDTO> serviceItems;
 }

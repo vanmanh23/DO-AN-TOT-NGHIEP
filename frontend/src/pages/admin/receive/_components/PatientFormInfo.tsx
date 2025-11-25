@@ -23,6 +23,13 @@ export default function PatientFormInfo({ onChange, patientIdUpdate }: Props) {
     const fetchPatientData = async () => {
       const res = await patientApi.getById(patientIdUpdate as string);
       setPatientInfo(res.result);
+      // onChange({
+      //   name: res.result.patientName,
+      //   birthdate: res.result.patientBirthDate,
+      //   gender: res.result.gender as "M" | "F" | "O",
+      //   address: res.result.address,
+      //   phoneNumber: res.result.phoneNumber
+      // });
     }
     fetchPatientData();
   }, [patientIdUpdate]);

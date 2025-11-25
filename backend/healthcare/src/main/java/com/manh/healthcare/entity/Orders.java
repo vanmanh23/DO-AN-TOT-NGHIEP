@@ -45,13 +45,21 @@ public class Orders {
 //    @JoinColumn(name = "study_id", referencedColumnName = "order_id")
 //    private Study studies;
 
-    @OneToOne
-    @JoinColumn(name = "doctor_id")
+//    @OneToOne
+//    @JoinColumn(name = "doctor_id")
+    @ManyToOne
+    @JoinColumn(name="doctor_id")
     private Doctor doctor;
 
     @JsonManagedReference
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToMany
+    @JoinTable(
+            name = "order_service_items",
+            joinColumns = @JoinColumn(name = "order_id"),
+            inverseJoinColumns = @JoinColumn(name = "id")
+    )
     private Set<ServiceItem> serviceItems;
+//    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
 }

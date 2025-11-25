@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Entity
 @Table(name = "doctors")
 @Data
@@ -39,6 +41,7 @@ public class Doctor {
     @Column(name = "status", length = 20)
     private String status;
 
-    @OneToOne(mappedBy = "doctor", cascade = CascadeType.ALL)
-    private Orders order;
+//    @OneToOne(mappedBy = "doctor", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy="doctor")
+    private Set<Orders> orders;
 }
