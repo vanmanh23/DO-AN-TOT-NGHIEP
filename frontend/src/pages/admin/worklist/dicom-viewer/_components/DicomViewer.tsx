@@ -14,7 +14,6 @@ import {
   init as cornerstoneToolsInit,
   ToolGroupManager,
   Enums as csToolsEnums,
-  addTool,
   BidirectionalTool,
   ZoomTool,
   EllipticalROITool,
@@ -27,6 +26,7 @@ import {
 import createImageIdsAndCacheMetaData from "../../../../../lib/createImageIdsAndCacheMetaData";
 import Features from "./Features";
 import { initToolGroup } from "./initToolGroup";
+import cropImageVolume from "./cropImageVolume";
 
 const { ViewportType } = Enums;
 volumeLoader.registerUnknownVolumeLoader(cornerstoneStreamingImageVolumeLoader);
@@ -58,9 +58,10 @@ function DicomViewer() {
     isArrowAnnotateTool: false,
   });
   const axialRef = useRef<HTMLDivElement | null>(null);
-  const sagittalRef = useRef<HTMLDivElement | null>(null);
+  // const sagittalRef = useRef<HTMLDivElement | null>(null);
+  // const acquisitionRef = useRef<HTMLDivElement | null>(null);
+  // const coronalRef = useRef<HTMLDivElement | null>(null);
   const running = useRef(false);
-
   useEffect(() => {
     async function run() {
       if (running.current) {
@@ -88,8 +89,10 @@ function DicomViewer() {
       });
 
       const viewportId1 = "CT_AXIAL";
-      const viewportId2 = "CT_SAGITTAL";
-      console.log("renderingEngine");
+      // const viewportId2 = "CT_SAGITTAL";
+      // const viewportId3 = "CT_CORONAL";
+      // const viewportId4 = "CT_ACQUISITION";
+
       const viewportInput = [
         {
           viewportId: viewportId1,
@@ -99,31 +102,40 @@ function DicomViewer() {
             orientation: Enums.OrientationAxis.AXIAL,
           },
         },
-        {
-          viewportId: viewportId2,
-          element: sagittalRef.current!,
-          type: ViewportType.ORTHOGRAPHIC,
-          defaultOptions: {
-            orientation: Enums.OrientationAxis.SAGITTAL,
-          },
-        },
+        // {
+        //   viewportId: viewportId2,
+        //   element: sagittalRef.current!,
+        //   type: ViewportType.ORTHOGRAPHIC,
+        //   defaultOptions: {
+        //     orientation: Enums.OrientationAxis.SAGITTAL,
+        //   },
+        // },
+        // {
+        //   viewportId: viewportId3,
+        //   element: coronalRef.current!,
+        //   type: ViewportType.ORTHOGRAPHIC,
+        //   defaultOptions: {
+        //     orientation: Enums.OrientationAxis.CORONAL,
+        //   },
+        // },
+        // {
+        //   viewportId: viewportId4,
+        //   element: acquisitionRef.current!,
+        //   type: ViewportType.VOLUME_3D,
+        //   defaultOptions: {
+        //     orientation: Enums.OrientationAxis.ACQUISITION,
+        //   },
+        // },
       ];
 
       renderingEngine.setViewports(viewportInput);
       await volume.load();
 
-      // Register tools
-      // addTool(BidirectionalTool);
-      // addTool(ZoomTool);
-      // addTool(EllipticalROITool);
-      // const toolGroupId = "myToolGroup";
-      // const toolGroup = ToolGroupManager.createToolGroup(toolGroupId);
       const toolGroup = initToolGroup();
-      // toolGroup.addTool(BidirectionalTool.toolName);
-      // toolGroup.addTool(ZoomTool.toolName);
-      // toolGroup.addTool(EllipticalROITool.toolName);
       toolGroup.addViewport(viewportId1, renderingEngineId);
-      toolGroup.addViewport(viewportId2, renderingEngineId);
+      // toolGroup.addViewport(viewportId2, renderingEngineId);
+      // toolGroup.addViewport(viewportId3, renderingEngineId);
+      // toolGroup.addViewport(viewportId4, renderingEngineId);
 
       toolGroup.setToolActive(BidirectionalTool.toolName, {
         bindings: [
@@ -132,22 +144,6 @@ function DicomViewer() {
           },
         ],
       });
-
-      // toolGroup.setToolActive(ZoomTool.toolName, {
-      //   bindings: [
-      //     {
-      //       mouseButton: csToolsEnums.MouseBindings.Secondary, // Right Click
-      //     },
-      //   ],
-      // });
-
-      // toolGroup.setToolActive(EllipticalROITool.toolName, {
-      //   bindings: [
-      //     {
-      //       mouseButton: csToolsEnums.MouseBindings.Secondary, // Right Click
-      //     },
-      //   ],
-      // });
 
       // Set Window-Level
       setVolumesForViewports(
@@ -159,128 +155,138 @@ function DicomViewer() {
               volumeActor
                 .getProperty()
                 .getRGBTransferFunction(0)
-                .setMappingRange(-180, 220);
+                // .setMappingRange(-180, 220);
+                .setMappingRange(-500, 1500);
             },
           },
         ],
-        [viewportId1, viewportId2]
+        [viewportId1]
       );
-
-      renderingEngine.renderViewports([viewportId1, viewportId2]);
+      const viewport = renderingEngine.getViewport(viewportId1);
+      viewport.setDisplayArea({
+        type: "SCALE",
+        scale: 3.0, // tùy chỉnh nếu muốn zoom hơn
+        imageCanvasPoint: {
+          imagePoint: [0.5, 0.5], // center ảnh
+          canvasPoint: [0.5, 0.5], // center canvas
+        },
+        storeAsInitialCamera: true,
+      });
+      viewport.resetCamera();
+      viewport.render();
+      // renderingEngine.renderViewports([viewportId1]);
     }
-
     run();
-  }, [axialRef, sagittalRef, running]);
+  }, [axialRef, running]);
 
-const changeTool = (toolName: string) => {
-  const toolGroup = ToolGroupManager.getToolGroup("myToolGroup");
-  if (!toolGroup) return;
+  const changeTool = (toolName: string) => {
+    const toolGroup = ToolGroupManager.getToolGroup("myToolGroup");
+    if (!toolGroup) return;
 
-  // 1️⃣ Reset tất cả tools
-  toolGroup.setToolPassive(ZoomTool.toolName);
-  toolGroup.setToolPassive(EllipticalROITool.toolName);
-  toolGroup.setToolPassive(BidirectionalTool.toolName);
-  toolGroup.setToolPassive(PanTool.toolName);
-  toolGroup.setToolPassive(LengthTool.toolName);
-  toolGroup.setToolPassive(RectangleROITool.toolName);
-  toolGroup.setToolPassive(CircleROITool.toolName);
-  toolGroup.setToolPassive(ArrowAnnotateTool.toolName);
+    // 1️⃣ Reset tất cả tools
+    toolGroup.setToolPassive(ZoomTool.toolName);
+    toolGroup.setToolPassive(EllipticalROITool.toolName);
+    toolGroup.setToolPassive(BidirectionalTool.toolName);
+    toolGroup.setToolPassive(PanTool.toolName);
+    toolGroup.setToolPassive(LengthTool.toolName);
+    toolGroup.setToolPassive(RectangleROITool.toolName);
+    toolGroup.setToolPassive(CircleROITool.toolName);
+    toolGroup.setToolPassive(ArrowAnnotateTool.toolName);
 
-  // 2️⃣ Active tool tương ứng
-  switch (toolName) {
-    case "isZoom":
-      console.log("👉 Zoom activated");
-      toolGroup.setToolActive(ZoomTool.toolName, {
-        bindings: [
-          {
-            mouseButton: csToolsEnums.MouseBindings.Primary, // Left Click
-          }
-        ],
-      });
-      break;
+    // 2️⃣ Active tool tương ứng
+    switch (toolName) {
+      case "isZoom":
+        console.log("👉 Zoom activated");
+        toolGroup.setToolActive(ZoomTool.toolName, {
+          bindings: [
+            {
+              mouseButton: csToolsEnums.MouseBindings.Primary, // Left Click
+            },
+          ],
+        });
+        break;
 
-    case "isElliptical":
-      console.log("👉 Elliptical ROI Activated");
-      toolGroup.setToolActive(EllipticalROITool.toolName, {
-        bindings: [
-          {
-            mouseButton: csToolsEnums.MouseBindings.Primary, 
-          }
-        ],
-      });
-      break;
+      case "isElliptical":
+        console.log("👉 Elliptical ROI Activated");
+        toolGroup.setToolActive(EllipticalROITool.toolName, {
+          bindings: [
+            {
+              mouseButton: csToolsEnums.MouseBindings.Primary,
+            },
+          ],
+        });
+        break;
 
-    case "isBidirectional":
-      console.log("👉 Bidirectional Activated");
-      toolGroup.setToolActive(BidirectionalTool.toolName, {
-        bindings: [
-          {
-            mouseButton: csToolsEnums.MouseBindings.Primary,
-          }
-        ],
-      });
-      break;
+      case "isBidirectional":
+        console.log("👉 Bidirectional Activated");
+        toolGroup.setToolActive(BidirectionalTool.toolName, {
+          bindings: [
+            {
+              mouseButton: csToolsEnums.MouseBindings.Primary,
+            },
+          ],
+        });
+        break;
 
-    case "isPan":
-      console.log("👉 Pan Activated");
-      toolGroup.setToolActive(PanTool.toolName, {
-        bindings: [
-          {
-            mouseButton: csToolsEnums.MouseBindings.Primary,
-          }
-        ],
-      });
-      break;
-    
-    case "isLength":
-      console.log("👉 isLength Activated");
-      toolGroup.setToolActive(LengthTool.toolName, {
-        bindings: [
-          {
-            mouseButton: csToolsEnums.MouseBindings.Primary,
-          }
-        ],
-      });
-      break;
+      case "isPan":
+        console.log("👉 Pan Activated");
+        toolGroup.setToolActive(PanTool.toolName, {
+          bindings: [
+            {
+              mouseButton: csToolsEnums.MouseBindings.Primary,
+            },
+          ],
+        });
+        break;
 
-    case "isrectangleRoi":
-      console.log("👉 isrectangleRoi Activated");
-      toolGroup.setToolActive(RectangleROITool.toolName, {
-        bindings: [
-          {
-            mouseButton: csToolsEnums.MouseBindings.Primary,
-          }
-        ],
-      });
-      break;
+      case "isLength":
+        console.log("👉 isLength Activated");
+        toolGroup.setToolActive(LengthTool.toolName, {
+          bindings: [
+            {
+              mouseButton: csToolsEnums.MouseBindings.Primary,
+            },
+          ],
+        });
+        break;
 
-    case "isCircleROITool":
-      console.log("👉 isCircleROITool Activated");
-      toolGroup.setToolActive(CircleROITool.toolName, {
-        bindings: [
-          {
-            mouseButton: csToolsEnums.MouseBindings.Primary,
-          }
-        ],
-      });
-      break;
+      case "isrectangleRoi":
+        console.log("👉 isrectangleRoi Activated");
+        toolGroup.setToolActive(RectangleROITool.toolName, {
+          bindings: [
+            {
+              mouseButton: csToolsEnums.MouseBindings.Primary,
+            },
+          ],
+        });
+        break;
 
-    case "isArrowAnnotateTool":
-      console.log("👉 isArrowAnnotateTool Activated");
-      toolGroup.setToolActive(ArrowAnnotateTool.toolName, {
-        bindings: [
-          {
-            mouseButton: csToolsEnums.MouseBindings.Primary,
-          }
-        ],
-      });
-      break;
+      case "isCircleROITool":
+        console.log("👉 isCircleROITool Activated");
+        toolGroup.setToolActive(CircleROITool.toolName, {
+          bindings: [
+            {
+              mouseButton: csToolsEnums.MouseBindings.Primary,
+            },
+          ],
+        });
+        break;
 
+      case "isArrowAnnotateTool":
+        console.log("👉 isArrowAnnotateTool Activated");
+        toolGroup.setToolActive(ArrowAnnotateTool.toolName, {
+          bindings: [
+            {
+              mouseButton: csToolsEnums.MouseBindings.Primary,
+            },
+          ],
+        });
+        break;
 
-    default:
-      console.warn("⚠ Unknown tool:", toolName);
-  }
-};
+      default:
+        console.warn("⚠ Unknown tool:", toolName);
+    }
+  };
 
   const setActiveTool = (toolName: keyof toolsUsed) => {
     setToolsUsed(
@@ -291,24 +297,17 @@ const changeTool = (toolName: string) => {
   };
   console.log(toolsUsed);
   return (
-    <div
-      id="content"
-      style={{
-        display: "flex",
-        gap: "20px",
-      }}
-    >
+    <div id="content" className="flex flex-row w-full h-screen p-2">
       <div
         ref={axialRef}
-        style={{ width: "500px", height: "500px", background: "black" }}
+        className="flex flex-col w-full h-full overflow-hidden"
       ></div>
-
-      <div
-        ref={sagittalRef}
-        style={{ width: "500px", height: "500px", background: "black" }}
-      ></div>
-      <div>
-        <Features toolsUsed={toolsUsed} setActiveTool={setActiveTool} changeTool={changeTool} />
+      <div className="w-36">
+        <Features
+          toolsUsed={toolsUsed}
+          setActiveTool={setActiveTool}
+          changeTool={changeTool}
+        />
       </div>
     </div>
   );
