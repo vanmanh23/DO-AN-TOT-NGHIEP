@@ -39,6 +39,7 @@ public class Orders {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id", nullable = false)
     @JsonBackReference
+    @ToString.Exclude
     private Patient patient;  // quan hệ tới Patient
 
 //    @OneToOne(cascade = CascadeType.ALL)
@@ -62,4 +63,7 @@ public class Orders {
     )
     private Set<ServiceItem> serviceItems;
 //    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
+
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
+    private ReportResults reportResults;
 }

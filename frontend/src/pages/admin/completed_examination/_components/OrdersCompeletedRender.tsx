@@ -10,7 +10,7 @@ type OrdersProps = {
   getOrdersCount: (count: number) => void;
 };
 
-export default function OrdersRender({
+export default function OrdersCompeletedRender({
   patientName,
   patient_type,
   order_id,
@@ -81,7 +81,7 @@ export default function OrdersRender({
                 order ID
               </th>
               <th className="px-1 py-2 text-center" colSpan={2}>
-                ngày nhận phiếu
+                Bác sĩ chỉ định
               </th>
               <th className="px-1 py-2 text-center" colSpan={4}>
                 Patient ID
@@ -95,11 +95,8 @@ export default function OrdersRender({
               <th className="px-1 py-2 text-center" colSpan={5}>
                 dịch vụ
               </th>
-              <th className="px-1 py-2 text-center" colSpan={1}>
-                ưu tiên
-              </th>
-              <th className="px-1 py-2 text-center" colSpan={1}>
-                action
+              <th className="px-1 py-2 text-center" colSpan={2}>
+                báo cáo
               </th>
             </tr>
           )}
@@ -145,13 +142,9 @@ export default function OrdersRender({
                     .map((service) => service.serviceName)
                     .join(", ")}
                 </td>
-                <td className="border px-4 py-2 text-center" colSpan={1}>
-                  {item.priority == "ROUTINE" && <div className="inline-block  h-4 w-4 bg-blue-500 rounded-full shadow-blue-500"></div>}
-                  {item.priority == "URGENT" && <div className="inline-block  h-4 w-4 bg-red-600 rounded-full shadow-red-600"></div>}
-                </td>
                 <td
                   className="cursor-pointer border px-4 py-2 z-20"
-                  colSpan={1}
+                  colSpan={2}
                 >
                   <PatientListAction order={item} />
                 </td>

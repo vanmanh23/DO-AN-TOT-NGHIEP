@@ -23,13 +23,12 @@ import {
   ArrowAnnotateTool,
   PanTool,
 } from "@cornerstonejs/tools";
-import createImageIdsAndCacheMetaData from "../../../../../lib/createImageIdsAndCacheMetaData";
+import createImageIdsAndCacheMetaData from "../../../lib/createImageIdsAndCacheMetaData";
 import Features from "./Features";
 import { initToolGroup } from "./initToolGroup";
-import cropImageVolume from "./cropImageVolume";
 
 const { ViewportType } = Enums;
-volumeLoader.registerUnknownVolumeLoader(cornerstoneStreamingImageVolumeLoader);
+// volumeLoader.registerUnknownVolumeLoader(cornerstoneStreamingImageVolumeLoader);
 
 export type toolsUsed = {
   isZoom: boolean;
@@ -57,12 +56,12 @@ function DicomViewer() {
     isCircleROITool: false,
     isArrowAnnotateTool: false,
   });
+  const studyInstance = localStorage.getItem("studyInstanceUID");
+  const seriesInstance = localStorage.getItem("seriesInstanceUID");
   const axialRef = useRef<HTMLDivElement | null>(null);
-  // const sagittalRef = useRef<HTMLDivElement | null>(null);
-  // const acquisitionRef = useRef<HTMLDivElement | null>(null);
-  // const coronalRef = useRef<HTMLDivElement | null>(null);
   const running = useRef(false);
   useEffect(() => {
+    let resizeObserver: ResizeObserver | null = null;
     async function run() {
       if (running.current) {
         return;
@@ -73,14 +72,17 @@ function DicomViewer() {
       await cornerstoneToolsInit();
       await dicomImageLoaderInit();
 
+      // Đăng ký volume loader chưa biết để xử lý các loại DICOM khác nhau
+        volumeLoader.registerUnknownVolumeLoader(
+            cornerstoneStreamingImageVolumeLoader
+        );
+
+
       const imageIds = await createImageIdsAndCacheMetaData({
-        StudyInstanceUID:
-          "1.2.826.0.1.3680043.8.1055.1.20111103111148288.98361414.79379639",
-        SeriesInstanceUID:
-          "1.2.826.0.1.3680043.8.1055.1.20111103111201370.72665630.67534267",
+        StudyInstanceUID: studyInstance,
+        SeriesInstanceUID: seriesInstance,
         wadoRsRoot: "http://localhost:8080/dcm4chee-arc/aets/DCM4CHEE/rs",
       });
-      console.log("imageIds: ", imageIds);
       const renderingEngineId = "myRenderingEngine";
       const volumeId = "myVolume";
       const renderingEngine = new RenderingEngine(renderingEngineId);
@@ -89,9 +91,6 @@ function DicomViewer() {
       });
 
       const viewportId1 = "CT_AXIAL";
-      // const viewportId2 = "CT_SAGITTAL";
-      // const viewportId3 = "CT_CORONAL";
-      // const viewportId4 = "CT_ACQUISITION";
 
       const viewportInput = [
         {
@@ -99,33 +98,10 @@ function DicomViewer() {
           element: axialRef.current!,
           type: ViewportType.ORTHOGRAPHIC,
           defaultOptions: {
-            orientation: Enums.OrientationAxis.AXIAL,
+            // orientation: Enums.OrientationAxis.AXIAL,
+            background: [0, 0, 0],
           },
         },
-        // {
-        //   viewportId: viewportId2,
-        //   element: sagittalRef.current!,
-        //   type: ViewportType.ORTHOGRAPHIC,
-        //   defaultOptions: {
-        //     orientation: Enums.OrientationAxis.SAGITTAL,
-        //   },
-        // },
-        // {
-        //   viewportId: viewportId3,
-        //   element: coronalRef.current!,
-        //   type: ViewportType.ORTHOGRAPHIC,
-        //   defaultOptions: {
-        //     orientation: Enums.OrientationAxis.CORONAL,
-        //   },
-        // },
-        // {
-        //   viewportId: viewportId4,
-        //   element: acquisitionRef.current!,
-        //   type: ViewportType.VOLUME_3D,
-        //   defaultOptions: {
-        //     orientation: Enums.OrientationAxis.ACQUISITION,
-        //   },
-        // },
       ];
 
       renderingEngine.setViewports(viewportInput);
@@ -133,10 +109,6 @@ function DicomViewer() {
 
       const toolGroup = initToolGroup();
       toolGroup.addViewport(viewportId1, renderingEngineId);
-      // toolGroup.addViewport(viewportId2, renderingEngineId);
-      // toolGroup.addViewport(viewportId3, renderingEngineId);
-      // toolGroup.addViewport(viewportId4, renderingEngineId);
-
       toolGroup.setToolActive(BidirectionalTool.toolName, {
         bindings: [
           {
@@ -144,35 +116,62 @@ function DicomViewer() {
           },
         ],
       });
-
       // Set Window-Level
-      setVolumesForViewports(
-        renderingEngine,
-        [
-          {
-            volumeId,
-            callback: ({ volumeActor }) => {
-              volumeActor
-                .getProperty()
-                .getRGBTransferFunction(0)
-                // .setMappingRange(-180, 220);
-                .setMappingRange(-500, 1500);
-            },
-          },
-        ],
-        [viewportId1]
-      );
+      // setVolumesForViewports(
+      //   renderingEngine,
+      //   [
+      //     {
+      //       volumeId,
+      //       callback: ({ volumeActor }) => {
+      //         volumeActor
+      //           .getProperty()
+      //           .getRGBTransferFunction(0)
+      //           // .setMappingRange(-180, 220);
+      //           .setMappingRange(-500, 1500);
+      //       },
+      //     },
+      //   ],
+      //   [viewportId1]
+      // );
+      // Gán Volume cho Viewport
+        // await setVolumesForViewports(
+        //     renderingEngine,
+        //     [
+        //         {
+        //             volumeId,
+        //         },
+        //     ],
+        //     [viewportId1]
+        // );
+        await setVolumesForViewports(
+            renderingEngine,
+            [{ volumeId }],
+            [viewportId1]
+        );
       const viewport = renderingEngine.getViewport(viewportId1);
-      viewport.setDisplayArea({
-        type: "SCALE",
-        scale: 3.0, // tùy chỉnh nếu muốn zoom hơn
-        imageCanvasPoint: {
-          imagePoint: [0.5, 0.5], // center ảnh
-          canvasPoint: [0.5, 0.5], // center canvas
-        },
-        storeAsInitialCamera: true,
-      });
-      viewport.resetCamera();
+
+        viewport.resetCamera();
+        // Tự động Resize khi thẻ div thay đổi kích thước
+        // Đây là lý do chính khiến ảnh bị bẹp hoặc vỡ hạt
+        resizeObserver = new ResizeObserver(() => {
+            if (renderingEngine) {
+                renderingEngine.resize(true, false); // (immediate, keepCamera)
+            }
+        });
+        
+        if (axialRef.current) {
+            resizeObserver.observe(axialRef.current);
+        }
+      // viewport.setDisplayArea({
+      //   type: "SCALE",
+      //   scale: 3.0, // tùy chỉnh nếu muốn zoom hơn
+      //   imageCanvasPoint: {
+      //     imagePoint: [0.5, 0.5], // center ảnh
+      //     canvasPoint: [0.5, 0.5], // center canvas
+      //   },
+      //   storeAsInitialCamera: true,
+      // });
+      // viewport.resetCamera();
       viewport.render();
       // renderingEngine.renderViewports([viewportId1]);
     }
@@ -183,7 +182,6 @@ function DicomViewer() {
     const toolGroup = ToolGroupManager.getToolGroup("myToolGroup");
     if (!toolGroup) return;
 
-    // 1️⃣ Reset tất cả tools
     toolGroup.setToolPassive(ZoomTool.toolName);
     toolGroup.setToolPassive(EllipticalROITool.toolName);
     toolGroup.setToolPassive(BidirectionalTool.toolName);
@@ -193,7 +191,6 @@ function DicomViewer() {
     toolGroup.setToolPassive(CircleROITool.toolName);
     toolGroup.setToolPassive(ArrowAnnotateTool.toolName);
 
-    // 2️⃣ Active tool tương ứng
     switch (toolName) {
       case "isZoom":
         console.log("👉 Zoom activated");
@@ -295,14 +292,14 @@ function DicomViewer() {
       ) as toolsUsed
     );
   };
-  console.log(toolsUsed);
+
   return (
-    <div id="content" className="flex flex-row w-full h-screen p-2">
+    <div id="content" className="relative flex flex-row w-full h-screen">
       <div
         ref={axialRef}
-        className="flex flex-col w-full h-full overflow-hidden"
+        className="flex flex-col w-screen h-screen overflow-hidden"
       ></div>
-      <div className="w-36">
+      <div className="absolute top-0 right-0 w-36">
         <Features
           toolsUsed={toolsUsed}
           setActiveTool={setActiveTool}

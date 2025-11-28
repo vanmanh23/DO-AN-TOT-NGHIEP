@@ -90,13 +90,13 @@ export default function OrdersRender({
               <th className="px-1 py-2 text-center" colSpan={3}>
                 Patient Name
               </th>
-              <th className="px-1 py-2 text-center" colSpan={5}>
+              <th className="px-1 py-2 text-center" colSpan={6}>
                 order ID
               </th>
               <th className="px-1 py-2 text-center" colSpan={2}>
                 ngày nhận phiếu
               </th>
-              <th className="px-1 py-2 text-center" colSpan={5}>
+              <th className="px-1 py-2 text-center" colSpan={3}>
                 Patient ID
               </th>
               <th className="px-1 py-2 text-center" colSpan={2}>
@@ -141,13 +141,13 @@ export default function OrdersRender({
                     <td className="border px-4 py-2" colSpan={3}>
                       {item.patientName}
                     </td>
-                    <td className="border px-4 py-2" colSpan={5}>
+                    <td className="border px-4 py-2" colSpan={6}>
                       {item.orderId}
                     </td>
                     <td className="border px-4 py-2" colSpan={2}>
                       {new Date(item.createdAt).toLocaleDateString("vi-VN")}
                     </td>
-                    <td className="border px-4 py-2" colSpan={5}>
+                    <td className="border px-4 py-2" colSpan={3}>
                       {item.patientId}
                     </td>
                     <td className="border px-4 py-2" colSpan={2}>

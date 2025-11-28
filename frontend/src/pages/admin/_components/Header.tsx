@@ -54,12 +54,12 @@ export default function Header({handleOpenNavbar}: NavbarProps) {
       }
     }, [])
   return (
-    <div className="relative py-6 px-6">
+    <div className="relative py-1 px-6">
       <div className="">
         <div className="flex flex-row justify-between items-center">
           <div className="flex flex-row justify-center items-center gap-3">
             <AlignJustify size={18} onClick={handleOpenNavbar} className="cursor-pointer"/>
-            <p className="md:text-2xl text-sm font-semibold">{stateOption}</p>
+            <p className="md:text-xl text-sm font-semibold">{stateOption}</p>
           </div>
           <div className="md:flex sm:flex xl:flex 2xl:flex hidden flex-row justify-between gap-7 text-menu-items">
             <Popover>

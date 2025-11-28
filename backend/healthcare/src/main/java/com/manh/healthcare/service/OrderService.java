@@ -135,6 +135,15 @@ public OrderDTO updateOrder(String orderId, OrdersRequestDTO request) {
         return convertToDTO(order);
     }
 
+    public void changeStatus(EOrderStatus new_status, String orderId) {
+        Orders order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
+
+        order.setStatus(new_status);
+        orderRepository.save(order);
+        return;
+    }
+
     private OrderDTO convertToDTO(Orders order) {
         OrderDTO dto = new OrderDTO();
         dto.setOrderId(order.getOrderId());

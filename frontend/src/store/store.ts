@@ -1,11 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit'
 import navbarSectionReducer from '../features/navbarsection/navbarSection';
 import roleUserReducer from '../features/userRoles';
+import pacsInstanceUID from '../features/pacsInstanceUID';
 
 export const store = configureStore({
   reducer: {
     option: navbarSectionReducer,
-    roles: roleUserReducer
+    roles: roleUserReducer,
+    pacsInstanceUID: pacsInstanceUID
   },
 });
 

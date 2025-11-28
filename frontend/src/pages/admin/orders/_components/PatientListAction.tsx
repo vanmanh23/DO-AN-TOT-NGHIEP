@@ -24,9 +24,10 @@ export default function PatientListAction({ order }: Props) {
     }
     const handleCancel = async () => {
       try {
-        await orderApis.delete(order?.orderId as string);
+        // await orderApis.delete(order?.orderId as string);
+        await orderApis.ChangeStatus({order_id: order?.orderId as string, new_status: "CANCELLED"});
         toast.success("Hủy phiếu chỉ định thành công!", { duration: 2000, richColors: true } );
-        // window.location.reload();
+        window.location.reload();
       } catch (error) {
         console.log(error);
       }

@@ -6,8 +6,10 @@ import type {
   PatientStudyProps,
   SeriesProps,
 } from "../types/types";
+import type { ApiResponse, PacsUidResponse } from "../types/order";
 
-const url = import.meta.env.VITE_DICOM_APIS;
+// const url = import.meta.env.VITE_DICOM_APIS;
+const url = "http://localhost:8081/api/pacsdcm";
 
 export const GetStudiesByStudyInstanceUID = async (
   studyInstanceUID: string
@@ -72,8 +74,10 @@ export const getAllDiagnoses = async () => {
   return res;
 };
 export const uploadDicomImg = async (
-  e: React.ChangeEvent<HTMLInputElement>
-) => {
+  e: React.ChangeEvent<HTMLInputElement>,
+  new_name: string,
+  sex: string
+): Promise<ApiResponse<PacsUidResponse[]>> => {
   const files = e.target.files;
   if (!files || files.length === 0) return;
 
@@ -81,7 +85,8 @@ export const uploadDicomImg = async (
   for (let i = 0; i < files.length; i++) {
     formData.append("file", files[i]); // KEY phải là "file" để Spring nhận đúng
   }
-
+  formData.append('new_name', new_name);
+    formData.append('sex', sex);
   try {
     const res = await axios.post(`${url}/upload`, formData, {
       headers: {
@@ -89,13 +94,14 @@ export const uploadDicomImg = async (
       },
     });
 
-    console.log("Response:", res.data);
+    console.log("Response:", res);
     return res.data;
   } catch (err) {
     console.error("Upload failed:", err);
     throw err;
   }
 };
+
 
 export const getSeries = async (studyUID: string): Promise<SeriesProps[]> => {
   const res = await axios

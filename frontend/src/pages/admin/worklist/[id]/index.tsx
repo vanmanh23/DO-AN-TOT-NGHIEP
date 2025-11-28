@@ -1,13 +1,36 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import orderApis from "../../../../apis/orderApis";
-import type { OrderResponse } from "../../../../types/order";
+import type {
+  OrderResponse,
+  PacsUidResponse,
+  ReportResult,
+} from "../../../../types/order";
 import { Camera, Eye } from "lucide-react";
+import { uploadDicomImg } from "../../../../apis/dicomApis";
+import { toast } from "sonner";
+import removeAccents from "remove-accents";
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "../../../../store/store";
+import {
+  setSeriesInstanceUID,
+  setStudyInstanceUID,
+} from "../../../../features/pacsInstanceUID";
 
 export default function Component() {
   const [orderDetail, setOrderDetail] = useState<OrderResponse>();
+  const [showModal, setShowModal] = useState<PacsUidResponse>();
+  const [diagnose, setDiagnose] = useState<ReportResult>({
+    description: "",
+    conclusion: "",
+    suggestion: "",
+    orderId: "",
+    studyUID: "",
+    seriesUID: "",
+    instances: "",
+  });
   const { id } = useParams();
-  console.log(id); // Lấy được orderId từ URL
+  const dispatch = useDispatch<AppDispatch>();
   useEffect(() => {
     const findByOrderId = async () => {
       const res = await orderApis.getById(id as string);
@@ -15,16 +38,86 @@ export default function Component() {
     };
     findByOrderId();
   }, []);
-  console.log("orderDetail", orderDetail?.serviceItems.at(0)?.modality.model);
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const removeAccent = removeAccents(
+      orderDetail?.patient?.patientName as string
+    );
+    try {
+      const result = await uploadDicomImg(
+        e,
+        removeAccent,
+        orderDetail?.patient?.gender as string
+      );
+      toast.success("Upload Dicom images successfully!", {
+        duration: 2000,
+        position: "bottom-right",
+        richColors: true,
+      });
+      setShowModal(result?.result[0]);
+      dispatch(setStudyInstanceUID(result?.result[0].studyInstanceUID));
+      dispatch(setSeriesInstanceUID(result?.result[0].seriesInstanceUID));
+      // window.location.reload();
+    } catch (error) {
+      toast.error(`${error.response.data}`, {
+        duration: 2000,
+        position: "bottom-right",
+        richColors: true,
+      });
+    }
+  };
+  const goToDetailImage = () => {
+    localStorage.setItem(
+      "studyInstanceUID",
+      showModal?.studyInstanceUID as string
+    );
+    localStorage.setItem(
+      "seriesInstanceUID",
+      showModal?.seriesInstanceUID as string
+    );
+    window.open(`/dicom-viewer`, "_blank");
+  };
+  const handleChangeInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setDiagnose({ ...diagnose, [name]: value });
+  };
+  const handleClose = async () => {
+    try {
+      // await orderApis.generateReport
+      setDiagnose({
+        ...diagnose,
+        orderId: orderDetail?.orderId as string,
+        studyUID: showModal?.studyInstanceUID as string,
+        seriesUID: showModal?.seriesInstanceUID as string,
+        instances: showModal?.instanceUID as string,
+      });
+
+      await orderApis.generateReport(diagnose);
+
+      await orderApis.ChangeStatus({
+        order_id: orderDetail?.orderId as string,
+        new_status: "COMPLETED",
+      });
+
+      toast.success("Successful completion of nomination form!", {
+        duration: 2000,
+        richColors: true,
+      });
+      window.location.reload();
+    } catch (error) {
+      toast.error("Failed to complete the nomination form!", {
+        duration: 2000,
+        richColors: true,
+      });
+      console.log(error);
+    }
+  };
+  console.log("diagnose", diagnose);
   return (
     <div className=" bg-gray-100 px-4 py-1 text-sm">
       <div className="bg-white shadow rounded p-4 border h-full flex flex-col">
-        {/* Header */}
         <div className="flex items-center  border-b pb-2 mb-3">
           <h1 className="font-semibold text-lg">Bệnh nhân thực hiện</h1>
         </div>
-
-        {/* Patient Info */}
         <div className="grid grid-cols-4 gap-x-2 border p-3 rounded bg-gray-50">
           <div className="col-span-1">
             <label className="font-medium">Mã BN:</label>
@@ -78,10 +171,8 @@ export default function Component() {
             />
           </div>
         </div>
-
         {/* Body */}
         <div className="flex flex-1 gap-4 mt-4 overflow-hidden">
-          {/* Left side */}
           <div className="flex-1 border rounded p-3 overflow-y-auto bg-white">
             <h2 className="font-medium mb-2">Kết quả</h2>
 
@@ -111,48 +202,92 @@ export default function Component() {
               </div>
               <div>
                 <label className="font-medium">Bác sĩ:</label>
-                <input className="w-full border p-1 rounded mt-1" />
+                <input
+                  value={orderDetail?.doctor.fullName}
+                  className="w-full border p-1 rounded mt-1"
+                />
               </div>
               <div>
                 <label className="font-medium">KTV/ĐD:</label>
                 <input className="w-full border p-1 rounded mt-1" />
               </div>
+              <div>
+                <label className="font-medium">Dịch vụ:</label>
+                <p>{orderDetail?.serviceItems?.[0]?.serviceName}</p>
+              </div>
             </div>
 
             <div>
               <label className="font-medium">Chẩn đoán:</label>
-              <textarea className="w-full border p-2 rounded h-20 mt-1"></textarea>
+              <textarea
+                name="suggestion"
+                value={diagnose.suggestion}
+                onChange={handleChangeInput}
+                className="w-full border outline-blue-400 p-2 rounded h-20 mt-1"
+              ></textarea>
             </div>
 
             <div className="mt-3">
               <label className="font-medium">Mô tả:</label>
-              <textarea className="w-full border p-2 rounded h-32 mt-1"></textarea>
+              <textarea
+                name="description"
+                value={diagnose.description}
+                onChange={handleChangeInput}
+                className="w-full border outline-blue-400 p-2 rounded h-32 mt-1"
+              ></textarea>
             </div>
 
             <div className="mt-3">
               <label className="font-medium">Kết luận:</label>
-              <textarea className="w-full border p-2 rounded h-20 mt-1"></textarea>
+              <textarea
+                name="conclusion"
+                value={diagnose.conclusion}
+                onChange={handleChangeInput}
+                className="w-full border outline-blue-400 p-2 rounded h-20 mt-1"
+              ></textarea>
             </div>
           </div>
-
-          {/* Right side */}
           <div className="w-80 border rounded p-3 bg-white flex flex-col">
             <div className="h-48 border rounded bg-gray-200 mb-3"></div>
 
             <h3 className="font-medium mb-2">Danh sách ảnh đã chụp</h3>
-            <div className="flex-1 border rounded mb-3"></div>
+            {showModal && (
+              <div className="flex-1 border rounded mb-3">
+                <img
+                  src={`http://localhost:8080/dcm4chee-arc/aets/DCM4CHEE/rs/studies/${showModal?.studyInstanceUID}/series/${showModal?.seriesInstanceUID}/instances/${showModal?.instanceUID}/rendered`}
+                  alt="dicom"
+                  className="w-full rounded border"
+                />
+              </div>
+            )}
 
             <h3 className="font-medium mb-2">Danh sách video</h3>
             <div className="flex-1 border rounded"></div>
             <div className="flex flex-row justify-around mt-3">
-                <div className="px-2 py-1 border rounded mt-3 flex flex-row justify-center items-center gap-2 bg-gray-100 hover:bg-gray-200 cursor-pointer">
-                    <Camera />
-                    <p>Chup anh</p>
-                </div>
-                <div className="px-2 py-1 border rounded mt-3 flex flex-row justify-center items-center gap-2 bg-gray-100 hover:bg-gray-200 cursor-pointer">
-                    <Eye />
-                    <p>View</p>
-                </div>
+              <div className="relative">
+                <input
+                  type="file"
+                  multiple
+                  accept=".dcm,image/*"
+                  onChange={handleUpload}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  id="fileInput"
+                />
+                <label
+                  htmlFor="fileInput"
+                  className="px-2 py-1 border rounded mt-3 flex flex-row justify-center items-center gap-2 bg-gray-100 hover:bg-gray-200 cursor-pointer"
+                >
+                  <Camera />
+                  <p>Chup anh</p>
+                </label>
+              </div>
+              <div
+                onClick={goToDetailImage}
+                className="px-2 py-1 border rounded mt-3 flex flex-row justify-center items-center gap-2 bg-gray-100 hover:bg-gray-200 cursor-pointer"
+              >
+                <Eye />
+                <p>View</p>
+              </div>
             </div>
           </div>
         </div>
@@ -165,16 +300,16 @@ export default function Component() {
           <button className="px-4 py-2 bg-blue-600 text-white rounded">
             Mô tả
           </button>
-          <button className="px-4 py-2 bg-yellow-600 text-white rounded">
-            Sinh thiết
-          </button>
           <button className="px-4 py-2 bg-gray-600 text-white rounded">
             Thoát
           </button>
           <button className="px-4 py-2 bg-purple-600 text-white rounded">
             In
           </button>
-          <button className="px-4 py-2 bg-red-600 text-white rounded">
+          <button
+            onClick={handleClose}
+            className="px-4 py-2 bg-red-600 text-white rounded"
+          >
             Kết thúc
           </button>
         </div>

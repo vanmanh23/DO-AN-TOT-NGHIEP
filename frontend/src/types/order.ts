@@ -45,11 +45,28 @@ export interface PatientResponse {
 export interface Order {
   patientId?: "";
   priority: "ROUTINE";
-  status: "NEW";
+  status: "SCHEDULED";
   studyId?: "";
   scheduledAt: "";
   serviceItemIds?: string[];
   completedAt?: "";
+  doctorId?: string;
+}
+
+export interface DoctorResponse {
+  id: string;
+  fullName: string;
+  dateOfBirth: string; 
+  gender: string;
+  phoneNumber: string;
+  email: string;
+  address: string;
+  doctorCode: string;
+  specialization: string;
+  degree: string;
+  yearsOfExperience: number;
+  clinicRoom: string;
+  status: string;
 }
 
 export interface OrderResponse {
@@ -65,31 +82,30 @@ export interface OrderResponse {
   patient?: PatientResponse;
   studyId: string | null;
   serviceItems: ServiceItem[];
+  doctor: DoctorResponse;
 }
-// // Modality Types
-// export interface Department {
-//   id: string;
-//   name: string;
-//   location: string;
-// }
 
-// export interface ServiceItem {
-//   id: string;
-//   serviceCode: string;
-//   serviceName: string;
-//   unitPrice: number;
-// }
+export interface PacsUidResponse {
+  studyInstanceUID: string;
+  seriesInstanceUID: string;
+  instanceUID: string;
+}
 
-//  export interface Modality {
-//   id: string;
-//   type: string;
-//   manufacturer: string;
-//   model: string;
-//   status: string;
-//   departmentId: string;
-//   department: Department;
-//   serviceItems: ServiceItem[];
-// }
+export interface ChangeStatus {
+  order_id: string;
+  new_status: "NEW" | "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
+}
+
+export interface ReportResult {
+  description: string;
+  conclusion: string;
+  suggestion: string;
+  orderId: string;
+  studyUID: string;
+  seriesUID: string;
+  instances: string;
+}
+
 export interface ApiResponse<T> {
   message: string;
   result: T;

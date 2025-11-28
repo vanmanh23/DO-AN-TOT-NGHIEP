@@ -1,13 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, FileText, Plus, Save } from "lucide-react";
+import { Calendar, FileText, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import orderApis from "../../../apis/orderApis";
 import type { OrderResponse, Patient, ServiceItem } from "../../../types/order";
 import PatientFormInfo from "./_components/PatientFormInfo";
 import patientApi from "../../../apis/patientApis";
 import { toast } from "sonner";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import serviceItemsApis from "../../../apis/serviceItemsApis";
+import { setOption } from "../../../features/navbarsection/navbarSection";
+import type { AppDispatch } from "../../../store/store";
+import { useDispatch } from "react-redux";
 
 type Props = {
   orderUpdate?: OrderResponse;
@@ -20,22 +23,27 @@ export default function Component() {
     address: "",
     phoneNumber: "",
   });
+  const [doctorPrescriptions, setDoctorPrescriptions] = useState<string>("");
   const [serviceType, setServiceType] = useState("CT");
   const [selectedService, setSelectedService] = useState<ServiceItem[]>([]);
   const [serviceList, setServiceList] = useState<ServiceItem[]>([]);
   const [currentService, setCurrentService] = useState("");
   const [patientIdUpdate, setPatientUpdateId] = useState("");
+  const [OrderIdUpdate, setOrderIdUpdate] = useState("");
   const [isUpdate, setIsUpdate] = useState(false);
 
   const location = useLocation();
   const state = location.state as Props;
-
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   useEffect(() => {
     if (state?.orderUpdate?.patientId) {
       setPatientUpdateId(state.orderUpdate.patientId);
+      setOrderIdUpdate(state.orderUpdate.orderId as string);
       setSelectedService(state.orderUpdate.serviceItems || []);
       setIsUpdate(true);
     }
+    console.log("state", state);
   }, [state?.orderUpdate?.patientId]);
 
   const handleAddToSelected = () => {
@@ -75,27 +83,26 @@ export default function Component() {
   }
   const handleSubmit = async () => {
     try {
-      //  const [patientRes, doctorRes] = await Promise.all([
       const [patientRes] = await Promise.all([
         patientApi.create(patientInfo),
-        // api.createDoctor(doctorData)
       ]);
       const ids = selectedService.map((s) => s.id);
       const orderRes = await orderApis.create({
         patientId: patientRes?.result?.id as "",
         serviceItemIds: ids,
         priority: "ROUTINE",
-        status: "NEW",
+        status: "SCHEDULED",
         scheduledAt: "",
         completedAt: "",
-        // doctorId: "",
+        doctorId: doctorPrescriptions,
       });
 
       if (orderRes.success) {
         toast.success("Tạo phiếu chỉ định thành công!", { duration: 2000, richColors: true } );
+        window.location.reload();
       }
     } catch (err) {
-      toast.error("Tạo phiếu chỉ định thất bại!");
+      toast.error("Tạo phiếu chỉ định thất bại!", { duration: 2000, richColors: true } );
       console.log(err);
     }
   };
@@ -106,17 +113,18 @@ export default function Component() {
                   patientIdUpdate,
                   patientInfo
                 );
-                console.log("patientUpdate", patientUpdate);
+          console.log("patientUpdate", patientUpdate);
       }
       
       const ids = selectedService.map((s) => s.id);
       const orderRes = await orderApis.update(state?.orderUpdate?.orderId as string, {
         serviceItemIds: ids,
         priority: "ROUTINE",
-        status: "NEW",
+        status: "SCHEDULED",
         studyId: "",
         scheduledAt: "",
         completedAt: "",
+        doctorId: doctorPrescriptions,
       });
       if (orderRes.success) {
         toast.success("update phiếu chỉ định thành công!", { duration: 2000, richColors: true } );
@@ -126,9 +134,10 @@ export default function Component() {
       console.log(error);
     }
   };
-  const idss = selectedService.map((s) => s.id).join(",");
-  console.log("selectedService", idss);
-    console.log("patientInfo", patientInfo);
+  const handleCancel = (pathName: string): void => {
+    dispatch(setOption(pathName));
+    navigate("/admin");
+  }
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="p-3 sm:p-4 md:p-6 lg:p-6">
@@ -137,6 +146,8 @@ export default function Component() {
           <PatientFormInfo
             onChange={setPatientInfo}
             patientIdUpdate={patientIdUpdate}
+            orderIdUpdate={OrderIdUpdate}
+            chooseDoctor={setDoctorPrescriptions}
           />
           {/* Service Request Section */}
           <div className="bg-white rounded-lg shadow p-3 sm:p-4 md:p-6">
@@ -193,8 +204,6 @@ export default function Component() {
                   </button>
                 </div>
               </div>
-
-              {/* Danh sách dịch vụ */}
               <div className="border-t pt-3 sm:pt-4">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
                   <h3 className="text-xs sm:text-sm font-medium">
@@ -278,7 +287,7 @@ export default function Component() {
                     </table>
                   </div>
                 ) : (
-                  <div className="border rounded p-4 sm:p-8 text-center text-xs sm:text-sm text-gray-500">
+                  <div className=" border rounded p-4 sm:p-8 text-center text-xs sm:text-sm text-gray-500">
                     Chưa có dịch vụ nào được chọn
                   </div>
                 )}
@@ -286,17 +295,8 @@ export default function Component() {
             </div>
           </div>
         </div>
-
-        {/* Action Buttons */}
         <div className="mt-4 sm:mt-5 md:mt-6 flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 md:gap-4">
-          <button
-            // onClick={}
-            className="bg-blue-600 text-white px-4 sm:px-8 py-2.5 sm:py-3 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-1 sm:gap-2 font-medium text-sm sm:text-base"
-          >
-            <Save size={16} className="sm:w-5 sm:h-5" />
-            LƯU PHIẾU CHỈ ĐỊNH
-          </button>
-          <button className="bg-gray-300 text-gray-700 px-4 sm:px-8 py-2.5 sm:py-3 rounded-lg hover:bg-gray-400 transition font-medium text-sm sm:text-base">
+          <button onClick={() => handleCancel("Dashboard")} className="bg-gray-300 text-gray-700 px-4 sm:px-8 py-2.5 sm:py-2 rounded-lg hover:bg-gray-400 transition font-medium text-sm sm:text-base">
             HỦY BỎ
           </button>
         </div>

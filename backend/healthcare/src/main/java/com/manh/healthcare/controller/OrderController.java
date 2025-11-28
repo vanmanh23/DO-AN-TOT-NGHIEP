@@ -1,9 +1,7 @@
 package com.manh.healthcare.controller;
 
-import com.manh.healthcare.dtos.BaseResponse;
-import com.manh.healthcare.dtos.OrderCreateRequest;
-import com.manh.healthcare.dtos.OrderDTO;
-import com.manh.healthcare.dtos.OrdersRequestDTO;
+import com.manh.healthcare.dtos.*;
+import com.manh.healthcare.entity.EOrderStatus;
 import com.manh.healthcare.service.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +59,12 @@ public class OrderController {
     public ResponseEntity<BaseResponse> findById(@PathVariable String id) {
         OrderDTO order = orderService.findById(id);
         BaseResponse baseResponse = BaseResponse.createSuccessResponse("order.success.findById", order);
+        return ResponseEntity.status(HttpStatus.OK).body(baseResponse);
+    }
+    @PutMapping("/change-status")
+    public ResponseEntity<BaseResponse> changeStatus(@RequestBody ChangeStatusRequestDTO req) {
+        orderService.changeStatus(req.getNew_status(), req.getOrder_id());
+        BaseResponse baseResponse = BaseResponse.createSuccessResponse("order_success_changestatus");
         return ResponseEntity.status(HttpStatus.OK).body(baseResponse);
     }
 }

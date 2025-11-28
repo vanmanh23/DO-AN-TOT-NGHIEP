@@ -19,6 +19,20 @@ export default {
       boxShadow: {
         'right': '1px 0 2px rgba(0,0,0,0.1)',
       },
+       keyframes: {
+        slideDown: {
+          '0%': { opacity: 0, transform: 'translateY(-20px)' },
+          '100%': { opacity: 1, transform: 'translateY(0)' },
+        },
+        slideUp: {
+          '0%': { opacity: 1, transform: 'translateY(0)' },
+          '100%': { opacity: 0, transform: 'translateY(-20px)' },
+        },
+      },
+      animation: {
+        slideDown: 'slideDown 0.3s ease-out forwards',
+        slideUp: 'slideUp 0.3s ease-in forwards',
+      },
     },
   },
   plugins: [],

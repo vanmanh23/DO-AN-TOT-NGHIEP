@@ -1,5 +1,6 @@
 package com.manh.healthcare.service;
 
+import com.manh.healthcare.dtos.PacsUidResponse;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.io.DicomInputStream;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,7 @@ public class PacsService {
     @Autowired
     private RestTemplate restTemplate;
     private static final String STOW_RS_URL = "http://localhost:8080/dcm4chee-arc/aets/DCM4CHEE/rs";
-    public void uploadDicomFile(MultipartFile dicomFile, String newName, String newSex) throws IOException {
+    public Map<String, String> uploadDicomFile(MultipartFile dicomFile, String newName, String newSex) throws IOException {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             DicomInputStream dis = new DicomInputStream(dicomFile.getInputStream());
@@ -62,8 +63,7 @@ public class PacsService {
                 if (statusCode >= 200 && statusCode < 300) {
 
                     // Trích xuất studyInstanceUID từ response nếu có
-                    Map<String,String> studySeriesInstanceIdsFromXmlResponse =extractStudySeriesInstanceIdsFromXmlResponse(responseBody);
-                    System.out.println("---------------: " + studySeriesInstanceIdsFromXmlResponse.get("studyInstanceUID"));
+                    Map<String, String> studySeriesInstanceIdsFromXmlResponse = extractStudySeriesInstanceIdsFromXmlResponse(responseBody);
                     updatePatientInfo(patientID, newName, newSex);
                     if (studySeriesInstanceIdsFromXmlResponse == null) {
                         throw new IOException("No studyInstanceUID found in response");
@@ -77,7 +77,7 @@ public class PacsService {
 //                        diagnoseRepository.save(diagnose);
 //                    }
 
-//                    return studySeriesInstanceIdsFromXmlResponse;
+                    return studySeriesInstanceIdsFromXmlResponse;
                 } else {
                     throw new IOException("Upload failed. Status: " + statusCode + ". Response: " + responseBody);
                 }

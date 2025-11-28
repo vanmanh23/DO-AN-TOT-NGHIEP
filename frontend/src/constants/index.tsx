@@ -1,9 +1,12 @@
 import {
+  ClipboardCheck,
   ClipboardPaste,
   FileUser,
   Info,
   Layers,
   LayoutDashboard,
+  ListCheck,
+  Rows3,
   Settings,
   Users,
 } from "lucide-react";
@@ -31,12 +34,17 @@ export const menuItems = [
   {
     name: "Orders",
     link: "/admin/orders",
-    icon: <FileUser size={18}/>,
+    icon: <ListCheck size={18}/>,
   },
   {
     name: "Worklist",
     link: "/admin/worklist",
-    icon: <FileUser size={18}/>,
+    icon: <Rows3 size={18}/>,
+  },
+  {
+    name: "Completed examination",
+    link: "/admin/completed_examination",
+    icon: <ClipboardCheck size={18}/>,
   },
   {
     name: "Studies",
