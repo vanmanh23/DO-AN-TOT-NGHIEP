@@ -1,17 +1,19 @@
-import type { ApiResponse, ServiceItem } from "../types/order";
+import type { ApiResponse, Modality, ServiceItem, ServiceItemRequest } from "../types/order";
 import axiosClient from "./axiosClient";
 
 
 const serviceItemsApis = {
-//   getAll: (): Promise<ApiResponse<OrderResponse[]>> => axiosClient.get("/orders"),
+  getAll: (): Promise<ApiResponse<ServiceItem[]>> => axiosClient.get("/service-items"),
 
   getByType: (type: string) : Promise<ApiResponse<ServiceItem[]>> => axiosClient.get(`/service-items/type/${type}`),
 
-//   create: (data: Order) => axiosClient.post("/orders", data),
+  findAllModalities: () : Promise<ApiResponse<Modality[]>> => axiosClient.get(`/modalities`),
 
-//   update: (id: string, data: Order) => axiosClient.put(`/orders/${id}`, data),
+  create: (data: ServiceItemRequest) => axiosClient.post("/service-items", data),
 
-//   delete: (id: string) => axiosClient.delete(`/orders/${id}`),
+  update: (id: string, data: ServiceItemRequest) => axiosClient.put(`/service-items/${id}`, data),
+
+  delete: (id: string) => axiosClient.delete(`/service-items/${id}`),
 };
 
 export default serviceItemsApis;

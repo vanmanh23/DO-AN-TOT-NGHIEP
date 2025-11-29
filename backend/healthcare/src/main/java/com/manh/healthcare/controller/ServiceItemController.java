@@ -43,9 +43,10 @@ public class ServiceItemController {
     }
     // Lấy tất cả ServiceItem
     @GetMapping
-    public ResponseEntity<List<ServiceItemResponseDTO>> getAllServiceItems() {
+    public ResponseEntity<BaseResponse> getAllServiceItems() {
         List<ServiceItemResponseDTO> response = serviceItemService.getAllServiceItems();
-        return ResponseEntity.ok(response);
+        BaseResponse baseResponse = BaseResponse.createSuccessResponse("services.success.findAll", response);
+        return ResponseEntity.status(HttpStatus.OK).body(baseResponse);
     }
 
     // Lấy ServiceItem theo Modality ID

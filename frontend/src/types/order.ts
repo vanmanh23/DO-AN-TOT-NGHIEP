@@ -13,6 +13,13 @@ export interface ServiceItem {
   modality: Modality;
 }
 
+export interface ServiceItemRequest {
+  serviceCode: string;
+  serviceName: string;
+  unitPrice: number;
+  modalityId: string;
+}
+
 export interface Modality {
   id: string;
   type: string;
