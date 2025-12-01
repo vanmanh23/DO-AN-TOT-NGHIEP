@@ -6,7 +6,7 @@ import ServiceItemsRender from "./_components/ServiceItemsRender";
 import SearchService from "./_components/SearchService";
 
 export default function Component() {
-  const [getOrdersCount, setOrdersCount] = useState(0);
+  const [getServiceItemsCount, setServiceItemsCount] = useState(0);
   const [formValues, setFormValues] = useState<{
     service_name: string;
     modality: string;
@@ -30,10 +30,15 @@ export default function Component() {
   const handleSearch = () => {
     setSearchValues(formValues);
   };
-  const handleGetOrdersCount  =  (count: number) => {
-    setOrdersCount(count);
+  const handleGetServiceItemsCount  =  (count: number) => {
+    setServiceItemsCount(count);
   }
   const handleReset = () => {
+    setFormValues({
+      service_name: "",
+      modality: "",
+      service_code: "",
+    })
     setSearchValues({
       service_name: "",
       modality: "",
@@ -51,7 +56,7 @@ export default function Component() {
           modality={modality}
           serviceCodeValue={service_codeValue}
           handleSearch={handleSearch}
-          ordersNumber={getOrdersCount}
+          serviceItemsNumber={getServiceItemsCount}
           handleReset={handleReset}
         />
       </div>
@@ -60,7 +65,7 @@ export default function Component() {
             serviceName={searchValues.service_name}
             serviceCode={searchValues.service_code}
             modality={searchValues.modality}
-            getOrdersCount={handleGetOrdersCount}
+            getServiceItemsCount={handleGetServiceItemsCount}
           />
       </div>
     </div>

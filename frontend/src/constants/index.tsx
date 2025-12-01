@@ -52,6 +52,11 @@ export const menuItems = [
     icon: <ClipboardCheck size={18}/>,
   },
   {
+    name: "Doctors Management",
+    link: "/admin/doctor_management",
+    icon: <ClipboardCheck size={18}/>,
+  },
+  {
     name: "Studies",
     link: "/admin/studies",
     icon: <Layers size={18}/>,

@@ -1,34 +1,34 @@
 import { ListFilter, Plus, Search, X } from "lucide-react";
 import { useState } from "react";
-import FormEditService from "./FormEditService";
+import FormEditDoctor from "./FormEditDoctor";
 
 export type patientSearch = {
-  serviceNameValue: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  modality: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  serviceCodeValue: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  doctorNameValue: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  gender: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  doctorCodeValue: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSearch: () => void;
-  serviceItemsNumber?: number;
+  ordersNumber?: number;
   handleReset: () => void;
 };
 export default function SearchService({
-  serviceNameValue,
-  modality,
+  doctorNameValue,
+  gender,
   handleSearch,
-  serviceCodeValue,
-  serviceItemsNumber,
+  doctorCodeValue,
+  ordersNumber,
   handleReset,
 }: patientSearch) {
   const [found, setFound] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const resetClick = () => {
     handleReset();
-    const serviceNameEl = document.getElementById("service_name") as HTMLInputElement | null;
-    const serviceCodeEl = document.getElementById("service_code") as HTMLSelectElement | null;
-    const ModalityEl = document.getElementById("modality") as HTMLInputElement | null;
+    const doctorNameEl = document.getElementById("doctor_name") as HTMLInputElement | null;
+    const doctorCodeEl = document.getElementById("doctor_code") as HTMLSelectElement | null;
+    const genderEl = document.getElementById("gender") as HTMLInputElement | null;
     
-    if (serviceNameEl) serviceNameEl.value = "";
-    if (serviceCodeEl) serviceCodeEl.value = "";
-    if (ModalityEl) ModalityEl.value = "";
+    if (doctorNameEl) doctorNameEl.value = "";
+    if (doctorCodeEl) doctorCodeEl.value = "";
+    if (genderEl) genderEl.value = "";
     setFound(false);
   };
   const searchClick = () => {
@@ -39,7 +39,7 @@ export default function SearchService({
     <div className="w-full flex md:flex-row flex-col justify-between">
       <div>
         <h3 className="md:text-xl text-xs font-semibold">
-          All Service Items: ({serviceItemsNumber})
+          All Doctors: ({ordersNumber})
         </h3>
       </div>
       <div className="flex md:flex-row flex-col md:items-center items-end gap-2 md:h-8 h-full ">
@@ -50,10 +50,10 @@ export default function SearchService({
         <div className="flex flex-row items-center h-full gap-2 pl-2 border-slate-200 rounded-md border">
           <Search className="text-secondary" size={16} />
           <input
-            id="service_code"
+            id="doctor_code"
             type="text"
-            placeholder="Search by service code"
-            onChange={(e) => serviceCodeValue(e)}
+            placeholder="Search by doctor code"
+            onChange={(e) => doctorCodeValue(e)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 searchClick();
@@ -65,10 +65,10 @@ export default function SearchService({
         <div className="flex flex-row items-center h-full gap-2 pl-2 border-slate-200 rounded-md border">
           <Search className="text-secondary" size={16} />
           <input
-            id="service_name"
+            id="doctor_name"
             type="text"
             placeholder="Search by service name"
-            onChange={(e) => serviceNameValue(e)}
+            onChange={(e) => doctorNameValue(e)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 searchClick();
@@ -78,14 +78,15 @@ export default function SearchService({
           />
         </div>
         <select
-          onChange={(e) => modality(e)}
-          name="modality"
-          id="modality"
+          onChange={(e) => gender(e)}
+          name="gender"
+          id="gender"
           className="w-full px-3 py-1 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         >
-          <option value="" className="text-gray-400">Modality</option>
-          <option value="CT">CT</option>
-          <option value="XRAY">XRAY</option>
+          <option value="" className="text-gray-400">Gender</option>
+          <option value="M">Male</option>
+          <option value="F">Female</option>
+          <option value="O">Other</option>
         </select>
         <button
           onClick={searchClick}
@@ -100,7 +101,7 @@ export default function SearchService({
           </div>
         )}
       </div>
-      <FormEditService open={openEdit} setOpen={setOpenEdit} isCreate={true} />
+      <FormEditDoctor open={openEdit} setOpen={setOpenEdit} isCreate={true} />
     </div>
   );
 }

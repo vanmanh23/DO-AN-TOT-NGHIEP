@@ -19,6 +19,8 @@ const orderApis = {
   openReport: (id: string) => axiosClient.get(`/report-results/generate_pdf/${id}`),
 
   generateReport: (data: ReportResult) => axiosClient.post(`/report-results`, data),
+
+  getByStatus: (status: string): Promise<ApiResponse<OrderResponse[]>> => axiosClient.get(`/orders/status/${status}`),
 };
 
 export default orderApis;

@@ -22,7 +22,8 @@ public class OrderCreateRequest {
     @NotNull(message = "Patient ID không được để trống")
     private String patientId;
 
-    private String studyId;
+//    private String studyId;
+//    private Study
 
     private Set<String> serviceItemIds; // Danh sách ID của ServiceItem
 

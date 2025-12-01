@@ -45,7 +45,7 @@ public class Person {
     private LocalDateTime updatedAt;
 
     // Quan hệ 1-1 với Doctor (optional)
-    @OneToOne(mappedBy = "person", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "person", fetch = FetchType.LAZY)
     private Doctor doctor;
 
     // Quan hệ 1-1 với Admin (optional)

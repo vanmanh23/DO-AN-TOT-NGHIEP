@@ -34,6 +34,11 @@ export default function Component() {
     setOrdersCount(count);
   }
   const handleReset = () => {
+    setFormValues({
+      patientName: "",
+      patientType: "",
+      findById: "",
+    })
     setSearchValues({
       patientName: "",
       patientType: "",

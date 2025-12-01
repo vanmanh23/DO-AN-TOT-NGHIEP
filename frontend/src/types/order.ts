@@ -61,14 +61,14 @@ export interface Order {
 }
 
 export interface DoctorResponse {
-  id: string;
+  id?: string;
   fullName: string;
   dateOfBirth: string; 
   gender: string;
   phoneNumber: string;
   email: string;
   address: string;
-  doctorCode: string;
+  doctorCode?: string;
   specialization: string;
   degree: string;
   yearsOfExperience: number;

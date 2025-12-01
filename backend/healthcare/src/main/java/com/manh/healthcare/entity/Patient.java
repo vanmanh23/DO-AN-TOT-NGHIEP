@@ -38,8 +38,8 @@ public class Patient {
     @JsonManagedReference
     private List<Orders> orders = new ArrayList<>();
 
-    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Study> studies = new ArrayList<>();
+//    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+//    private List<Study> studies = new ArrayList<>();
 
     // Method để tính age
     public Integer getAge() {

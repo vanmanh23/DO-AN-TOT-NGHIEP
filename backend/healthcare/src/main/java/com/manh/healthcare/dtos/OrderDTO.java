@@ -19,7 +19,8 @@ public class OrderDTO {
     private String patientId;
     private LocalDate patientBirthday;
     private String patientName;
-    private String studyId;
+//    private String studyId;
+    private StudyDTO study;
     private String doctorId;
     private PatientResponseDTO patient;
     private DoctorResponseDTO doctor;

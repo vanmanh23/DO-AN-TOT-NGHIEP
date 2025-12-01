@@ -144,6 +144,12 @@ public OrderDTO updateOrder(String orderId, OrdersRequestDTO request) {
         return;
     }
 
+    public List<OrderDTO> findByStatus(EOrderStatus status) {
+        List<Orders> order = orderRepository.findByStatus(status);
+        List<OrderDTO> orderDTOS = order.stream().map(this::convertToDTO).toList();
+        return orderDTOS;
+    }
+
     private OrderDTO convertToDTO(Orders order) {
         OrderDTO dto = new OrderDTO();
         dto.setOrderId(order.getOrderId());
@@ -158,9 +164,10 @@ public OrderDTO updateOrder(String orderId, OrdersRequestDTO request) {
             dto.setPatientBirthday(order.getPatient().getBirthdate());
         }
 
-//        if (order.getStudies() != null) {
-//            dto.setStudyId(order.getStudies().getId());
-//        }
+        if (order.getStudy() != null) {
+            StudyDTO study = modelMapper.map(order.getStudy(), StudyDTO.class);
+            dto.setStudy(study);
+        }
         if (order.getDoctor() != null) {
             DoctorResponseDTO doctorResponseDTO = new DoctorResponseDTO();
             doctorResponseDTO.setId(order.getDoctor().getId());
@@ -179,7 +186,7 @@ public OrderDTO updateOrder(String orderId, OrdersRequestDTO request) {
 
             dto.setDoctor(doctorResponseDTO);
 
-            dto.setStudyId(order.getDoctor().getId());
+//            dto.setStudyId(order.getDoctor().getId());
         }
 
         if (order.getPatient() != null) {

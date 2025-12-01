@@ -1,88 +1,88 @@
 import React, { useEffect, useState } from "react";
-import type { ServiceItem } from "../../../../types/order";
-import serviceItemsApis from "../../../../apis/serviceItemsApis";
-import ServiceItemsAction from "./ServiceItemsAction";
+import type { DoctorResponse } from "../../../../types/order";
+import DoctorAction from "./DoctorAction";
+import doctorsApi from "../../../../apis/doctorApis";
 
-type OrdersProps = {
-  serviceName?: string;
-  serviceCode?: string;
-  modality?: string;
-  getServiceItemsCount: (count: number) => void;
+type doctorsProps = {
+  doctorName?: string;
+  doctorCode?: string;
+  gender?: string;
+  getDoctorsCount: (count: number) => void;
 };
 
-export default function ServiceItemsRender({
-  serviceName,
-  serviceCode,
-  modality,
-  getServiceItemsCount,
-}: OrdersProps) {
-  const [serviceItems, setServiceItems] = useState<ServiceItem[]>();
-  const [headTableforPatients, setHeadTableforPatients] = useState({
+export default function DoctorsRender({
+  doctorName,
+  doctorCode,
+  gender,
+  getDoctorsCount,
+}: doctorsProps) {
+  const [doctors, setDoctors] = useState<DoctorResponse[]>();
+  const [headTableforDoctors, setHeadTableforDoctors] = useState({
     isHeadTitle: true,
     isKey: "",
   });
-  const forcusOnPatients = (orderID: string) => {
-    setHeadTableforPatients({
+  const forcusOnDoctor = (doctorID: string) => {
+    setHeadTableforDoctors({
       isHeadTitle: true,
-      isKey: orderID,
+      isKey: doctorID,
     });
   };
 
   // Fetch all patients once on mount
   useEffect(() => {
     const fetchOrder = async () => {
-      const res = await serviceItemsApis.getAll();
-      setServiceItems(res.result as unknown as ServiceItem[]);
+      const res = await doctorsApi.getAll();
+      setDoctors(res.result as unknown as DoctorResponse[]);
     };
     fetchOrder();
   }, []);
   useEffect(() => {
-    serviceItemsApis.getAll().then((res) => {
-      let filtered = res.result as unknown as ServiceItem[];
-      if (serviceName?.trim()) {
-        const q = serviceName.toLocaleLowerCase();
-        filtered = filtered.filter((serviceItem: ServiceItem) =>
-          serviceItem.serviceName?.toLocaleLowerCase().includes(q)
+    doctorsApi.getAll().then((res) => {
+      let filtered = res.result as unknown as DoctorResponse[];
+      if (doctorName?.trim()) {
+        const q = doctorName.toLocaleLowerCase();
+        filtered = filtered.filter((doctor: DoctorResponse) =>
+          doctor.fullName?.toLocaleLowerCase().includes(q)
         );
       }
-      if (serviceCode?.trim()) {
-        const q = serviceCode.toUpperCase();
-        filtered = filtered.filter((serviceItem: ServiceItem) =>
-          serviceItem?.serviceCode?.toUpperCase().includes(q)
+      if (doctorCode?.trim()) {
+        const q = doctorCode.toUpperCase();
+        filtered = filtered.filter((doctor: DoctorResponse) =>
+          doctor?.doctorCode?.toUpperCase().includes(q)
         );
       }
-      if (modality?.trim()) {
-        const q = modality.toUpperCase();
-        filtered = filtered.filter((serviceItem: ServiceItem) =>
-          serviceItem?.modality.type.toUpperCase().includes(q)
+      if (gender?.trim()) {
+        const q = gender.toUpperCase();
+        filtered = filtered.filter((doctor: DoctorResponse) =>
+          doctor?.gender.toUpperCase().includes(q)
         );
       }
-      setServiceItems(filtered);
+      setDoctors(filtered);
     });
-  }, [serviceCode, serviceName, modality]);
-  if (serviceItems && typeof getServiceItemsCount === "function") {
-    getServiceItemsCount(serviceItems.length);
+  }, [doctorCode, doctorName, gender]);
+  if (doctors && typeof getDoctorsCount === "function") {
+    getDoctorsCount(doctors.length);
   }
   return (
     <div className="container overflow-x-auto mx-auto w-full flex justify-center">
       <table className="w-full min-w-[600px] table-fixed">
         <thead className="bg-bg-secondary text-white overflow-hidden">
-          {headTableforPatients.isHeadTitle && (
+          {headTableforDoctors.isHeadTitle && (
             <tr className=" overflow-hidden text-xs">
               <th className="px-1 py-2 text-center" colSpan={1}>
                 STT
               </th>
               <th className="px-1 py-2 text-center" colSpan={4}>
-                service Name
+                doctor Name
               </th>
               <th className="px-1 py-2 text-center" colSpan={3}>
-                service Code
+                doctor Code
               </th>
               <th className="px-1 py-2 text-center" colSpan={3}>
-                Modality
+                Gender
               </th>
               <th className="px-1 py-2 text-center" colSpan={2}>
-                Unit Price
+                Phone Number
               </th>
               <th className="px-1 py-2 text-center" colSpan={1}>
                 action
@@ -92,16 +92,16 @@ export default function ServiceItemsRender({
         </thead>
         <tbody>
           {/* Patients */}
-          {serviceItems?.map((item: ServiceItem, index: number) => (
+          {doctors?.map((item: DoctorResponse, index: number) => (
             <React.Fragment key={index}>
               <tr
                 key={index}
                 className={`overflow-hidden text-xs h-11 ${
-                  headTableforPatients.isKey === item.id
+                  headTableforDoctors.isKey === item.id
                     ? "bg-gray-200"
                     : ""
                 }`}
-                onMouseMove={() => forcusOnPatients(item.id)}
+                onMouseMove={() => forcusOnDoctor(item.id as string)}
               >
                 <td className="border px-4 py-2 " colSpan={1}>
                   <div className="flex flex-row justify-between">
@@ -109,27 +109,27 @@ export default function ServiceItemsRender({
                   </div>
                 </td>
                 <td className="border px-4 py-2" colSpan={4}>
-                  {item.serviceName}
+                  {item.fullName}
                 </td>
                 <td className="border px-4 py-2 truncate" colSpan={3}>
-                  {item.serviceCode}
+                  {item.doctorCode}
                 </td>
                 <td className="border px-4 py-2" colSpan={3}>
-                  {item.modality.type}
+                  {item.gender}
                 </td>
                 <td className="border px-4 py-2" colSpan={2}>
-                  {item.unitPrice}
+                  {item.phoneNumber}
                 </td>
                 <td
                   className="cursor-pointer border px-4 py-2 z-20"
                   colSpan={1}
                 >
-                  <ServiceItemsAction serviceItems={item} />
+                  <DoctorAction doctors={item} />
                 </td>
               </tr>
             </React.Fragment>
           ))}
-          {serviceItems?.length === 0 && (
+          {doctors?.length === 0 && (
             <React.Fragment>
               <tr>
                 <td colSpan={12} className="text-center">

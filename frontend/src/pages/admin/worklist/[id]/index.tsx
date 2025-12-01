@@ -111,7 +111,6 @@ export default function Component() {
       console.log(error);
     }
   };
-  console.log("diagnose", diagnose);
   return (
     <div className=" bg-gray-100 px-4 py-1 text-sm">
       <div className="bg-white shadow rounded p-4 border h-full flex flex-col">

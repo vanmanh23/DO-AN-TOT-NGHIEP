@@ -42,9 +42,10 @@ public class Orders {
     @ToString.Exclude
     private Patient patient;  // quan hệ tới Patient
 
-//    @OneToOne(cascade = CascadeType.ALL)
 //    @JoinColumn(name = "study_id", referencedColumnName = "order_id")
-//    private Study studies;
+
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
+    private Study study;
 
 //    @OneToOne
 //    @JoinColumn(name = "doctor_id")

@@ -19,7 +19,7 @@ public class Doctor {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "person_id", nullable = false, unique = true)
     private Person person;
 

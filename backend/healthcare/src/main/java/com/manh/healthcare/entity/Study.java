@@ -12,18 +12,19 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Study {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String ID;
+
     @Column(name = "studyInstance_uid", nullable = false)
     private String studyInstanceUID;
+
     @Column(name = "seriesInstance_uid", nullable = false)
     private String seriesInstanceUID;
-    @Column(name = "modality", nullable = false)
-    private EModality modality;
-    @Transient
-    private Integer age;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "patient_id", nullable = false)
-    private Patient patient;
+    @Column(name = "Instance_uid", nullable = false)
+    private String InstanceUID;
 
+    @OneToOne
+    @JoinColumn(name = "order_id", referencedColumnName = "order_id")
+    private Orders order;
 }

@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
@@ -35,6 +37,14 @@ public class OrderController {
         BaseResponse baseResponse = BaseResponse.createSuccessResponse("order.success.findALl", orders);
         return ResponseEntity.status(HttpStatus.OK).body(baseResponse);
     }
+
+    @GetMapping("/status/{status}")
+    public ResponseEntity<BaseResponse> getByStatus(@PathVariable EOrderStatus status) {
+        List<OrderDTO> orders = orderService.findByStatus(status);
+        BaseResponse baseResponse = BaseResponse.createSuccessResponse("order.success.findByStatus", orders);
+        return ResponseEntity.status(HttpStatus.OK).body(baseResponse);
+    }
+
     @PostMapping
     public ResponseEntity<BaseResponse> createOrder(@Valid @RequestBody OrderCreateRequest request) {
         OrderDTO createdOrder = orderService.createOrder(request);

@@ -31,14 +31,14 @@ export default function OrdersCompeletedRender({
   // Fetch all patients once on mount
   useEffect(() => {
     const fetchOrder = async () => {
-      const res = await orderApis.getAll();
-      setOrder(res.result.content as unknown as OrderResponse[]);
+      const res = await orderApis.getByStatus("COMPLETED");
+      setOrder(res.result as unknown as OrderResponse[]);
     };
     fetchOrder();
   }, []);
   useEffect(() => {
-    orderApis.getAll().then((res) => {
-      let filtered = res.result.content as unknown as OrderResponse[];
+    orderApis.getByStatus("COMPLETED").then((res) => {
+      let filtered = res.result as unknown as OrderResponse[];
       if (patientName?.trim()) {
         const q = patientName.toLocaleLowerCase();
         filtered = filtered.filter((patient: OrderResponse) =>
@@ -65,6 +65,7 @@ export default function OrdersCompeletedRender({
   if (order && typeof getOrdersCount === "function") {
     getOrdersCount(order.length);
   }
+  console.log("order", order);
   return (
     <div className="container overflow-x-auto mx-auto w-full flex justify-center">
       <table className="w-full min-w-[600px] table-fixed">

@@ -33,6 +33,7 @@ export default function PatientFormInfo({
 
   const handleGetDoctor = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const doctor = e.target;
+    console.log("doctor", doctor.value);
       chooseDoctor(doctor.value);
   };
   const generateAgeFromBirthdate = (birthdate: string) => {
