@@ -1,6 +1,6 @@
 // Types/Interfaces
 export interface Department {
-  id: string;
+  id?: string;
   name: string;
   location: string;
 }
@@ -21,13 +21,15 @@ export interface ServiceItemRequest {
 }
 
 export interface Modality {
-  id: string;
+  id?: string;
   type: string;
   manufacturer: string;
   model: string;
   status: string;
-  departmentId: string;
-  department: Department;
+  departmentId?: string;
+  department?: Department;
+  nameDepartment?: string;
+  locationDepartment?: string;
   // serviceItems: ServiceItem[];
 }
 // Patient Types

@@ -17,4 +17,6 @@ public interface UserRepository extends JpaRepository<User, String> {
     @Query("SELECT COUNT(u) FROM User u WHERE u.id LIKE CONCAT(:pattern, '%')")
     Long countByUserIdStartingWith(@Param("pattern") String pattern);
     Optional<User> findByEmail(String email);
+
+    Boolean existsByEmail(String email);
 }

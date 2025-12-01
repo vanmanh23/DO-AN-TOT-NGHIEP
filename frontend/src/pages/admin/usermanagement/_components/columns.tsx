@@ -3,22 +3,19 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import PatientDetailsDialog from "./EditUserForm";
 import RemoveHandle from "./RemoveHandle";
+import type { UserResponseDTO } from "../../../../apis/authApis";
 
-type Role = {
-  id: number;
-  name: string;
-};
-export type User = {
-  id: number;
-  username: string;
-  password?: string;
-  roles: Role[];
-  role?: ["admin" | "user"];
-  email?: string;
-  phoneNumber?: string;
-};
+// export type User = {
+//   id: number;
+//   username: string;
+//   password?: string;
+//   roles: Role[];
+//   role?: ["admin" | "user"];
+//   email?: string;
+//   phoneNumber?: string;
+// };
 
-export const columns: ColumnDef<User>[] = [
+export const columns: ColumnDef<UserResponseDTO>[] = [
   {
     accessorKey: "username",
     header: "User’s name",
@@ -47,11 +44,11 @@ export const columns: ColumnDef<User>[] = [
       return row.original.roles.map((role, index) => (
         <div
           key={index}
-          className={`inline px-2 py-1 text-xs w-fit ml-2 text-white ${
-            role.name === "ROLE_ADMIN"
-              ? "bg-red-500 rounded-full"
-              : "bg-green-500 rounded-full"
-          }`}
+          className={`inline px-2 py-1 text-xs w-fit ml-2 text-white 
+            ${role.name === "ROLE_USER" && "bg-red-500 rounded-full"}
+            ${role.name === "ROLE_ADMIN" && "bg-green-500 rounded-full"}
+            ${role.name === "ROLE_DOCTOR" && "bg-blue-500 rounded-full"}
+            ${role.name === "REGISTRATION_STAFF" && "bg-yellow-500 rounded-full"} `}
         >
           {role.name}
         </div>
@@ -64,7 +61,7 @@ export const columns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex justify-center">
-            <PatientDetailsDialog props={row.original} />
+          <PatientDetailsDialog props={row.original} />
         </div>
       );
     },
@@ -75,7 +72,7 @@ export const columns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex justify-center text-secondary">
-            <RemoveHandle id={row.original.id} />
+          <RemoveHandle id={row.original.id} />
         </div>
       );
     },

@@ -6,6 +6,7 @@ import type { AppDispatch, RootState } from "../../../store/store";
 import { setOption } from "../../../features/navbarsection/navbarSection";
 import type { NavbarProps } from "../_layout";
 import { bottom_navbar, menuItems } from "../../../constants";
+import { getFilteredMenuForUser } from "./getFilteredMenuForUser";
 
 export default function Navbar({
   isOpenNavbar,
@@ -16,9 +17,26 @@ export default function Navbar({
   const handleOption = (nameOption: string): void => {
     dispatch(setOption(nameOption));
   };
-  const filteredItems = menuItems.filter(
-    (item) => item.name !== "User management" || roles.includes("ROLE_ADMIN")
-  );
+  console.log("roles in navbar===", roles);
+  const filteredItems = getFilteredMenuForUser(roles);
+  // const isDoctor = roles.some((r) => r.name === "ROLE_DOCTOR");
+  // const excludedNamesforDoctor = ["Dashboard", "Worklist", "Completed examination"];
+  // const filteredItems = menuItems.filter(
+  //   (item) => excludedNamesforDoctor.includes(item.name) && isDoctor
+  // );
+
+  // const isRegistration = roles.some((r) => r.name === "REGISTRATION_STAFF");
+  // const excludedNamesforRegistration = ["Dashboard", "Receive", "Orders", "Patients"];
+  // const filteredItems = menuItems.filter(
+  //   (item) => excludedNamesforRegistration.includes(item.name) && isRegistration
+  // );
+
+  //  const isAdmin = roles.some((r) => r.name === "ROLE_ADMIN");
+  // const excludedNames = ["User management", "Patients", "Orders"];
+  // const filteredItems = menuItems.filter(
+  //   (item) => !excludedNames.includes(item.name) || isAdmin
+  // );
+
   const stateOption = useSelector(
     (state: RootState) => state.option.valueOption
   );

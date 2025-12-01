@@ -98,7 +98,7 @@ export default function PatientsRender({ patientName, sex, findById }: PatientsP
                     ? "bg-gray-200"
                     : ""
                 }`}
-                onMouseMove={() => forcusOnPatients(item.id)}
+                onMouseMove={() => forcusOnPatients(item.id || "")}
               >
                 <td className="border px-4 py-2 " colSpan={1}>
                   <div className="flex flex-row justify-between">

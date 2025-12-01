@@ -1,10 +1,16 @@
 import axios from "axios";
 import type { User } from "../pages/admin/usermanagement/_components/columns";
+import type { ApiResponse } from "../types/order";
 
 export interface user {
   email: string;
-  password: string;
+  password: 
+  string;
 }
+export type Role = {
+  id: number;
+  name: string;
+};
 export interface userProps {
   username: string;
   password: string;
@@ -12,42 +18,58 @@ export interface userProps {
   email: string;
   phoneNumber: string;
 }
+
+export interface AuthResponseDTO {
+  userId: string;
+  accessToken: string;
+  refreshToken: string;
+}
+export interface UserResponseDTO {
+  id?: string;
+  username: string;
+  phoneNumber: string;
+  email: string;
+  roles: Role[];
+}
 const url = import.meta.env.VITE_USER_URL;
-export const SignIn = async (data: user) => {
+export const SignIn = async (data: user): Promise<ApiResponse<AuthResponseDTO>> => {
   const res = await axios
     .post(`${url}/auth/signin`, data)
     .then((res) => res.data)
     .catch((err) => console.log(err));
   return res;
 };
+
+export const GetAllUsers = async (): Promise<ApiResponse<UserResponseDTO[]>> => {
+  const res = await axios
+    .get(`${url}/auth/all`)
+    .then((res) => res.data)
+    .catch((err) => console.log(err));
+  return res;
+};
+
 export const SignUp = async (data: userProps) => {
   const res = await axios
     .post(`${url}/signup`, data)
     .then((res) => res.data)
     .catch((err) => console.log(err));
   return res;
-}
-export const GetEmailFromJWT = async (token: string) => {
+};
+export const GetEmailFromJWT = async (token: string): Promise<ApiResponse<string>>=> {
   const res = await axios
     .get(`${url}/auth/getemail/${token}`)
     .then((res) => res.data)
     .catch((err) => console.log(err));
   return res;
 };
-export const GetUserByEmail= async (email: string) => {
+export const GetUserByEmail = async (email: string):  Promise<ApiResponse<UserResponseDTO>> => {
   const res = await axios
     .get(`${url}/auth/getuser/${email}`)
     .then((res) => res.data)
     .catch((err) => console.log(err));
   return res;
 };
-export const GetAllUsers = async (): Promise<User[]> => {
-  const res = await axios
-    .get(`${url}/all`)
-    .then((res) => res.data)
-    .catch((err) => console.log(err));
-  return res;
-};
+
 
 export const UpdateUser = async (
   data: User,

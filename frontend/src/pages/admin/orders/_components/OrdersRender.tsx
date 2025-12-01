@@ -32,13 +32,15 @@ export default function OrdersRender({
   useEffect(() => {
     const fetchOrder = async () => {
       const res = await orderApis.getAll();
-      setOrder(res.result.content as unknown as OrderResponse[]);
+      const filter = res.result.content.filter(item => item.status !== "COMPLETED");
+      setOrder(filter as unknown as OrderResponse[]);
     };
     fetchOrder();
   }, []);
   useEffect(() => {
     orderApis.getAll().then((res) => {
-      let filtered = res.result.content as unknown as OrderResponse[];
+      let filtered = res.result.content.filter(item => item.status !== "COMPLETED");
+      // let filtered = res.result.content as unknown as OrderResponse[];
       if (patientName?.trim()) {
         const q = patientName.toLocaleLowerCase();
         filtered = filtered.filter((patient: OrderResponse) =>
@@ -46,12 +48,6 @@ export default function OrdersRender({
         );
       }
 
-      // if (patient_type?.trim()) {
-      //   const q = patient_type.toUpperCase();
-      //   filtered = filtered.filter((patient: OrderResponse) =>
-      //     patient?.?.toUpperCase().includes(q)
-      //   );
-      // }
       if (order_id?.trim()) {
         const q = order_id.toUpperCase();
         filtered = filtered.filter((patient: OrderResponse) =>

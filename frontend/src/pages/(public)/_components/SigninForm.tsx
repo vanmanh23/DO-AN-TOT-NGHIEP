@@ -20,7 +20,6 @@ export default function SigninForm() {
   const onSubmit: SubmitHandler<SignInProps> = async (data) => {
     try {
       const res = await SignIn(data);
-      console.log("==========: ",res);
       localStorage.setItem("token", res.result.accessToken);
       if (res.result.accessToken) {
         toast.success("Login successfully!", { duration: 2000, position: "bottom-right",richColors: true }, );

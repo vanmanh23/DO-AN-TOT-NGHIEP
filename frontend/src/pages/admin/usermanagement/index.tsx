@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { columns, type User } from "./_components/columns";
+import { columns } from "./_components/columns";
 import UserTable from "./_components/UserTable";
-import { GetAllUsers } from "../../../apis/authApis";
+import { GetAllUsers, type UserResponseDTO } from "../../../apis/authApis";
 import { ListFilter, Search } from "lucide-react";
 import AddAccount from "./_components/AddAccount";
 import { useDispatch } from "react-redux";
@@ -9,7 +9,7 @@ import type { AppDispatch } from "../../../store/store";
 import { setOption } from "../../../features/navbarsection/navbarSection";
 
 export default function Component() {
-  const [usersData, setUsersData] = useState<User[]>([]);
+  const [usersData, setUsersData] = useState<UserResponseDTO[]>([]);
   const [formValues, setFormValues] = useState<{ [key: string]: string }>({});
   const [submitSearch, setSubmitSearch] = useState<{ [key: string]: string }>(
     {}
@@ -18,8 +18,8 @@ export default function Component() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const [studies] = await Promise.all([GetAllUsers()]);
-        setUsersData(studies);
+        const users = await GetAllUsers();
+        setUsersData(users.result);
       } catch (error) {
         console.error("Error fetching data", error);
       }

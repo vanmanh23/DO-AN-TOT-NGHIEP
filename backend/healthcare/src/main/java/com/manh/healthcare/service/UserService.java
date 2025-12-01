@@ -87,14 +87,26 @@ public class UserService {
         } else {
             strRoles.forEach(role -> {
                 switch (role) {
-                    case "admin":
+                    case "ROLE_ADMIN":
                         Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN.name())
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                         roles.add(adminRole);
+                        break;
+                    case "ROLE_DOCTOR":
+                        Role doctorRole = roleRepository.findByName(ERole.ROLE_DOCTOR.name())
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        roles.add(doctorRole);
+                        break;
+                    case "REGISTRATION_STAFF":
+                        Role registration = roleRepository.findByName(ERole.REGISTRATION_STAFF.name())
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        roles.add(registration);
+                        break;
                     default:
                         Role userRole = roleRepository.findByName(ERole.ROLE_USER.name())
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                         roles.add(userRole);
+                        break;
                 }
             });
         }
@@ -117,6 +129,9 @@ public class UserService {
         if (userRepository.findByUsername(createUserRequestDTO.getUsername()).isPresent()) {
             throw new RuntimeException("Error: Username is already taken!");
         }
+        if (userRepository.existsByEmail(createUserRequestDTO.getEmail())) {
+            throw new RuntimeException("Error: Email is already in use!");
+        }
         String useridGenerate = generateUserId(createUserRequestDTO.getRole());
         User user = new User();
         user.setId(useridGenerate);
@@ -133,14 +148,26 @@ public class UserService {
         } else {
             strRoles.forEach(role -> {
                 switch (role) {
-                    case "admin":
+                    case "ROLE_ADMIN":
                         Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN.name())
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                         roles.add(adminRole);
+                        break;
+                    case "ROLE_DOCTOR":
+                        Role doctorRole = roleRepository.findByName(ERole.ROLE_DOCTOR.name())
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        roles.add(doctorRole);
+                        break;
+                    case "REGISTRATION_STAFF":
+                        Role registration = roleRepository.findByName(ERole.REGISTRATION_STAFF.name())
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        roles.add(registration);
+                        break;
                     default:
                         Role userRole = roleRepository.findByName(ERole.ROLE_USER.name())
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                         roles.add(userRole);
+                        break;
                 }
             });
         }
@@ -168,9 +195,9 @@ public class UserService {
         UserResponseDTO userResponseDTO = new UserResponseDTO();
         userResponseDTO.setUsername(user.getUsername());
         userResponseDTO.setEmail(user.getEmail());
-        Set<String> strRoles = new HashSet<>();
+        Set<Role> strRoles = new HashSet<>();
         for (Role role : user.getRoles()) {
-            strRoles.add(role.getName());
+            strRoles.add(role);
         }
         userResponseDTO.setRoles(strRoles);
         return userResponseDTO;
@@ -196,7 +223,7 @@ public class UserService {
         if (roles.contains("ROLE_NURSE")) return "NUR";
         if (roles.contains("ROLE_TECHNICIAN")) return "TEC";
         if (roles.contains("ROLE_ADMIN")) return "ADM";
-        if (roles.contains("ROLE_RECEPTIONIST")) return "REC";
+        if (roles.contains("REGISTRATION_STAFF")) return "REC";
         return "USR";
     }
 }

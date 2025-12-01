@@ -22,11 +22,11 @@ export default function PatientListAction({ order }: Props) {
          state: { orderUpdate: order }
     });
     }
-    const handleCancel = async () => {
+    const handleScheduled = async () => {
       try {
         // await orderApis.delete(order?.orderId as string);
-        await orderApis.ChangeStatus({order_id: order?.orderId as string, new_status: "CANCELLED"});
-        toast.success("Hủy phiếu chỉ định thành công!", { duration: 2000, richColors: true } );
+        await orderApis.ChangeStatus({order_id: order?.orderId as string, new_status: "SCHEDULED"});
+        toast.success("Scheduled order successfully!", { duration: 2000, richColors: true } );
         window.location.reload();
       } catch (error) {
         console.log(error);
@@ -45,8 +45,8 @@ export default function PatientListAction({ order }: Props) {
           <DropdownMenuItem onClick={handleNavigate} className="cursor-pointer">
             Edit
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleCancel} className="cursor-pointer">
-            cancel order
+          <DropdownMenuItem onClick={handleScheduled} className="cursor-pointer">
+            Scheduled Order
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
