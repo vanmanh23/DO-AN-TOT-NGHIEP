@@ -9,10 +9,15 @@ import {
 import type {
   Modality,
   ServiceItem,
-  ServiceItemRequest,
+  // ServiceItemRequest,
 } from "../../../../types/order";
 import serviceItemsApis from "../../../../apis/serviceItemsApis";
 import { toast } from "sonner";
+import { serviceItemSchema } from "../../../../utils/schema";
+import type z from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 
 type Props = {
   open: boolean;
@@ -20,91 +25,69 @@ type Props = {
   serviceItem?: ServiceItem;
   isCreate?: boolean;
 };
-
+type ServiceItemSchema = z.infer<typeof serviceItemSchema>;
 export default function FormEditService({
   open,
   setOpen,
   serviceItem,
   isCreate,
 }: Props) {
-  const [modalityOptions, setModalityOptions] = useState<Modality[]>([]);
+   const [modalityOptions, setModalityOptions] = useState<Modality[]>([]);
 
-  const [formData, setFormData] = useState<ServiceItemRequest>();
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    } as ServiceItemRequest);
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    try {
-      if (!serviceItem) return;
-      const response = await serviceItemsApis.update(
-        serviceItem?.id,
-        formData as ServiceItemRequest
-      );
-      toast.success("Update service successfully!", {
-        duration: 2000,
-        richColors: true,
-      });
-      setOpen(false);
-      console.log("Update service successfully:", response);
-      window.location.reload();
-    } catch (error) {
-      toast.error("Update service failed!", {
-        duration: 2000,
-        richColors: true,
-      });
-      console.error("Error updating service:", error);
-    }
-  };
-
-  const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    try {
-      const response = await serviceItemsApis.create(
-        formData as ServiceItemRequest
-      );
-      toast.success("Create service successfully!", {
-        duration: 2000,
-        richColors: true,
-      });
-      setOpen(false);
-      console.log("Create service successfully:", response);
-      window.location.reload();
-    } catch (error) {
-      toast.error("Create service failed!", {
-        duration: 2000,
-        richColors: true,
-      });
-      console.error("Error creating service:", error);
-    }
-  };
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ServiceItemSchema>({
+    resolver: zodResolver(serviceItemSchema),
+  });
 
   useEffect(() => {
     if (!isCreate && serviceItem) {
-      setFormData({
+      reset({
         serviceCode: serviceItem.serviceCode,
         serviceName: serviceItem.serviceName,
         unitPrice: serviceItem.unitPrice,
         modalityId: serviceItem.modality.id,
       });
     }
+
     const fetchData = async () => {
       const res = await serviceItemsApis.findAllModalities();
-      setModalityOptions(res.result as unknown as Modality[]);
+      setModalityOptions(res.result as Modality[]);
     };
 
     fetchData();
+  }, [serviceItem, isCreate, reset]);
 
-    return () => {
-      // cleanup code here if needed
-    };
-  }, []);
+  const onUpdate = async (data: ServiceItemSchema) => {
+    try {
+      if (!serviceItem) return;
+
+      await serviceItemsApis.update(serviceItem.id, data);
+
+      toast.success("Update service successfully!", { duration: 2000, richColors: true });
+      setOpen(false);
+      window.location.reload();
+    } catch (error) {
+      toast.error("Update service failed!", { duration: 2000, richColors: true });
+      console.error(error);
+    }
+  };
+
+  const onCreate = async (data: ServiceItemSchema) => {
+    try {
+      await serviceItemsApis.create(data);
+
+      toast.success("Create service successfully!", { duration: 2000, richColors: true });
+      setOpen(false);
+      window.location.reload();
+    } catch (error) {
+      toast.error("Create service failed!", { duration: 2000, richColors: true });
+      console.error(error);
+    }
+  };
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[80vh] bg-white">
@@ -118,107 +101,70 @@ export default function FormEditService({
               📝 Update Service Information
             </h2>
           )}
-          <form onSubmit={isCreate ? handleCreate : handleSubmit}>
+            <form onSubmit={isCreate ? handleSubmit(onCreate) : handleSubmit(onUpdate)}>
             {/* 1. Service Code */}
             <div className="mb-4">
-              <label
-                htmlFor="serviceCode"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Service Code
-              </label>
+                <label className="block text-sm font-medium">Service Code</label>
               <input
                 type="text"
-                id="serviceCode"
-                name="serviceCode"
-                value={formData?.serviceCode}
-                onChange={handleChange}
-                required
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                {...register("serviceCode")}
+                className="mt-1 w-full border px-3 py-2 rounded"
               />
+              {errors.serviceCode && (
+                <p className="text-sm text-red-600">{errors.serviceCode.message}</p>
+              )}
             </div>
 
             {/* 2. Service Name */}
             <div className="mb-4">
-              <label
-                htmlFor="serviceName"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Service Name
-              </label>
+              <label className="block text-sm font-medium">Service Name</label>
               <input
                 type="text"
-                id="serviceName"
-                name="serviceName"
-                value={formData?.serviceName}
-                onChange={handleChange}
-                required
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                {...register("serviceName")}
+                className="mt-1 w-full border px-3 py-2 rounded"
               />
+              {errors.serviceName && (
+                <p className="text-sm text-red-600">{errors.serviceName.message}</p>
+              )}
             </div>
 
             {/* 3. Modality (Equipment) */}
             <div className="mb-4">
-              <label
-                htmlFor="modalityId"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Modality (Equipment)
-              </label>
+               <label className="block text-sm font-medium">Modality</label>
               <select
-                id="modalityId"
-                name="modalityId"
-                value={formData?.modalityId}
-                onChange={handleChange}
-                required
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                {...register("modalityId")}
+                className="mt-1 w-full border px-3 py-2 rounded"
               >
-                <option>-- Select Modality --</option>
+                <option value="">-- Select Modality --</option>
+
                 {modalityOptions.map((option) => (
                   <option key={option.id} value={option.id}>
                     {option.type}
                   </option>
                 ))}
-              </select>
-              <p className="mt-1 text-xs text-gray-500">
-                ID: (Pre-selected)
-              </p>
+                </select>
+              {errors.modalityId && (
+                <p className="text-sm text-red-600">{errors.modalityId.message}</p>
+              )}
             </div>
 
             <div className="mb-6">
-              <label
-                htmlFor="unitPrice"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Unit Price (VND)
-              </label>
+              <label className="block text-sm font-medium">Unit Price (VND)</label>
               <input
                 type="number"
-                id="unitPrice"
-                name="unitPrice"
-                value={formData?.unitPrice}
-                onChange={handleChange}
-                required
-                min="0"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                {...register("unitPrice", { valueAsNumber: true })}
+                className="mt-1 w-full border px-3 py-2 rounded"
               />
+              {errors.unitPrice && (
+                <p className="text-sm text-red-600">{errors.unitPrice.message}</p>
+              )}
             </div>
-
-            {isCreate ? (
-              <button
-                type="submit"
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Create New Service
-              </button>
-            ) : (
-              <button
-                type="submit"
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Save Update
-              </button>
-            )}
+             <button
+              type="submit"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded shadow"
+            >
+              {isCreate ? "Create New Service" : "Save Update"}
+            </button>
           </form>
         </div>
         <DialogFooter>

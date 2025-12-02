@@ -4,7 +4,6 @@ import orderApis from "../../../../apis/orderApis";
 import type {
   OrderResponse,
   PacsUidResponse,
-  ReportResult,
 } from "../../../../types/order";
 import { Camera, Eye } from "lucide-react";
 import { uploadDicomImg } from "../../../../apis/dicomApis";
@@ -16,18 +15,29 @@ import {
   setSeriesInstanceUID,
   setStudyInstanceUID,
 } from "../../../../features/pacsInstanceUID";
+import { z } from "zod";
+import { reportSchema } from "../../../../utils/schema";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+type ReportFormValues = z.infer<typeof reportSchema>;
 
 export default function Component() {
   const [orderDetail, setOrderDetail] = useState<OrderResponse>();
   const [showModal, setShowModal] = useState<PacsUidResponse>();
-  const [diagnose, setDiagnose] = useState<ReportResult>({
-    description: "",
-    conclusion: "",
-    suggestion: "",
-    orderId: "",
-    studyUID: "",
-    seriesUID: "",
-    instances: "",
+
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<ReportFormValues>({
+    resolver: zodResolver(reportSchema),
+    defaultValues: {
+      suggestion: "",
+      description: "",
+      conclusion: "",
+    },
   });
 
   const { id } = useParams();
@@ -77,26 +87,26 @@ export default function Component() {
     );
     window.open(`/dicom-viewer`, "_blank");
   };
-  const handleChangeInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setDiagnose({ ...diagnose, [name]: value });
-  };
-  const handleClose = async () => {
+
+  const onSubmit = async (data: ReportFormValues) => {
     try {
-      await orderApis.createStudy({
-        studyInstanceUID: showModal?.studyInstanceUID as string,
-        seriesInstanceUID: showModal?.seriesInstanceUID as string,
-        instanceUID: showModal?.instanceUID as string,
-        orderId: orderDetail?.orderId as string,
-      });
+      if (showModal) {
+        await orderApis.createStudy({
+          studyInstanceUID: showModal.studyInstanceUID,
+          seriesInstanceUID: showModal.seriesInstanceUID,
+          instanceUID: showModal.instanceUID,
+          orderId: orderDetail?.orderId as string,
+        });
+      }
+
       await orderApis.generateReport({
-        description: diagnose.description,
-        conclusion: diagnose.conclusion,
-        suggestion: diagnose.suggestion,
+        description: data.description,
+        conclusion: data.conclusion,
+        suggestion: data.suggestion || "",
         orderId: orderDetail?.orderId as string,
-        studyUID: showModal?.studyInstanceUID as string,
-        seriesUID: showModal?.seriesInstanceUID as string,
-        instances: showModal?.instanceUID as string,
+        studyUID: showModal?.studyInstanceUID || "",
+        seriesUID: showModal?.seriesInstanceUID || "",
+        instances: showModal?.instanceUID || "",
       });
 
       await orderApis.ChangeStatus({
@@ -178,7 +188,13 @@ export default function Component() {
         </div>
         {/* Body */}
         <div className="flex flex-1 gap-4 mt-4 overflow-hidden">
-          <div className="flex-1 border rounded p-3 overflow-y-auto bg-white">
+          {/* <div className="flex-1 border rounded p-3 overflow-y-auto bg-white"> */}
+
+          <form
+            id="report-form"
+            className="flex-1 border rounded p-3 overflow-y-auto bg-white"
+            onSubmit={handleSubmit(onSubmit)}
+          >
             <h2 className="font-medium mb-2">Kết quả</h2>
 
             <div className="grid grid-cols-4 gap-4 mb-3">
@@ -186,6 +202,7 @@ export default function Component() {
                 <label className="font-medium">Ngày:</label>
                 <input
                   type="datetime-local"
+                  readOnly
                   value={new Date(
                     Date.now() - new Date().getTimezoneOffset() * 60000
                   )
@@ -197,6 +214,7 @@ export default function Component() {
               <div>
                 <label className="font-medium">Máy:</label>
                 <select
+                  disabled
                   value={orderDetail?.patientName ?? ""}
                   className="w-full border p-1 rounded mt-1"
                 >
@@ -208,6 +226,7 @@ export default function Component() {
               <div>
                 <label className="font-medium">Bác sĩ:</label>
                 <input
+                  readOnly
                   value={orderDetail?.doctor.fullName}
                   className="w-full border p-1 rounded mt-1"
                 />
@@ -225,33 +244,54 @@ export default function Component() {
             <div>
               <label className="font-medium">Chẩn đoán:</label>
               <textarea
-                name="suggestion"
-                value={diagnose.suggestion}
-                onChange={handleChangeInput}
-                className="w-full border outline-blue-400 p-2 rounded h-20 mt-1"
+                {...register("suggestion")}
+                className="w-full border outline-blue-400 p-2 rounded h-20 mt-1 focus:ring-1 focus:ring-blue-500"
+                placeholder="Nhập chẩn đoán sơ bộ..."
               ></textarea>
             </div>
 
             <div className="mt-3">
-              <label className="font-medium">Mô tả:</label>
+              <label className="font-medium">
+                Mô tả: <span className="text-red-500">*</span>
+              </label>
               <textarea
-                name="description"
-                value={diagnose.description}
-                onChange={handleChangeInput}
-                className="w-full border outline-blue-400 p-2 rounded h-32 mt-1"
+                {...register("description")}
+                className={`w-full border p-2 rounded h-32 mt-1 outline-none ${
+                  errors.description
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                }`}
+                placeholder="Mô tả chi tiết hình ảnh..."
               ></textarea>
+              {errors.description && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.description.message}
+                </p>
+              )}
             </div>
 
             <div className="mt-3">
-              <label className="font-medium">Kết luận:</label>
+              <label className="font-medium">
+                Kết luận: <span className="text-red-500">*</span>
+              </label>
               <textarea
-                name="conclusion"
-                value={diagnose.conclusion}
-                onChange={handleChangeInput}
-                className="w-full border outline-blue-400 p-2 rounded h-20 mt-1"
+                {...register("conclusion")}
+                className={`w-full border p-2 rounded h-20 mt-1 outline-none ${
+                  errors.conclusion
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                }`}
+                placeholder="Kết luận bệnh..."
               ></textarea>
+              {errors.conclusion && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.conclusion.message}
+                </p>
+              )}
             </div>
-          </div>
+          </form>
+
+          {/* </div> */}
           <div className="w-80 border rounded p-3 bg-white flex flex-col">
             <div className="h-48 border rounded bg-gray-200 mb-3"></div>
 
@@ -311,11 +351,19 @@ export default function Component() {
           <button className="px-4 py-2 bg-purple-600 text-white rounded">
             In
           </button>
-          <button
+          {/* <button
             onClick={handleClose}
             className="px-4 py-2 bg-red-600 text-white rounded"
           >
             Kết thúc
+          </button> */}
+          <button
+            type="submit"
+            form="report-form" // Liên kết với ID của form
+            disabled={isSubmitting}
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors disabled:opacity-50"
+          >
+            {isSubmitting ? "Đang xử lý..." : "Kết thúc"}
           </button>
         </div>
       </div>

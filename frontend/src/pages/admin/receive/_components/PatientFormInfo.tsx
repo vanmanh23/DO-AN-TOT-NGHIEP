@@ -2,20 +2,27 @@ import React, { useEffect, useState } from "react";
 import type { DoctorResponse, Patient } from "../../../../types/order";
 import doctorsApi from "../../../../apis/doctorApis";
 import orderApis from "../../../../apis/orderApis";
+import { z } from "zod";
+import { useFormContext } from "react-hook-form";
+import { patientSchema } from "../../../../utils/schema";
 interface Props {
   onChange: (data: Patient) => void;
   chooseDoctor?: (doctorId: string) => void;
   patientIdUpdate?: string;
   orderIdUpdate?: string;
 }
+
+export type PatientFormSchema = z.infer<typeof patientSchema>;
+
 export default function PatientFormInfo({
   onChange,
   chooseDoctor,
   orderIdUpdate,
-  patientIdUpdate
+  patientIdUpdate,
 }: Props) {
   const [allDoctors, setAllDoctors] = useState<DoctorResponse[]>([]);
-  const [selecteDoctor, setSelectedDoctor] = useState<DoctorResponse>();
+  // const [selectedDoctor, setSelectedDoctor] = useState<DoctorResponse>();
+
   const [patientInfo, setPatientInfo] = useState<Patient>({
     name: "",
     birthdate: "",
@@ -23,47 +30,60 @@ export default function PatientFormInfo({
     address: "",
     phoneNumber: "",
   });
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext();
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
+
     const newForm = { ...patientInfo, [name]: value };
     setPatientInfo(newForm);
+
+    // báo ra parent
     onChange(newForm);
-
   };
 
+  // ------------------ Doctor select -------------------------
   const handleGetDoctor = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const doctor = e.target;
-    console.log("doctor", doctor.value);
-      chooseDoctor(doctor.value);
+    chooseDoctor?.(e.target.value);
   };
+
+  // ------------------ Age generator -------------------------
   const generateAgeFromBirthdate = (birthdate: string) => {
+    if (!birthdate) return "";
     const birth = new Date(birthdate);
     const today = new Date();
     let age = today.getFullYear() - birth.getFullYear();
     const monthDiff = today.getMonth() - birth.getMonth();
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birth.getDate())
-    ) {
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate()))
       age--;
-    }
     return age;
   };
 
+  // ------------------ Load when update ----------------------
   useEffect(() => {
+    if (!orderIdUpdate) return;
+
     const fetchOrderData = async () => {
-      const res = await orderApis.getById(orderIdUpdate as string);
-      setPatientInfo(
-        {
-          name: res.result.patient?.patientName as string,
-          birthdate: res.result.patient?.patientBirthDate as string,
-          gender: res.result.patient?.gender as "M" | "F" | "O",
-          address: res.result.patient?.address as string,
-          phoneNumber: res.result.patient?.phoneNumber as string,
-        }
-      )
-      setSelectedDoctor(res.result.doctor as DoctorResponse);
+      const res = await orderApis.getById(orderIdUpdate);
+
+      const data: Patient = {
+        name: res.result.patient?.patientName as string,
+        birthdate: res.result.patient?.patientBirthDate as string,
+        gender: res.result.patient?.gender as "M" | "F" | "O",
+        address: res.result.patient?.address as string,
+        phoneNumber: res.result.patient?.phoneNumber as string,
+      };
+
+      setPatientInfo(data);
+      // setSelectedDoctor(res.result.doctor);
     };
+
     fetchOrderData();
   }, [orderIdUpdate]);
 
@@ -93,64 +113,64 @@ export default function PatientFormInfo({
             </select>
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
-              Họ tên <span className="text-red-500">*</span>
-            </label>
-            <div className="flex gap-1 sm:gap-2">
-              <input
-                type="text"
-                name="name"
-                value={patientInfo?.name}
-                onChange={handleInputChange}
-                placeholder="TÌM KIẾM MÃ, HỌ TÊN, SỐ BHYT"
-                className="flex-1 border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500"
-              />
-            </div>
+            <label className="text-sm font-medium">Họ tên *</label>
+            <input
+              type="text"
+              value={patientInfo.name}
+              {...register("name")}
+              onChange={handleInputChange}
+              className="border rounded px-3 py-2 w-full"
+            />
+            {errors.name && (
+              <p className="text-red-500 text-xs">
+                {errors.name.message as string}
+              </p>
+            )}
           </div>
         </div>
 
-        {/* Tuổi, Ngày sinh, Giới tính */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
           <div>
-            <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
-              Tuổi <span className="text-red-500">*</span>
-            </label>
+            <label className="text-sm font-medium">Tuổi</label>
             <input
               type="number"
-              name="age"
-              value={generateAgeFromBirthdate(
-                patientInfo?.birthdate
-              ).toString()}
-              // onChange={handleInputChange}
-              className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500"
+              className="border rounded px-3 py-2 w-full"
+              value={generateAgeFromBirthdate(patientInfo.birthdate)}
+              disabled
             />
           </div>
           <div>
-            <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
-              Ngày sinh
-            </label>
+            <label className="text-sm font-medium">Ngày sinh *</label>
             <input
               type="date"
-              name="birthdate"
-              value={patientInfo?.birthdate}
+              value={patientInfo.birthdate}
+              {...register("birthdate")}
               onChange={handleInputChange}
-              className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500"
+              className="border rounded px-3 py-2 w-full"
             />
+            {errors.birthdate && (
+              <p className="text-red-500 text-xs">
+                {errors.birthdate.message as string}
+              </p>
+            )}
           </div>
           <div>
-            <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
-              Giới tính <span className="text-red-500">*</span>
-            </label>
+            <label className="text-sm font-medium">Giới tính *</label>
             <select
-              name="gender"
-              value={patientInfo?.gender}
+              value={patientInfo.gender}
+              {...register("gender")}
               onChange={handleInputChange}
-              className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500"
+              className="border rounded px-3 py-2 w-full"
             >
-              <option value={"M"}>Nam</option>
-              <option value={"F"}>Nữ</option>
-              <option value={"0"}>khác</option>
+              <option value="M">Nam</option>
+              <option value="F">Nữ</option>
+              <option value="O">Khác</option>
             </select>
+            {errors.gender && (
+              <p className="text-red-500 text-xs">
+                {errors.gender.message as string}
+              </p>
+            )}
           </div>
         </div>
 
@@ -168,46 +188,46 @@ export default function PatientFormInfo({
               className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500"
             />
           </div>
-          {/* sdt */}
           <div>
-            <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
-              PhoneNumber <span className="text-red-500">*</span>
-            </label>
+            <label className="text-sm font-medium">Phone *</label>
             <input
               type="text"
-              name="phoneNumber"
-              value={patientInfo?.phoneNumber}
+              value={patientInfo.phoneNumber}
+              {...register("phoneNumber")}
               onChange={handleInputChange}
-              className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500"
+              className="border rounded px-3 py-2 w-full"
             />
+            {errors.phoneNumber && (
+              <p className="text-red-500 text-xs">
+                {errors.phoneNumber.message as string}
+              </p>
+            )}
           </div>
         </div>
         {/* Địa chỉ */}
         <div>
-          <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
-            Địa chỉ <span className="text-red-500">*</span>
-          </label>
+          <label className="text-sm font-medium">Địa chỉ *</label>
           <input
             type="text"
-            name="address"
-            value={patientInfo?.address}
+            value={patientInfo.address}
+            {...register("address")}
             onChange={handleInputChange}
-            placeholder="Địa chỉ của bệnh nhân"
-            className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500"
+            className="border rounded px-3 py-2 w-full"
           />
+          {errors.address && (
+            <p className="text-red-500 text-xs">
+              {errors.address.message as string}
+            </p>
+          )}
         </div>
 
         {/* Bác sĩ chỉ định & Khoa chỉ định */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3 md:gap-4">
           <div>
-            <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
-              Bác sĩ chỉ định
-            </label>
+            <label className="text-sm font-medium">Bác sĩ chỉ định</label>
             <select
-              name="department"
-              value={selecteDoctor?.fullName}
               onChange={handleGetDoctor}
-              className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500"
+              className="border rounded px-3 py-2 w-full"
             >
               <option value="">-- Chọn bác sĩ --</option>
               {allDoctors.map((doctor) => (
@@ -216,10 +236,6 @@ export default function PatientFormInfo({
                 </option>
               ))}
             </select>
-            {/* <input
-                    type="text"
-                    className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500"
-                  /> */}
           </div>
           <div>
             <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">

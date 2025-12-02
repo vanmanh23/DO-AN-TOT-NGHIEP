@@ -11,10 +11,16 @@ import serviceItemsApis from "../../../apis/serviceItemsApis";
 import { setOption } from "../../../features/navbarsection/navbarSection";
 import type { AppDispatch } from "../../../store/store";
 import { useDispatch } from "react-redux";
+import { z } from "zod";
+import { patientSchema } from "../../../utils/schema";
+import { FormProvider, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 type Props = {
   orderUpdate?: OrderResponse;
 };
+export type PatientFormSchema = z.infer<typeof patientSchema>;
+
 export default function Component() {
   const [patientInfo, setPatientInfo] = useState<Patient>({
     name: "",
@@ -23,6 +29,12 @@ export default function Component() {
     address: "",
     phoneNumber: "",
   });
+
+  const methods = useForm<PatientFormSchema>({
+    resolver: zodResolver(patientSchema),
+    defaultValues: patientInfo,
+  });
+
   const [doctorPrescriptions, setDoctorPrescriptions] = useState<string>("");
   const [serviceType, setServiceType] = useState("CT");
   const [selectedService, setSelectedService] = useState<ServiceItem[]>([]);
@@ -83,9 +95,7 @@ export default function Component() {
   }
   const handleSubmit = async () => {
     try {
-      const [patientRes] = await Promise.all([
-        patientApi.create(patientInfo),
-      ]);
+      const [patientRes] = await Promise.all([patientApi.create(patientInfo)]);
       const ids = selectedService.map((s) => s.id);
       const orderRes = await orderApis.create({
         patientId: patientRes?.result?.id as "",
@@ -98,36 +108,48 @@ export default function Component() {
       });
 
       if (orderRes.success) {
-        toast.success("Tạo phiếu chỉ định thành công!", { duration: 2000, richColors: true } );
+        toast.success("Tạo phiếu chỉ định thành công!", {
+          duration: 2000,
+          richColors: true,
+        });
         window.location.reload();
       }
     } catch (err) {
-      toast.error("Tạo phiếu chỉ định thất bại!", { duration: 2000, richColors: true } );
+      toast.error("Tạo phiếu chỉ định thất bại!", {
+        duration: 2000,
+        richColors: true,
+      });
       console.log(err);
     }
   };
   const handleUpdate = async () => {
     try {
-      if (patientInfo.name !== ''){
-          const patientUpdate = await patientApi.update(
-                  patientIdUpdate,
-                  patientInfo
-                );
-          console.log("patientUpdate", patientUpdate);
+      if (patientInfo.name !== "") {
+        const patientUpdate = await patientApi.update(
+          patientIdUpdate,
+          patientInfo
+        );
+        console.log("patientUpdate", patientUpdate);
       }
-      
+
       const ids = selectedService.map((s) => s.id);
-      const orderRes = await orderApis.update(state?.orderUpdate?.orderId as string, {
-        serviceItemIds: ids,
-        priority: "ROUTINE",
-        status: "SCHEDULED",
-        studyId: "",
-        scheduledAt: "",
-        completedAt: "",
-        doctorId: doctorPrescriptions,
-      });
+      const orderRes = await orderApis.update(
+        state?.orderUpdate?.orderId as string,
+        {
+          serviceItemIds: ids,
+          priority: "ROUTINE",
+          status: "SCHEDULED",
+          studyId: "",
+          scheduledAt: "",
+          completedAt: "",
+          doctorId: doctorPrescriptions,
+        }
+      );
       if (orderRes.success) {
-        toast.success("update phiếu chỉ định thành công!", { duration: 2000, richColors: true } );
+        toast.success("update phiếu chỉ định thành công!", {
+          duration: 2000,
+          richColors: true,
+        });
         window.location.reload();
       }
     } catch (error) {
@@ -137,170 +159,177 @@ export default function Component() {
   const handleCancel = (pathName: string): void => {
     dispatch(setOption(pathName));
     navigate("/admin");
-  }
+  };
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="p-3 sm:p-4 md:p-6 lg:p-6">
-        <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
-          {/* Patient Information Section */}
-          <PatientFormInfo
-            onChange={setPatientInfo}
-            patientIdUpdate={patientIdUpdate}
-            orderIdUpdate={OrderIdUpdate}
-            chooseDoctor={setDoctorPrescriptions}
-          />
-          {/* Service Request Section */}
-          <div className="bg-white rounded-lg shadow p-3 sm:p-4 md:p-6">
-            <h2 className="text-base sm:text-lg md:text-lg font-bold mb-3 sm:mb-4 flex items-center gap-2">
-              <span className="text-blue-600 text-lg sm:text-xl">📋</span>
-              <span className="truncate">DỊCH VỤ CHẨN ĐOÁN HÌNH ẢNH</span>
-            </h2>
+    <FormProvider {...methods}>
+      <form onSubmit={methods.handleSubmit(handleSubmit)}>
+        <div className="min-h-screen bg-gray-50">
+          <div className="p-3 sm:p-4 md:p-6 lg:p-6">
+            <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
+              <PatientFormInfo
+                onChange={setPatientInfo}
+                patientIdUpdate={patientIdUpdate}
+                orderIdUpdate={OrderIdUpdate}
+                chooseDoctor={setDoctorPrescriptions}
+              />
+              {/* Service Request Section */}
+              <div className="bg-white rounded-lg shadow p-3 sm:p-4 md:p-6">
+                <h2 className="text-base sm:text-lg md:text-lg font-bold mb-3 sm:mb-4 flex items-center gap-2">
+                  <span className="text-blue-600 text-lg sm:text-xl">📋</span>
+                  <span className="truncate">DỊCH VỤ CHẨN ĐOÁN HÌNH ẢNH</span>
+                </h2>
 
-            <div className="space-y-3 sm:space-y-3 md:space-y-4">
-              {/* Loại thiết bị */}
-              <div>
-                <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
-                  Loại thiết bị <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={serviceType}
-                  onChange={(e) => setServiceType(e.target.value)}
-                  className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500"
-                >
-                  <option>CT</option>
-                  <option>XRAY</option>
-                  <option>MRI</option>
-                  <option>MAMMO</option>
-                </select>
-              </div>
+                <div className="space-y-3 sm:space-y-3 md:space-y-4">
+                  {/* Loại thiết bị */}
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
+                      Loại thiết bị <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={serviceType}
+                      onChange={(e) => setServiceType(e.target.value)}
+                      className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500"
+                    >
+                      <option>CT</option>
+                      <option>XRAY</option>
+                      <option>MRI</option>
+                      <option>MAMMO</option>
+                    </select>
+                  </div>
 
-              {/* Dịch vụ */}
-              <div>
-                <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
-                  Dịch vụ <span className="text-red-500">*</span>
-                </label>
+                  {/* Dịch vụ */}
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
+                      Dịch vụ <span className="text-red-500">*</span>
+                    </label>
 
-                <div className="flex gap-1 sm:gap-2">
-                  <select
-                    value={currentService}
-                    onChange={(e) => setCurrentService(e.target.value)}
-                    className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500 "
-                  >
-                    <option value="">-- Chọn dịch vụ --</option>
-                    {serviceList?.map((service) => (
-                      <option
-                        key={service.serviceCode}
-                        value={service.serviceName}
+                    <div className="flex gap-1 sm:gap-2">
+                      <select
+                        value={currentService}
+                        onChange={(e) => setCurrentService(e.target.value)}
+                        className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500 "
                       >
-                        {service.serviceName}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    onClick={handleAddToSelected}
-                    className="bg-blue-600 text-white px-2 sm:px-4 py-2 rounded hover:bg-blue-700 transition flex-shrink-0"
-                  >
-                    <Plus size={14} className="sm:w-4 sm:h-4" />
-                  </button>
-                </div>
-              </div>
-              <div className="border-t pt-3 sm:pt-4">
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                  <h3 className="text-xs sm:text-sm font-medium">
-                    Danh sách dịch vụ
-                  </h3>
-                  {isUpdate ? (
-                    <div>
-                      <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 w-full sm:w-auto">
-                        <button
-                          onClick={handleUpdate}
-                          className="bg-blue-600 text-white px-3 sm:px-4 py-2 rounded hover:bg-blue-700 transition flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap flex-1 sm:flex-none"
-                        >
-                          <FileText size={14} className="sm:w-4 sm:h-4" />
-                          UPDATE
-                        </button>
-                        <button className="bg-red-500 text-white px-3 sm:px-4 py-2 rounded hover:bg-green-700 transition flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap flex-1 sm:flex-none">
-                          HỦY
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 w-full sm:w-auto">
-                      <button
-                        onClick={handleSubmit}
-                        className="bg-blue-600 text-white px-3 sm:px-4 py-2 rounded hover:bg-blue-700 transition flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap flex-1 sm:flex-none"
-                      >
-                        <FileText size={14} className="sm:w-4 sm:h-4" />
-                        LƯU YÊU CẦU
-                      </button>
-                      <button className="bg-green-600 text-white px-3 sm:px-4 py-2 rounded hover:bg-green-700 transition flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap flex-1 sm:flex-none">
-                        <Calendar size={14} className="sm:w-4 sm:h-4" />
-                        LƯU & LẬP LỊCH
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {selectedService.length > 0 ? (
-                  <div className="border rounded overflow-x-auto">
-                    <table className="w-full text-xs sm:text-sm">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="text-left px-2 sm:px-4 py-2 border-b">
-                            Mã dịch vụ
-                          </th>
-                          <th className="text-left px-2 sm:px-4 py-2 border-b">
-                            Tên dịch vụ
-                          </th>
-                          <th className="text-left px-2 sm:px-4 py-2 border-b">
-                            Thao tác
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {selectedService.map((service) => (
-                          <tr
-                            key={service.id}
-                            className="hover:bg-gray-50 transition"
+                        <option value="">-- Chọn dịch vụ --</option>
+                        {serviceList?.map((service) => (
+                          <option
+                            key={service.serviceCode}
+                            value={service.serviceName}
                           >
-                            <td className="px-2 sm:px-4 py-2 border-b">
-                              {service.serviceCode}
-                            </td>
-                            <td className="px-2 sm:px-4 py-2 border-b">
-                              {service.serviceName}
-                            </td>
-                            <td className="px-2 sm:px-4 py-2 border-b">
-                              <button
-                                onClick={() =>
-                                  setSelectedService((prev) =>
-                                    prev.filter((s) => s.id !== service.id)
-                                  )
-                                }
-                                className="text-red-600 hover:text-red-800 transition font-medium"
-                              >
-                                Xóa
-                              </button>
-                            </td>
-                          </tr>
+                            {service.serviceName}
+                          </option>
                         ))}
-                      </tbody>
-                    </table>
+                      </select>
+                      <button
+                        onClick={handleAddToSelected}
+                        className="bg-blue-600 text-white px-2 sm:px-4 py-2 rounded hover:bg-blue-700 transition flex-shrink-0"
+                      >
+                        <Plus size={14} className="sm:w-4 sm:h-4" />
+                      </button>
+                    </div>
                   </div>
-                ) : (
-                  <div className=" border rounded p-4 sm:p-8 text-center text-xs sm:text-sm text-gray-500">
-                    Chưa có dịch vụ nào được chọn
+                  <div className="border-t pt-3 sm:pt-4">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                      <h3 className="text-xs sm:text-sm font-medium">
+                        Danh sách dịch vụ
+                      </h3>
+                      {isUpdate ? (
+                        <div>
+                          <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 w-full sm:w-auto">
+                            <button
+                              onClick={handleUpdate}
+                              className="bg-blue-600 text-white px-3 sm:px-4 py-2 rounded hover:bg-blue-700 transition flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap flex-1 sm:flex-none"
+                            >
+                              <FileText size={14} className="sm:w-4 sm:h-4" />
+                              UPDATE
+                            </button>
+                            <button className="bg-red-500 text-white px-3 sm:px-4 py-2 rounded hover:bg-green-700 transition flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap flex-1 sm:flex-none">
+                              HỦY
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 w-full sm:w-auto">
+                          <button
+                            type="submit"
+                            // onClick={handleSubmit}
+                            className="bg-blue-600 text-white px-3 sm:px-4 py-2 rounded hover:bg-blue-700 transition flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap flex-1 sm:flex-none"
+                          >
+                            <FileText size={14} className="sm:w-4 sm:h-4" />
+                            LƯU YÊU CẦU
+                          </button>
+                          <button className="bg-green-600 text-white px-3 sm:px-4 py-2 rounded hover:bg-green-700 transition flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap flex-1 sm:flex-none">
+                            <Calendar size={14} className="sm:w-4 sm:h-4" />
+                            LƯU & LẬP LỊCH
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {selectedService.length > 0 ? (
+                      <div className="border rounded overflow-x-auto">
+                        <table className="w-full text-xs sm:text-sm">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="text-left px-2 sm:px-4 py-2 border-b">
+                                Mã dịch vụ
+                              </th>
+                              <th className="text-left px-2 sm:px-4 py-2 border-b">
+                                Tên dịch vụ
+                              </th>
+                              <th className="text-left px-2 sm:px-4 py-2 border-b">
+                                Thao tác
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {selectedService.map((service) => (
+                              <tr
+                                key={service.id}
+                                className="hover:bg-gray-50 transition"
+                              >
+                                <td className="px-2 sm:px-4 py-2 border-b">
+                                  {service.serviceCode}
+                                </td>
+                                <td className="px-2 sm:px-4 py-2 border-b">
+                                  {service.serviceName}
+                                </td>
+                                <td className="px-2 sm:px-4 py-2 border-b">
+                                  <button
+                                    onClick={() =>
+                                      setSelectedService((prev) =>
+                                        prev.filter((s) => s.id !== service.id)
+                                      )
+                                    }
+                                    className="text-red-600 hover:text-red-800 transition font-medium"
+                                  >
+                                    Xóa
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <div className=" border rounded p-4 sm:p-8 text-center text-xs sm:text-sm text-gray-500">
+                        Chưa có dịch vụ nào được chọn
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
+            </div>
+            <div className="mt-4 sm:mt-5 md:mt-6 flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 md:gap-4">
+              <button
+                onClick={() => handleCancel("Dashboard")}
+                className="bg-gray-300 text-gray-700 px-4 sm:px-8 py-2.5 sm:py-2 rounded-lg hover:bg-gray-400 transition font-medium text-sm sm:text-base"
+              >
+                HỦY BỎ
+              </button>
             </div>
           </div>
         </div>
-        <div className="mt-4 sm:mt-5 md:mt-6 flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 md:gap-4">
-          <button onClick={() => handleCancel("Dashboard")} className="bg-gray-300 text-gray-700 px-4 sm:px-8 py-2.5 sm:py-2 rounded-lg hover:bg-gray-400 transition font-medium text-sm sm:text-base">
-            HỦY BỎ
-          </button>
-        </div>
-      </div>
-    </div>
+      </form>
+    </FormProvider>
   );
 }
