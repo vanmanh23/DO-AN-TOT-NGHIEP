@@ -27,9 +27,17 @@ export interface AuthResponseDTO {
 export interface UserResponseDTO {
   id?: string;
   username: string;
+  password?: string;
   phoneNumber: string;
   email: string;
   roles: Role[];
+}
+export interface CreateUserRequest {
+  username: string;
+  password?: string;
+  phoneNumber: string;
+  email: string;
+  role: Role[];
 }
 const url = import.meta.env.VITE_USER_URL;
 export const SignIn = async (data: user): Promise<ApiResponse<AuthResponseDTO>> => {
@@ -72,12 +80,12 @@ export const GetUserByEmail = async (email: string):  Promise<ApiResponse<UserRe
 
 
 export const UpdateUser = async (
-  data: User,
-  id: number,
+  data: CreateUserRequest,
+  id: string,
   token: string
-): Promise<User> => {
+): Promise<ApiResponse<UserResponseDTO>> => {
   const res = await axios
-    .put(`${url}/update/${id}`, data, {
+    .put(`${url}/auth/update/${id}`, data, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -87,18 +95,18 @@ export const UpdateUser = async (
     .catch((err) => console.log(err));
   return res;
 };
-export const DeleteUser = async (id: number, token: string) => {
+export const DeleteUser = async (id: string, token: string) => {
   const res = await axios
-    .delete(`${url}/delete/${id}`, {
+    .delete(`${url}/auth/delete/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
     .then((res) => res.data)
     .catch((err) => console.log(err));
   return res;
 };
-export const CreateUser = async (data: User) => {
+export const CreateUser = async (data: CreateUserRequest) => {
   const res = await axios
-    .post(`${url}/signup`, data)
+    .post(`${url}/auth/signup`, data)
     .then((res) => res.data)
     .catch((err) => console.log(err));
   return res;

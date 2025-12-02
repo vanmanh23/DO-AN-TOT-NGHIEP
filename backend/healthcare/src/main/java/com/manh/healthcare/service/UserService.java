@@ -13,6 +13,7 @@ import com.manh.healthcare.repository.RoleRepository;
 import com.manh.healthcare.repository.UserRepository;
 import com.manh.healthcare.security.JwtTokenProvider;
 import jakarta.persistence.PrePersist;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,10 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class UserService {
@@ -113,12 +111,18 @@ public class UserService {
         newUser.setRoles(roles);
         return userRepository.save(newUser);
     }
-
+    @Transactional
     public void deleteUser(String id) {
-        if (!userRepository.existsById(id)) {
-            throw new ResourceNotFoundException("User not found");
-        }
-        userRepository.deleteById(id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        // Safely remove roles using an iterator to avoid ConcurrentModificationException
+//        Iterator<Role> iterator = user.getRoles().iterator();
+//        while (iterator.hasNext()) {
+//            iterator.next();
+//            iterator.remove(); // Safe removal
+//        }
+        userRepository.delete(user);
+//        userRepository.deleteById(id);
     }
 
     public User getUserById(String id) {

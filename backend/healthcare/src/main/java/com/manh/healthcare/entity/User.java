@@ -29,11 +29,25 @@ public class User {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(  name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id"))
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private Set<Role> roles = new HashSet<>();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "user", cascade =  CascadeType.ALL )
+    @OneToMany(mappedBy = "user", cascade =  CascadeType.ALL, orphanRemoval = true )
     private Set<RefreshToken> refreshTokens = new HashSet();
+
+    // Trong User.java, RefreshToken.java và Role.java
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User)) return false; // Sửa lại class tương ứng
+        User user = (User) o;
+        return id != null && id.equals(user.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode(); // Trả về hằng số để đảm bảo tính nhất quán trong Set
+    }
 }

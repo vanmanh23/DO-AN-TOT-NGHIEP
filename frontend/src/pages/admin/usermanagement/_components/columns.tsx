@@ -72,7 +72,7 @@ export const columns: ColumnDef<UserResponseDTO>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex justify-center text-secondary">
-          <RemoveHandle id={row.original.id} />
+          <RemoveHandle id={row.original.id as string} />
         </div>
       );
     },

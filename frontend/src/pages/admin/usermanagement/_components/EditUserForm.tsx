@@ -6,18 +6,25 @@ import {
 } from "../../../../components/ui/dialog";
 import { Button } from "../../../../components/ui/button";
 import { SquarePen } from "lucide-react";
-import type { User } from "./columns";
 import { useForm } from "react-hook-form";
-import { UpdateUser } from "../../../../apis/authApis";
+import {
+  UpdateUser,
+  type CreateUserRequest,
+  type UserResponseDTO,
+} from "../../../../apis/authApis";
 import { toast } from "sonner";
 
-export default function PatientDetailsDialog({ props }: { props: User }) {
+export default function PatientDetailsDialog({
+  props,
+}: {
+  props: UserResponseDTO;
+}) {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<User>();
-  const onSubmit = async (data: User) => {
+  } = useForm<CreateUserRequest>();
+  const onSubmit = async (data: CreateUserRequest) => {
     const token = localStorage.getItem("token");
     if (token === null) {
       toast.error("You are not logged in!", {
@@ -27,9 +34,7 @@ export default function PatientDetailsDialog({ props }: { props: User }) {
       });
       return;
     }
-    console.log("input---------------",data);
-    const res = await UpdateUser(data, props.id, token);
-    console.log("output---------------",res);
+    const res = await UpdateUser(data, props.id as string, token);
     if (res) {
       toast.success("User updated successfully!", {
         duration: 2000,
@@ -136,34 +141,27 @@ export default function PatientDetailsDialog({ props }: { props: User }) {
                   <p className="text-red-500 text-sm">{errors.email.message}</p>
                 )}
               </div>
-              {/* role */}
+
               <div className="mb-4">
-                <label className="block mb-1 font-medium">
+                <label htmlFor="role-access" className="block mb-1 font-medium">
                   Access <span className="text-red-500">*</span>
                 </label>
-                <div className="flex flex-row gap-2">
-                  <input
-                    type="checkbox"
-                    id="role"
-                    value="admin"
-                    {...register("role")}
-                  />
-                  <label htmlFor="vehicle1">Admin</label>
-                  <input
-                    type="checkbox"
-                    id="role"
-                    value="user"
-                    checked
-                    {...register("role", {
-                      required: "Access user role is required",
-                    })}
-                  />
-                  <label htmlFor="vehicle2"> User</label>
-                </div>
+                <select
+                  id="role-access"
+                  multiple
+                  className="border p-2 rounded w-full h-40"
+                  {...register("role", {
+                    required: "Access user role is required",
+                  })}
+                >
+                  <option value="ROLE_ADMIN">Admin</option>
+                  <option value="ROLE_USER">User</option>
+                  <option value="ROLE_DOCTOR">Doctor</option>
+                  <option value="REGISTRATION_STAFF">Registration Staff</option>
+                </select>
               </div>
-
               {/* Submit */}
-              <div className="flex flex-row justify-end gap-2 text-center">
+              <div className="flex flex-row justify-end gap-2 text-center mb-4">
                 <DialogClose asChild>
                   <Button variant="outline">Cancel</Button>
                 </DialogClose>

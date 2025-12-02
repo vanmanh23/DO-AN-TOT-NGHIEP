@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import type { OrderResponse } from "../../../../types/order";
 import orderApis from "../../../../apis/orderApis";
 import PatientListAction from "./PatientListAction";
+import { MonitorPlay } from "lucide-react";
 
 type OrdersProps = {
   patientName?: string;
@@ -65,7 +66,18 @@ export default function OrdersCompeletedRender({
   if (order && typeof getOrdersCount === "function") {
     getOrdersCount(order.length);
   }
-  console.log("order", order);
+  const goToDetailImage = (studyInstanceUID: string, seriesInstanceUID: string) => {
+    console.log("studyInstanceUID, seriesInstanceUID", studyInstanceUID, seriesInstanceUID);
+    localStorage.setItem(
+      "studyInstanceUID",
+      studyInstanceUID as string
+    );
+    localStorage.setItem(
+      "seriesInstanceUID",
+      seriesInstanceUID as string
+    );
+    window.open(`/dicom-viewer`, "_blank");
+  };
   return (
     <div className="container overflow-x-auto mx-auto w-full flex justify-center">
       <table className="w-full min-w-[600px] table-fixed">
@@ -78,17 +90,17 @@ export default function OrdersCompeletedRender({
               <th className="px-1 py-2 text-center" colSpan={3}>
                 Patient Name
               </th>
-              <th className="px-1 py-2 text-center" colSpan={5}>
+              <th className="px-1 py-2 text-center" colSpan={4}>
                 order ID
               </th>
-              <th className="px-1 py-2 text-center" colSpan={2}>
+              <th className="px-1 py-2 text-center" colSpan={3}>
                 Bác sĩ chỉ định
               </th>
               <th className="px-1 py-2 text-center" colSpan={4}>
                 Patient ID
               </th>
               <th className="px-1 py-2 text-center" colSpan={2}>
-                BirthDate
+                Study
               </th>
               <th className="px-1 py-2 text-center" colSpan={3}>
                 status
@@ -123,22 +135,22 @@ export default function OrdersCompeletedRender({
                 <td className="border px-4 py-2" colSpan={3}>
                   {item.patientName}
                 </td>
-                <td className="border px-4 py-2 truncate" colSpan={5}>
+                <td className="border px-4 py-2 truncate" colSpan={4}>
                   {item.orderId}
                 </td>
-                <td className="border px-4 py-2" colSpan={2}>
-                  {new Date(item.createdAt).toLocaleDateString("vi-VN")}
+                <td className="border px-4 py-2" colSpan={3}>
+                  {item.doctor.fullName}
                 </td>
                 <td className="border px-4 py-2" colSpan={4}>
                   {item.patientId}
                 </td>
                 <td className="border px-4 py-2" colSpan={2}>
-                  {new Date(item.patientBirthday).toLocaleDateString("vi-VN")}
+                  <MonitorPlay onClick={() => goToDetailImage(item.study.studyInstanceUID as string, item.study.seriesInstanceUID as string)} className="text-blue-600 cursor-pointer mx-auto" />
                 </td>
                 <td className="border px-4 py-2" colSpan={3}>
                   {item.status}
                 </td>
-                <td className="border px-4 py-2" colSpan={5}>
+                <td className="border px-4 py-2 truncate" colSpan={5}>
                   {item.serviceItems
                     .map((service) => service.serviceName)
                     .join(", ")}

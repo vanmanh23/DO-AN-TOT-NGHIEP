@@ -29,6 +29,7 @@ export default function Component() {
     seriesUID: "",
     instances: "",
   });
+
   const { id } = useParams();
   const dispatch = useDispatch<AppDispatch>();
   useEffect(() => {
@@ -82,16 +83,21 @@ export default function Component() {
   };
   const handleClose = async () => {
     try {
-      // await orderApis.generateReport
-      setDiagnose({
-        ...diagnose,
+      await orderApis.createStudy({
+        studyInstanceUID: showModal?.studyInstanceUID as string,
+        seriesInstanceUID: showModal?.seriesInstanceUID as string,
+        instanceUID: showModal?.instanceUID as string,
+        orderId: orderDetail?.orderId as string,
+      });
+      await orderApis.generateReport({
+        description: diagnose.description,
+        conclusion: diagnose.conclusion,
+        suggestion: diagnose.suggestion,
         orderId: orderDetail?.orderId as string,
         studyUID: showModal?.studyInstanceUID as string,
         seriesUID: showModal?.seriesInstanceUID as string,
         instances: showModal?.instanceUID as string,
       });
-
-      await orderApis.generateReport(diagnose);
 
       await orderApis.ChangeStatus({
         order_id: orderDetail?.orderId as string,

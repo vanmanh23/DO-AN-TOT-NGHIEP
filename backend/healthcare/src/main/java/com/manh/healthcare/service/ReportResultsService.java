@@ -54,6 +54,7 @@ public class ReportResultsService {
     private ModelMapper modelMapper;
 
     public ReportResultsResponseDTO createReportResult(ReportResultsRequestDTO dto) throws IOException {
+        System.out.println("===============" + dto);
         // Check if order exists
         Orders order = ordersRepository.findById(dto.getOrderId())
                 .orElseThrow(() -> new RuntimeException("Order not found with id: " + dto.getOrderId()));

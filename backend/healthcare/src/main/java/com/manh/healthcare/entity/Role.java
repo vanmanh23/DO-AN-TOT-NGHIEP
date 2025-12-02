@@ -25,4 +25,18 @@ public class Role {
 //    @Column(name = "name", length = 50, nullable = false)
 //    @Enumerated(EnumType.STRING)
     private String name;
+
+    // Trong User.java, RefreshToken.java và Role.java
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User)) return false; // Sửa lại class tương ứng
+        User user = (User) o;
+        return id != null && id.equals(user.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode(); // Trả về hằng số để đảm bảo tính nhất quán trong Set
+    }
 }

@@ -18,7 +18,7 @@ import java.time.Instant;
 public class RefreshToken {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private  int id;
+    private int id;
 
     @NotBlank(message = "{error.refresh_token.token.blank")
     @Column(name = "token")
@@ -31,4 +31,18 @@ public class RefreshToken {
 
     @Column(name = "expires_at")
     private Instant expiresAt;
+
+    // Trong User.java, RefreshToken.java và Role.java
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof RefreshToken)) return false; // Compare with RefreshToken
+        RefreshToken that = (RefreshToken) o;
+        return id == that.id; // Compare primitive int directly
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(id); // Use id for hash code
+    }
 }

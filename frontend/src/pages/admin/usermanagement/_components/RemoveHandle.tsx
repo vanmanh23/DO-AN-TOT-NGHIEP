@@ -2,7 +2,7 @@ import { Trash } from "lucide-react";
 import { DeleteUser } from "../../../../apis/authApis";
 import { toast } from "sonner";
 
-export default function RemoveHandle({id}: { id:number }) {
+export default function RemoveHandle({id}: { id:string }) {
   const token = localStorage.getItem("token");
   if (token === null) {
     toast.error("You are not logged in!", {

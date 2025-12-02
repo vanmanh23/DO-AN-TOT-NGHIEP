@@ -6,9 +6,8 @@ import {
 } from "../../../../components/ui/dialog";
 import { Button } from "../../../../components/ui/button";
 import { Plus } from "lucide-react";
-import type { User } from "./columns";
 import { useForm } from "react-hook-form";
-import { CreateUser } from "../../../../apis/authApis";
+import { CreateUser, type CreateUserRequest } from "../../../../apis/authApis";
 import { toast } from "sonner";
 
 export default function AddAccount() {
@@ -16,8 +15,8 @@ export default function AddAccount() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<User>();
-  const onSubmit = async (data: User) => {
+  } = useForm<CreateUserRequest>();
+  const onSubmit = async (data: CreateUserRequest) => {
     const res = await CreateUser(data);
     if (res) {
       toast.success("Create user successfully!", {
@@ -45,7 +44,7 @@ export default function AddAccount() {
             </div>
           </Button>
         </DialogTrigger>
-        <DialogContent className="w-96 md:h-[50%] h-full overflow-y-scroll no-scrollbar  rounded-xl bg-white md:p-3 p-2 xl:space-y-3 md:space-y-3 space-y-2 shadow-lg">
+        <DialogContent className="w-[43%] md:h-[93%] h-full overflow-y-scroll no-scrollbar  rounded-xl bg-white md:p-3 p-2 xl:space-y-3 md:space-y-3 space-y-2 shadow-lg">
           <div className="w-full flex justify-center items-center min-h-fit">
             <form
               onSubmit={handleSubmit(onSubmit)}
@@ -131,33 +130,27 @@ export default function AddAccount() {
                 )}
               </div>
               {/* role */}
-              <div className="mb-4">
-                <label className="block mb-1 font-medium">
+               <div className="mb-4">
+                <label htmlFor="role-access" className="block mb-1 font-medium">
                   Access <span className="text-red-500">*</span>
                 </label>
-                <div className="flex flex-row gap-2">
-                  <input
-                    type="checkbox"
-                    id="role"
-                    value="admin"
-                    {...register("role")}
-                  />
-                  <label htmlFor="vehicle1">Admin</label>
-                  <input
-                    type="checkbox"
-                    id="role"
-                    value="user"
-                    checked
-                    {...register("role", {
-                      required: "Access user role is required",
-                    })}
-                  />
-                  <label htmlFor="vehicle2"> User</label>
-                </div>
+                <select
+                  id="role-access"
+                  multiple
+                  className="border p-2 rounded w-full h-40"
+                  {...register("role", {
+                    required: "Access user role is required",
+                  })}
+                >
+                  <option value="ROLE_ADMIN">Admin</option>
+                  <option value="ROLE_USER">User</option>
+                  <option value="ROLE_DOCTOR">Doctor</option>
+                  <option value="REGISTRATION_STAFF">Registration Staff</option>
+                </select>
               </div>
 
               {/* Submit */}
-              <div className="flex flex-row justify-end gap-2 text-center">
+              <div className="flex flex-row justify-end gap-2 text-center mb-5">
                 <DialogClose asChild>
                   <Button variant="outline">Cancel</Button>
                 </DialogClose>

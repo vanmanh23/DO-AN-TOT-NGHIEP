@@ -1,4 +1,4 @@
-import { MonitorPlay } from "lucide-react";
+import { FolderPlus } from "lucide-react";
 import type { OrderResponse } from "../../../../types/order";
 import axios from "axios";
 
@@ -31,7 +31,7 @@ export default function PatientListAction({ order }: Props) {
         onClick={handleOpenReport}
         className="cursor-pointer text-blue-600 hover:underline flex items-center gap-1"
       >
-        <MonitorPlay />
+        <FolderPlus />
       </div>
     </div>
   );

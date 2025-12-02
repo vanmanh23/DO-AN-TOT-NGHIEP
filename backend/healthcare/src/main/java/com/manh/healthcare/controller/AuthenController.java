@@ -56,10 +56,10 @@ public class AuthenController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable String id) {
+    public ResponseEntity<BaseResponse> deleteUser(@PathVariable String id) {
         userService.deleteUser(id);
         BaseResponse baseResponse = BaseResponse.createSuccessResponse("auth.success.delete");
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(baseResponse);
+        return ResponseEntity.status(HttpStatus.OK).body(baseResponse);
     }
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequestDTO loginRequest) {

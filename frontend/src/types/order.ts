@@ -78,6 +78,14 @@ export interface DoctorResponse {
   status: string;
 }
 
+export interface StudyResponse {
+  id?: string;
+  orderId?: string;
+  studyInstanceUID: string;
+  seriesInstanceUID: string;
+  instanceUID: string;
+}
+
 export interface OrderResponse {
   orderId: string;
   priority: string;
@@ -90,6 +98,7 @@ export interface OrderResponse {
   patientName: string;
   patient?: PatientResponse;
   studyId: string | null;
+  study: StudyResponse;
   serviceItems: ServiceItem[];
   doctor: DoctorResponse;
 }

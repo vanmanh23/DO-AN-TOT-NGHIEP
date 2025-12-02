@@ -1,5 +1,5 @@
 import axiosClient from "./axiosClient";
-import type { ApiResponse, ChangeStatus, Modality, Order, OrderResponse, ReportResult } from "../types/order";
+import type { ApiResponse, ChangeStatus, Modality, Order, OrderResponse, ReportResult, StudyResponse } from "../types/order";
 
 const orderApis = {
   getAll: (): Promise<ApiResponse<OrderResponse[]>> => axiosClient.get("/orders"),
@@ -21,6 +21,8 @@ const orderApis = {
   generateReport: (data: ReportResult) => axiosClient.post(`/report-results`, data),
 
   getByStatus: (status: string): Promise<ApiResponse<OrderResponse[]>> => axiosClient.get(`/orders/status/${status}`),
+
+  createStudy: (data: StudyResponse) => axiosClient.post(`/studies`, data),
 };
 
 export default orderApis;
