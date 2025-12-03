@@ -25,6 +25,8 @@ export const serviceItemSchema = z.object({
 });
 
 export const doctorSchema = z.object({
+  id: z.string().optional(),
+
   fullName: z.string().min(3, "Full name must be at least 3 characters"),
 
   dateOfBirth: z
@@ -34,7 +36,8 @@ export const doctorSchema = z.object({
       message: "Invalid date format",
     }),
 
-  gender: z.enum(["Male", "Female", "Other", "Prefer not to say"]),
+  // gender: z.enum(["Male", "Female", "Other", "Prefer not to say"]),
+  gender: z.string().min(1, "Gender is required"),
 
   phoneNumber: z
     .string()
@@ -59,5 +62,19 @@ export const doctorSchema = z.object({
 
   clinicRoom: z.string().min(1, "Clinic room is required"),
 
-  status: z.enum(["Active", "On Leave", "Inactive"]),
+  // status: z.enum(["Active", "On Leave", "Inactive"]),
+  status: z.string().min(1, "Status is required"),
+});
+
+export const patientEdtSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(1, "Patient name is required"),
+  birthdate: z.string().min(1, "Birth date is required"),
+  gender: z.enum(["M", "F", "O"], "Gender is required"),
+  address: z.string().min(1, "Address is required"),
+  phoneNumber: z
+    .string()
+    .min(8, "Phone number must be at least 8 digits")
+    .max(15, "Phone number must be at most 15 digits"),
+  age: z.number().min(0, "Age must be a positive number").optional(),
 });

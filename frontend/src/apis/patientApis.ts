@@ -11,7 +11,8 @@ const patientApi = {
   create: (data: Patient) :  Promise<ApiResponse<PatientResponse>> => axiosClient.post("/patients", data),
 
   update: (id: string, data: Patient) => axiosClient.put(`/patients/${id}`, data),
-  // delete: (id) => axiosClient.delete(`/users/${id}`),
+
+  delete: (id: string) => axiosClient.delete(`/patients/${id}`),
 };
 
 export default patientApi;

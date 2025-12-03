@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import type { PatientResponse } from "../../../../types/order";
 import patientApi from "../../../../apis/patientApis";
+import PatientsAction from "./PatientsAction";
 
 type PatientsProps = {
   patientName?: string;
@@ -124,7 +125,7 @@ export default function PatientsRender({ patientName, sex, findById }: PatientsP
                   {item.phoneNumber}
                 </td>
                 <td className="cursor-pointer border px-4 py-2 z-20" colSpan={1}>
-                  {/* <PatientListAction order={item}/>  */}
+                  <PatientsAction patients={item} />
                 </td>
               </tr>
             </React.Fragment>

@@ -48,7 +48,7 @@ export interface PatientResponse {
   gender: string;
   address: string;
   phoneNumber: string;
-  age: number;
+  age?: number;
 }
 
 export interface Order {
