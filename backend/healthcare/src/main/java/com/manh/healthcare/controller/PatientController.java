@@ -25,7 +25,6 @@ public class PatientController {
 
     @PostMapping
     public ResponseEntity<BaseResponse> createPatient(@Valid @RequestBody PatientRequestDTO request) {
-        System.out.println("---------: "+ request);
         Patient patient = patientService.patientAdmission(request);
         BaseResponse response = BaseResponse.createSuccessResponse("patient.success.create", patient);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);

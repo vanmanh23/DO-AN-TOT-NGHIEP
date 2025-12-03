@@ -164,6 +164,11 @@ public OrderDTO updateOrder(String orderId, OrdersRequestDTO request) {
             dto.setPatientBirthday(order.getPatient().getBirthdate());
         }
 
+        if (order.getPayment() != null) {
+            PaymentResponseDTO paymentResponseDTO = modelMapper.map(order.getPayment(), PaymentResponseDTO.class);
+            dto.setPayment(paymentResponseDTO);
+        }
+
         if (order.getStudy() != null) {
             StudyDTO study = modelMapper.map(order.getStudy(), StudyDTO.class);
             dto.setStudy(study);

@@ -20,6 +20,7 @@ public class OrderDTO {
     private LocalDate patientBirthday;
     private String patientName;
 //    private String studyId;
+    private PaymentResponseDTO payment;
     private StudyDTO study;
     private String doctorId;
     private PatientResponseDTO patient;

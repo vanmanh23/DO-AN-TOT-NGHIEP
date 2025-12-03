@@ -18,4 +18,5 @@ public class PatientResponseDTO {
     private Integer age;
     private String address;
     private String phoneNumber;
+    private PaymentResponseDTO payments;
 }
