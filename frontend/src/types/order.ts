@@ -101,12 +101,31 @@ export interface OrderResponse {
   study: StudyResponse;
   serviceItems: ServiceItem[];
   doctor: DoctorResponse;
+  payment?: PaymentResponse;
 }
 
 export interface PacsUidResponse {
   studyInstanceUID: string;
   seriesInstanceUID: string;
   instanceUID: string;
+}
+
+export interface PaymentRequest {
+  status: string;
+  createdAt: string;  
+  paidAt?: string | null;
+  method?: string | null;
+  orderId: string;
+  patientId: string;
+}
+
+export interface PaymentResponse {
+  id?: string;
+  status: string;
+  createdAt: string;  
+  paidAt?: string | null;
+  method: string;
+  amount: number;
 }
 
 export interface ChangeStatus {

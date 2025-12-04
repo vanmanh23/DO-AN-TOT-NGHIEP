@@ -6,7 +6,7 @@ type Props = {
   order?: OrderResponse;
 };
 
-export default function PatientListAction({ order }: Props) {
+export default function ReportAction({ order }: Props) {
   const handleOpenReport = async () => {
     try {
       const id = order?.orderId as string;

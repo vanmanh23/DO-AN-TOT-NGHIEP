@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PaymentResponseDTO {
+    private String id;
+
     private double amount;
 
     private EPaymentStatus status;
@@ -21,6 +23,10 @@ public class PaymentResponseDTO {
     private LocalDateTime paidAt;
 
     private EPaymentMethod method;
+
+    private String orderId;
+
+    private String patientId;
 
 //    private OrderDTO order;
 //

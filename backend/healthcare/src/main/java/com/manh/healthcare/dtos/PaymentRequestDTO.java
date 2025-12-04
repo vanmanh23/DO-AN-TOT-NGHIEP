@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PaymentRequestDTO {
+    private String id;
 
     private EPaymentStatus status;
 
@@ -24,7 +25,7 @@ public class PaymentRequestDTO {
 
     private EPaymentMethod method;
 
-    private String order_id;
+    private String orderId;
 
-    private String patient_id;
+    private String patientId;
 }

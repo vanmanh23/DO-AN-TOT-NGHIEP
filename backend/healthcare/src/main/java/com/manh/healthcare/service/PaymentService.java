@@ -28,10 +28,10 @@ public class PaymentService {
     private ModelMapper modelMapper;
 
     public PaymentResponseDTO createPayment(PaymentRequestDTO dto) {
-        Orders order = orderRepository.findById(dto.getOrder_id())
+        Orders order = orderRepository.findById(dto.getOrderId())
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        Patient patient = patientRepository.findById(dto.getPatient_id())
+        Patient patient = patientRepository.findById(dto.getPatientId())
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
         double totalAmount = order.getServiceItems()
@@ -70,10 +70,10 @@ public class PaymentService {
         Payment payment = paymentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Payment not found"));
 
-        Orders order = orderRepository.findById(dto.getOrder_id())
+        Orders order = orderRepository.findById(dto.getOrderId())
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        Patient patient = patientRepository.findById(dto.getPatient_id())
+        Patient patient = patientRepository.findById(dto.getPatientId())
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
         double totalAmount = order.getServiceItems()

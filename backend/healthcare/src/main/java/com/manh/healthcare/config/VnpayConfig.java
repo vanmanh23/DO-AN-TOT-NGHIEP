@@ -19,7 +19,7 @@ import jakarta.servlet.http.HttpServletRequest;
 public class VnpayConfig {
 
     public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    public static String vnp_ReturnUrl = "http://localhost:8081/api/vnpay/return";
+    public static String vnp_ReturnUrl = "/api/vnpay/return";
     // #vnpay
     public static String vnp_TmnCode = "4YUP19I4";
     public static String secretKey = "MDUIFDCRAKLNBPOFIAFNEKFRNMFBYEPX";
@@ -61,7 +61,7 @@ public class VnpayConfig {
         return digest;
     }
 
-    // Util for VNPAY
+    //Util for VNPAY
     public static String hashAllFields(Map fields) {
         List fieldNames = new ArrayList(fields.keySet());
         Collections.sort(fieldNames);
@@ -110,7 +110,7 @@ public class VnpayConfig {
         try {
             ipAdress = request.getHeader("X-FORWARDED-FOR");
             if (ipAdress == null) {
-                ipAdress = request.getRemoteAddr();
+                ipAdress = request.getLocalAddr();
             }
         } catch (Exception e) {
             ipAdress = "Invalid IP:" + e.getMessage();

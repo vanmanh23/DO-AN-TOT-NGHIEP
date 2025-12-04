@@ -53,7 +53,7 @@ export default function PatientsAction({ patients }: Props) {
               onClick={handleDelete}
               className="cursor-pointer outline-bg-secondary"
             >
-              Remove Service
+              Remove patient
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>

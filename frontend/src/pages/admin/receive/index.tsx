@@ -15,6 +15,7 @@ import { z } from "zod";
 import { patientSchema } from "../../../utils/schema";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Spinner } from "../../../components/ui/spinner";
 
 type Props = {
   orderUpdate?: OrderResponse;
@@ -29,7 +30,7 @@ export default function Component() {
     address: "",
     phoneNumber: "",
   });
-
+  const [isProcessing, setIsProcessing] = useState(false);
   const methods = useForm<PatientFormSchema>({
     resolver: zodResolver(patientSchema),
     defaultValues: patientInfo,
@@ -95,6 +96,7 @@ export default function Component() {
   }
   const handleSubmit = async () => {
     try {
+      setIsProcessing(true);
       const [patientRes] = await Promise.all([patientApi.create(patientInfo)]);
       const ids = selectedService.map((s) => s.id);
       const orderRes = await orderApis.create({
@@ -120,6 +122,8 @@ export default function Component() {
         richColors: true,
       });
       console.log(err);
+    } finally {
+      setIsProcessing(false);
     }
   };
   const handleUpdate = async () => {
@@ -154,7 +158,7 @@ export default function Component() {
       }
     } catch (error) {
       console.log(error);
-    }
+    } 
   };
   const handleCancel = (pathName: string): void => {
     dispatch(setOption(pathName));
@@ -249,13 +253,28 @@ export default function Component() {
                         </div>
                       ) : (
                         <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 w-full sm:w-auto">
-                          <button
+                          {/* <button
                             type="submit"
                             // onClick={handleSubmit}
                             className="bg-blue-600 text-white px-3 sm:px-4 py-2 rounded hover:bg-blue-700 transition flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap flex-1 sm:flex-none"
                           >
                             <FileText size={14} className="sm:w-4 sm:h-4" />
                             LƯU YÊU CẦU
+                          </button> */}
+
+                          <button
+                            type="submit"
+                            disabled={isProcessing}
+                            className="w-full bg-blue-600 text-white px-3 sm:px-4 py-2 rounded hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed  font-semibold shadow-lg shadow-blue-200 transition-all active:scale-[0.99] flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap"
+                          >
+                            {isProcessing ? (
+                              <>
+                                <Spinner />
+                                <span>Processing...</span>
+                              </>
+                            ) : (
+                              <>LƯU YÊU CẦU</>
+                            )}
                           </button>
                           <button className="bg-green-600 text-white px-3 sm:px-4 py-2 rounded hover:bg-green-700 transition flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap flex-1 sm:flex-none">
                             <Calendar size={14} className="sm:w-4 sm:h-4" />

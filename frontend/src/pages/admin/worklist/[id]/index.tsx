@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import orderApis from "../../../../apis/orderApis";
-import type {
-  OrderResponse,
-  PacsUidResponse,
-} from "../../../../types/order";
+import type { OrderResponse, PacsUidResponse } from "../../../../types/order";
 import { Camera, Eye } from "lucide-react";
 import { uploadDicomImg } from "../../../../apis/dicomApis";
 import { toast } from "sonner";
@@ -19,13 +16,16 @@ import { z } from "zod";
 import { reportSchema } from "../../../../utils/schema";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import paymentApis from "../../../../apis/paymentApis";
+import { Spinner } from "../../../../components/ui/spinner";
 
 type ReportFormValues = z.infer<typeof reportSchema>;
 
 export default function Component() {
   const [orderDetail, setOrderDetail] = useState<OrderResponse>();
   const [showModal, setShowModal] = useState<PacsUidResponse>();
-
+  const [isUploading, setIsUploading] = useState(false);
+  const navigate = useNavigate();
 
   const {
     register,
@@ -54,6 +54,7 @@ export default function Component() {
       orderDetail?.patient?.patientName as string
     );
     try {
+      setIsUploading(true);
       const result = await uploadDicomImg(
         e,
         removeAccent,
@@ -74,6 +75,8 @@ export default function Component() {
         position: "bottom-right",
         richColors: true,
       });
+    } finally {
+      setIsUploading(false);
     }
   };
   const goToDetailImage = () => {
@@ -114,6 +117,15 @@ export default function Component() {
         new_status: "COMPLETED",
       });
 
+      await paymentApis.create({
+        status: "PENDING",
+        createdAt: new Date().toISOString(),
+        paidAt: null,
+        method: null,
+        orderId: orderDetail?.orderId as string,
+        patientId: orderDetail?.patientId as string,
+      });
+
       toast.success("Successful completion of nomination form!", {
         duration: 2000,
         richColors: true,
@@ -126,6 +138,12 @@ export default function Component() {
       });
       console.log(error);
     }
+  };
+  const handleExit = () => {
+    navigate("/admin");
+  };
+  const handleNewOrder = () => {
+    navigate("/admin/worklist/");
   };
   return (
     <div className=" bg-gray-100 px-4 py-1 text-sm">
@@ -320,10 +338,21 @@ export default function Component() {
                 />
                 <label
                   htmlFor="fileInput"
-                  className="px-2 py-1 border rounded mt-3 flex flex-row justify-center items-center gap-2 bg-gray-100 hover:bg-gray-200 cursor-pointer"
+                  className={`px-2 py-1 border rounded mt-3 flex flex-row justify-center items-center gap-2 bg-gray-100 hover:bg-gray-200 cursor-pointer  ${
+                    isUploading ? "opacity-60 cursor-not-allowed" : ""
+                  }`}
                 >
-                  <Camera />
-                  <p>Chup anh</p>
+                  {isUploading ? (
+                    <>
+                      <Spinner className="w-4 h-4 animate-spin text-blue-500" />
+                      <p>Đang tải...</p>
+                    </>
+                  ) : (
+                    <>
+                      <Camera className="w-4 h-4" />
+                      <p>Chụp ảnh</p>
+                    </>
+                  )}
                 </label>
               </div>
               <div
@@ -339,24 +368,18 @@ export default function Component() {
 
         {/* Footer */}
         <div className="flex justify-end gap-4 mt-4 border-t pt-3">
-          <button className="px-4 py-2 bg-green-600 text-white rounded">
+          <button
+            onClick={handleNewOrder}
+            className="px-4 py-2 bg-green-600 text-white rounded"
+          >
             Mới
           </button>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded">
-            Mô tả
-          </button>
-          <button className="px-4 py-2 bg-gray-600 text-white rounded">
+          <button
+            onClick={handleExit}
+            className="px-4 py-2 bg-gray-600 text-white rounded"
+          >
             Thoát
           </button>
-          <button className="px-4 py-2 bg-purple-600 text-white rounded">
-            In
-          </button>
-          {/* <button
-            onClick={handleClose}
-            className="px-4 py-2 bg-red-600 text-white rounded"
-          >
-            Kết thúc
-          </button> */}
           <button
             type="submit"
             form="report-form" // Liên kết với ID của form

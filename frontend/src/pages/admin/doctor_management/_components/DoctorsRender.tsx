@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import type { DoctorResponse } from "../../../../types/order";
 import DoctorAction from "./DoctorAction";
 import doctorsApi from "../../../../apis/doctorApis";
+import { Skeleton } from "../../../../components/ui/skeleton";
 
 type doctorsProps = {
   doctorName?: string;
@@ -17,6 +18,7 @@ export default function DoctorsRender({
   getDoctorsCount,
 }: doctorsProps) {
   const [doctors, setDoctors] = useState<DoctorResponse[]>();
+  const [isLoading, setIsLoading] = useState(false);
   const [headTableforDoctors, setHeadTableforDoctors] = useState({
     isHeadTitle: true,
     isKey: "",
@@ -31,13 +33,16 @@ export default function DoctorsRender({
   // Fetch all patients once on mount
   useEffect(() => {
     const fetchOrder = async () => {
+      setIsLoading(true);
       const res = await doctorsApi.getAll();
       setDoctors(res.result as unknown as DoctorResponse[]);
+      setIsLoading(false);
     };
     fetchOrder();
   }, []);
   useEffect(() => {
     doctorsApi.getAll().then((res) => {
+      setIsLoading(true);
       let filtered = res.result as unknown as DoctorResponse[];
       if (doctorName?.trim()) {
         const q = doctorName.toLocaleLowerCase();
@@ -58,11 +63,32 @@ export default function DoctorsRender({
         );
       }
       setDoctors(filtered);
+      setIsLoading(false);
     });
   }, [doctorCode, doctorName, gender]);
   if (doctors && typeof getDoctorsCount === "function") {
     getDoctorsCount(doctors.length);
   }
+
+ const renderSkeletonRows = () => {
+    return (
+      <>
+        {[1, 2, 3, 4, 5].map((i) => (
+          <tr
+            key={i}
+            className="block md:table-row mb-4 md:mb-0 rounded-lg border p-3 "
+          >
+            {[...Array(9)].map((_, idx) => (
+              <td key={idx} className="p-3 block md:table-cell  md:border-0">
+                <Skeleton className="h-4 w-full bg-slate-100" />
+              </td>
+            ))}
+          </tr>
+        ))}
+      </>
+    );
+  };
+
   return (
     <div className="container overflow-x-auto mx-auto w-full flex justify-center">
       <table className="w-full min-w-[600px] table-fixed">
@@ -91,8 +117,8 @@ export default function DoctorsRender({
           )}
         </thead>
         <tbody>
-          {/* Patients */}
-          {doctors?.map((item: DoctorResponse, index: number) => (
+          {isLoading && renderSkeletonRows()}
+          {!isLoading && doctors?.map((item: DoctorResponse, index: number) => (
             <React.Fragment key={index}>
               <tr
                 key={index}
