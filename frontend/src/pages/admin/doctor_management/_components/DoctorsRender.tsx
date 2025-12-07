@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import type { DoctorResponse } from "../../../../types/order";
 import DoctorAction from "./DoctorAction";
 import doctorsApi from "../../../../apis/doctorApis";
-import { Skeleton } from "../../../../components/ui/skeleton";
+import { renderSkeletonRows } from "../../../../components/renderSkeletonRows";
 
 type doctorsProps = {
   doctorName?: string;
@@ -70,25 +70,6 @@ export default function DoctorsRender({
     getDoctorsCount(doctors.length);
   }
 
- const renderSkeletonRows = () => {
-    return (
-      <>
-        {[1, 2, 3, 4, 5].map((i) => (
-          <tr
-            key={i}
-            className="block md:table-row mb-4 md:mb-0 rounded-lg border p-3 "
-          >
-            {[...Array(9)].map((_, idx) => (
-              <td key={idx} className="p-3 block md:table-cell  md:border-0">
-                <Skeleton className="h-4 w-full bg-slate-100" />
-              </td>
-            ))}
-          </tr>
-        ))}
-      </>
-    );
-  };
-
   return (
     <div className="container overflow-x-auto mx-auto w-full flex justify-center">
       <table className="w-full min-w-[600px] table-fixed">
@@ -117,7 +98,7 @@ export default function DoctorsRender({
           )}
         </thead>
         <tbody>
-          {isLoading && renderSkeletonRows()}
+          {isLoading && renderSkeletonRows({ counts: [1, 4, 3, 3, 2, 1]})}
           {!isLoading && doctors?.map((item: DoctorResponse, index: number) => (
             <React.Fragment key={index}>
               <tr

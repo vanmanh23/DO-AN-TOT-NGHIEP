@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import type { ServiceItem } from "../../../../types/order";
 import serviceItemsApis from "../../../../apis/serviceItemsApis";
 import ServiceItemsAction from "./ServiceItemsAction";
+import { renderSkeletonRows } from "../../../../components/renderSkeletonRows";
 
 type OrdersProps = {
   serviceName?: string;
@@ -17,6 +18,7 @@ export default function ServiceItemsRender({
   getServiceItemsCount,
 }: OrdersProps) {
   const [serviceItems, setServiceItems] = useState<ServiceItem[]>();
+  const [loading, setLoading] = useState(true);
   const [headTableforPatients, setHeadTableforPatients] = useState({
     isHeadTitle: true,
     isKey: "",
@@ -31,13 +33,16 @@ export default function ServiceItemsRender({
   // Fetch all patients once on mount
   useEffect(() => {
     const fetchOrder = async () => {
+      setLoading(true);
       const res = await serviceItemsApis.getAll();
       setServiceItems(res.result as unknown as ServiceItem[]);
+      setLoading(false);
     };
     fetchOrder();
   }, []);
   useEffect(() => {
     serviceItemsApis.getAll().then((res) => {
+      setLoading(true);
       let filtered = res.result as unknown as ServiceItem[];
       if (serviceName?.trim()) {
         const q = serviceName.toLocaleLowerCase();
@@ -58,6 +63,7 @@ export default function ServiceItemsRender({
         );
       }
       setServiceItems(filtered);
+      setLoading(false);
     });
   }, [serviceCode, serviceName, modality]);
   if (serviceItems && typeof getServiceItemsCount === "function") {
@@ -91,7 +97,7 @@ export default function ServiceItemsRender({
           )}
         </thead>
         <tbody>
-          {/* Patients */}
+          {loading && renderSkeletonRows({ counts: [1, 4, 3, 3, 2, 1] })}
           {serviceItems?.map((item: ServiceItem, index: number) => (
             <React.Fragment key={index}>
               <tr

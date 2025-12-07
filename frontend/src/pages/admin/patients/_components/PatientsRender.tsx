@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import type { PatientResponse } from "../../../../types/order";
 import patientApi from "../../../../apis/patientApis";
 import PatientsAction from "./PatientsAction";
-import { Skeleton } from "../../../../components/ui/skeleton";
+import { renderSkeletonRows } from "../../../../components/renderSkeletonRows";
 
 type PatientsProps = {
   patientName?: string;
@@ -65,25 +65,6 @@ export default function PatientsRender({
     });
   }, [patientName, sex, findById]);
 
-  const renderSkeletonRows = () => {
-    return (
-      <>
-        {[1, 2, 3, 4, 5].map((i) => (
-          <tr
-            key={i}
-            className="block md:table-row mb-4 md:mb-0 rounded-lg border p-3 "
-          >
-            {[...Array(9)].map((_, idx) => (
-              <td key={idx} className="p-3 block md:table-cell  md:border-0">
-                <Skeleton className="h-4 w-full bg-slate-100" />
-              </td>
-            ))}
-          </tr>
-        ))}
-      </>
-    );
-  };
-
   return (
     <div className="container overflow-x-auto mx-auto w-full flex justify-center">
       <table className="w-full min-w-[600px] table-fixed">
@@ -118,7 +99,7 @@ export default function PatientsRender({
           )}
         </thead>
         <tbody>
-          {loading && renderSkeletonRows()}
+          {loading && renderSkeletonRows({ counts: [1, 3, 5, 2, 2, 5, 2, 1] })}
           {!loading &&
             patients?.map((item: PatientResponse, index: number) => (
               <React.Fragment key={index}>

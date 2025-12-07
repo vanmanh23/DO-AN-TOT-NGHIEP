@@ -1,203 +1,3 @@
-// import React, { useEffect, useState } from "react";
-// import type { OrderResponse } from "../../../../types/order";
-// import orderApis from "../../../../apis/orderApis";
-// import ReportAction from "./ReportAction";
-// import { MonitorPlay } from "lucide-react";
-// import CheckoutCard from "./CheckoutCard";
-// import InvoiceCard from "./InvoiceCard";
-
-// type OrdersProps = {
-//   patientName?: string;
-//   patient_type?: string;
-//   order_id?: string;
-//   getOrdersCount: (count: number) => void;
-// };
-
-// export default function OrdersCompeletedRender({
-//   patientName,
-//   patient_type,
-//   order_id,
-//   getOrdersCount,
-// }: OrdersProps) {
-//   const [order, setOrder] = useState<OrderResponse[]>();
-//   const [headTableforPatients, setHeadTableforPatients] = useState({
-//     isHeadTitle: true,
-//     isKey: "",
-//   });
-//   const forcusOnPatients = (orderID: string) => {
-//     setHeadTableforPatients({
-//       isHeadTitle: true,
-//       isKey: orderID,
-//     });
-//   };
-
-//   // Fetch all patients once on mount
-//   useEffect(() => {
-//     const fetchOrder = async () => {
-//       const res = await orderApis.getByStatus("COMPLETED");
-//       setOrder(res.result as unknown as OrderResponse[]);
-//     };
-//     fetchOrder();
-//   }, []);
-//   useEffect(() => {
-//     orderApis.getByStatus("COMPLETED").then((res) => {
-//       let filtered = res.result as unknown as OrderResponse[];
-//       if (patientName?.trim()) {
-//         const q = patientName.toLocaleLowerCase();
-//         filtered = filtered.filter((patient: OrderResponse) =>
-//           patient.patientName?.toLocaleLowerCase().includes(q)
-//         );
-//       }
-
-//       // if (patient_type?.trim()) {
-//       //   const q = patient_type.toUpperCase();
-//       //   filtered = filtered.filter((patient: OrderResponse) =>
-//       //     patient?.?.toUpperCase().includes(q)
-//       //   );
-//       // }
-//       if (order_id?.trim()) {
-//         const q = order_id.toUpperCase();
-//         filtered = filtered.filter((patient: OrderResponse) =>
-//           patient?.orderId?.toUpperCase().includes(q)
-//         );
-//       }
-
-//       setOrder(filtered);
-//     });
-//   }, [patientName, patient_type, order_id]);
-//   if (order && typeof getOrdersCount === "function") {
-//     getOrdersCount(order.length);
-//   }
-//   const goToDetailImage = (
-//     studyInstanceUID: string,
-//     seriesInstanceUID: string
-//   ) => {
-//     console.log(
-//       "studyInstanceUID, seriesInstanceUID",
-//       studyInstanceUID,
-//       seriesInstanceUID
-//     );
-//     localStorage.setItem("studyInstanceUID", studyInstanceUID as string);
-//     localStorage.setItem("seriesInstanceUID", seriesInstanceUID as string);
-//     window.open(`/dicom-viewer`, "_blank");
-//   };
-//   return (
-//     <div className="container overflow-x-auto mx-auto w-full flex justify-center">
-//       <table className="w-full min-w-[600px] table-fixed">
-//         <thead className="bg-bg-secondary text-white overflow-hidden">
-//           {headTableforPatients.isHeadTitle && (
-//             <tr className=" overflow-hidden text-xs">
-//               <th className="px-1 py-2 text-center" colSpan={1}>
-//                 STT
-//               </th>
-//               <th className="px-1 py-2 text-center" colSpan={3}>
-//                 Patient Name
-//               </th>
-//               <th className="px-1 py-2 text-center hidden md:table-cell" colSpan={4}>
-//                 order ID
-//               </th>
-//               <th className="px-1 py-2 text-center" colSpan={3}>
-//                 Bác sĩ chỉ định
-//               </th>
-//               <th className="px-1 py-2 text-center" colSpan={3}>
-//                 Patient ID
-//               </th>
-//               <th className="px-1 py-2 text-center" colSpan={1}>
-//                 Study
-//               </th>
-//               <th className="px-1 py-2 text-center" colSpan={5}>
-//                 dịch vụ
-//               </th>
-//               <th className="px-1 py-2 text-center" colSpan={1}>
-//                 báo cáo
-//               </th>
-//               <th className="px-1 py-2 text-center" colSpan={3}>
-//                 thanh toán
-//               </th>
-//             </tr>
-//           )}
-//         </thead>
-//         <tbody>
-//           {/* Patients */}
-//           {order?.map((item: OrderResponse, index: number) => (
-//             <React.Fragment key={index}>
-//               <tr
-//                 key={index}
-//                 className={`overflow-hidden text-xs h-11 ${
-//                   headTableforPatients.isKey === item.orderId
-//                     ? "bg-gray-200"
-//                     : ""
-//                 }`}
-//                 onMouseMove={() => forcusOnPatients(item.orderId)}
-//               >
-//                 <td className="border px-4 py-2 " colSpan={1}>
-//                   <div className="flex flex-row justify-between">
-//                     <p>{index + 1}</p>
-//                   </div>
-//                 </td>
-//                 <td className="border px-4 py-2" colSpan={3}>
-//                   {item.patientName}
-//                 </td>
-//                 <td className="border px-4 py-2 truncate hidden md:table-cell" colSpan={4}>
-//                   {item.orderId}
-//                 </td>
-//                 <td className="border px-4 py-2" colSpan={3}>
-//                   {item.doctor.fullName}
-//                 </td>
-//                 <td className="border px-4 py-2" colSpan={3}>
-//                   {item.patientId}
-//                 </td>
-//                 <td className="border px-4 py-2" colSpan={1}>
-//                   <MonitorPlay
-//                     onClick={() =>
-//                       goToDetailImage(
-//                         item.study.studyInstanceUID as string,
-//                         item.study.seriesInstanceUID as string
-//                       )
-//                     }
-//                     className="text-blue-600 cursor-pointer mx-auto"
-//                   />
-//                 </td>
-//                 <td className="border px-4 py-2 truncate" colSpan={5}>
-//                   {item.serviceItems
-//                     .map((service) => service.serviceName)
-//                     .join(", ")}
-//                 </td>
-//                 <td
-//                   className="cursor-pointer border px-4 py-2 z-20"
-//                   colSpan={1}
-//                 >
-//                   <ReportAction order={item} />
-//                 </td>
-//                 <td className="border px-4 py-2 overflow-hidden w-fit" colSpan={3}>
-//                   {item.payment ? (
-//                     item.payment.status === "PENDING" ? (
-//                       <CheckoutCard order={item} />
-//                     ) : (
-//                       "Đã thanh toán"
-//                     )
-//                   ) : (
-//                     <InvoiceCard />
-//                   )}
-//                 </td>
-//               </tr>
-//             </React.Fragment>
-//           ))}
-//           {order?.length === 0 && (
-//             <React.Fragment>
-//               <tr>
-//                 <td colSpan={12} className="text-center">
-//                   Not found
-//                 </td>
-//               </tr>
-//             </React.Fragment>
-//           )}
-//         </tbody>
-//       </table>
-//     </div>
-//   );
-// }
-
 import React, { useEffect, useState } from "react";
 import type { OrderResponse } from "../../../../types/order";
 import orderApis from "../../../../apis/orderApis";
@@ -205,7 +5,7 @@ import ReportAction from "./ReportAction";
 import { MonitorPlay } from "lucide-react";
 import CheckoutCard from "./CheckoutCard";
 import InvoiceCard from "./InvoiceCard";
-import { Skeleton } from "../../../../components/ui/skeleton";
+import { renderSkeletonRows } from "../../../../components/renderSkeletonRows";
 
 type OrdersProps = {
   patientName?: string;
@@ -280,25 +80,6 @@ export default function OrdersCompeletedRender({
     window.open(`/dicom-viewer`, "_blank");
   };
 
-  const renderSkeletonRows = () => {
-    return (
-      <>
-        {[1, 2, 3, 4, 5].map((i) => (
-          <tr
-            key={i}
-            className="block md:table-row mb-4 md:mb-0 rounded-lg border p-3 "
-          >
-            {[...Array(9)].map((_, idx) => (
-              <td key={idx} className="p-3 block md:table-cell  md:border-0">
-                <Skeleton className="h-4 w-full bg-slate-100" />
-              </td>
-            ))}
-          </tr>
-        ))}
-      </>
-    );
-  };
-
   return (
     <div className="container mx-auto w-full px-2 md:px-0">
       {/* Thay đổi class table để w-full */}
@@ -321,7 +102,7 @@ export default function OrdersCompeletedRender({
         </thead>
 
         <tbody className="block md:table-row-group">
-          {loading && renderSkeletonRows()}
+          {loading && renderSkeletonRows({counts: [1, 1 ,1 ,1 ,1 ,1 ,1 ,1 ,1]})}
           {!loading &&
             order?.map((item: OrderResponse, index: number) => (
               <tr

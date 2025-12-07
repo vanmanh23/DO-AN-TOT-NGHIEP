@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import type { OrderResponse } from "../../../../types/order";
 import orderApis from "../../../../apis/orderApis";
 import PatientListAction from "./PatientListAction";
-import { Skeleton } from "../../../../components/ui/skeleton";
+import { renderSkeletonRows } from "../../../../components/renderSkeletonRows";
 
 type OrdersProps = {
   patientName?: string;
@@ -72,25 +72,6 @@ export default function OrdersRender({
     getOrdersCount(order.length);
   }
 
-  const renderSkeletonRows = () => {
-    return (
-      <>
-        {[1, 2, 3, 4, 5].map((i) => (
-          <tr
-            key={i}
-            className="block md:table-row mb-4 md:mb-0 rounded-lg border p-3 "
-          >
-            {[...Array(9)].map((_, idx) => (
-              <td key={idx} className="p-3 block md:table-cell  md:border-0">
-                <Skeleton className="h-4 w-full bg-slate-100" />
-              </td>
-            ))}
-          </tr>
-        ))}
-      </>
-    );
-  };
-
   return (
     <div className="container overflow-x-auto mx-auto w-full flex justify-center">
       <table className="w-full min-w-[600px] table-fixed">
@@ -131,7 +112,7 @@ export default function OrdersRender({
           )}
         </thead>
         <tbody>
-          {isLoading && renderSkeletonRows()}
+          {isLoading && renderSkeletonRows({counts: [1, 3, 5, 2, 4, 2, 3, 5, 1, 1]})}
           {!isLoading &&
             order?.map((item: OrderResponse, index: number) => (
               <React.Fragment key={index}>

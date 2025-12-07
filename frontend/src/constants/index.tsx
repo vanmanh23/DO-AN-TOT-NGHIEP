@@ -112,6 +112,11 @@ export const menuItems: readonly MenuItem[] = [
     icon: <ClipboardCheck size={18}/>,
   },
   {
+    name: "Device Management",
+    link: "/admin/device_management",
+    icon: <ClipboardCheck size={18}/>,
+  },
+  {
     name: "Doctors Management",
     link: "/admin/doctor_management",
     icon: <ClipboardCheck size={18}/>,

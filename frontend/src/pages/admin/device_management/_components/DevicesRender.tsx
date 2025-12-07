@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import type { Modality } from "../../../../types/order";
 import DevicesAction from "./DevicesAction";
 import devicesApi from "../../../../apis/deviceApis";
-import { Skeleton } from "../../../../components/ui/skeleton";
+import { renderSkeletonRows } from "../../../../components/renderSkeletonRows";
 
 type DevicesProps = {
   status?: string;
@@ -62,29 +62,10 @@ export default function ServiceItemsRender({
     getDevicesCount(modalities.length);
   }
 
-   const renderSkeletonRows = () => {
-    return (
-      <>
-        {[1, 2, 3, 4, 5].map((i) => (
-          <tr
-            key={i}
-            className="block md:table-row mb-4 md:mb-0 rounded-lg border p-3 bg-white"
-          >
-            {[...Array(9)].map((_, idx) => (
-              <td key={idx} className="p-3 block md:table-cell  md:border-0">
-                <Skeleton className="h-4 w-full bg-slate-100" />
-              </td>
-            ))}
-          </tr>
-        ))}
-      </>
-    );
-  };
   return (
     <div className="container overflow-x-auto mx-auto w-full flex justify-center">
       <table className="w-full min-w-[600px] table-fixed">
         <thead className="bg-bg-secondary text-white overflow-hidden">
-          {isLoading && renderSkeletonRows()}
           {!isLoading && headTableforDevices.isHeadTitle && (
             <tr className=" overflow-hidden text-xs">
               <th className="px-1 py-2 text-center" colSpan={1}>
@@ -112,7 +93,7 @@ export default function ServiceItemsRender({
           )}
         </thead>
         <tbody>
-          {/* Patients */}
+          {isLoading && renderSkeletonRows({counts: [1, 2, 2, 2, 4, 2, 1]})}
           {modalities?.map((item: Modality, index: number) => (
             <React.Fragment key={index}>
               <tr

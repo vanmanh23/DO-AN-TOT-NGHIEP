@@ -26,6 +26,7 @@ import {
 import createImageIdsAndCacheMetaData from "../../../lib/createImageIdsAndCacheMetaData";
 import Features from "./Features";
 import { initToolGroup } from "./initToolGroup";
+import { is } from "zod/v4/locales";
 
 const { ViewportType } = Enums;
 // volumeLoader.registerUnknownVolumeLoader(cornerstoneStreamingImageVolumeLoader);
@@ -44,6 +45,7 @@ export type toolsUsed = {
 };
 
 function DicomViewer() {
+  const [isLoading, setIsLoading] = useState(true);
   const [toolsUsed, setToolsUsed] = useState<toolsUsed>({
     isZoom: false,
     isElliptical: false,
@@ -62,119 +64,89 @@ function DicomViewer() {
   const running = useRef(false);
   useEffect(() => {
     let resizeObserver: ResizeObserver | null = null;
-    async function run() {
+    // async function run() {
+    const run = async () => {
       if (running.current) {
         return;
       }
       running.current = true;
+      try {
+        await csToolsInit();
+        await cornerstoneToolsInit();
+        await dicomImageLoaderInit();
 
-      await csToolsInit();
-      await cornerstoneToolsInit();
-      await dicomImageLoaderInit();
-
-      // Đăng ký volume loader chưa biết để xử lý các loại DICOM khác nhau
+        // Đăng ký volume loader chưa biết để xử lý các loại DICOM khác nhau
         volumeLoader.registerUnknownVolumeLoader(
-            cornerstoneStreamingImageVolumeLoader
+          cornerstoneStreamingImageVolumeLoader
         );
 
+        const imageIds = await createImageIdsAndCacheMetaData({
+          StudyInstanceUID: studyInstance,
+          SeriesInstanceUID: seriesInstance,
+          wadoRsRoot: "http://localhost:8080/dcm4chee-arc/aets/DCM4CHEE/rs",
+        });
+        const renderingEngineId = "myRenderingEngine";
+        const volumeId = "myVolume";
+        const renderingEngine = new RenderingEngine(renderingEngineId);
+        const volume = await volumeLoader.createAndCacheVolume(volumeId, {
+          imageIds,
+        });
 
-      const imageIds = await createImageIdsAndCacheMetaData({
-        StudyInstanceUID: studyInstance,
-        SeriesInstanceUID: seriesInstance,
-        wadoRsRoot: "http://localhost:8080/dcm4chee-arc/aets/DCM4CHEE/rs",
-      });
-      const renderingEngineId = "myRenderingEngine";
-      const volumeId = "myVolume";
-      const renderingEngine = new RenderingEngine(renderingEngineId);
-      const volume = await volumeLoader.createAndCacheVolume(volumeId, {
-        imageIds,
-      });
+        const viewportId1 = "CT_AXIAL";
 
-      const viewportId1 = "CT_AXIAL";
-
-      const viewportInput = [
-        {
-          viewportId: viewportId1,
-          element: axialRef.current!,
-          type: ViewportType.ORTHOGRAPHIC,
-          defaultOptions: {
-            // orientation: Enums.OrientationAxis.AXIAL,
-            background: [0, 0, 0],
-          },
-        },
-      ];
-
-      renderingEngine.setViewports(viewportInput);
-      await volume.load();
-
-      const toolGroup = initToolGroup();
-      toolGroup.addViewport(viewportId1, renderingEngineId);
-      toolGroup.setToolActive(BidirectionalTool.toolName, {
-        bindings: [
+        const viewportInput = [
           {
-            mouseButton: csToolsEnums.MouseBindings.Primary,
+            viewportId: viewportId1,
+            element: axialRef.current!,
+            type: ViewportType.ORTHOGRAPHIC,
+            defaultOptions: {
+              // orientation: Enums.OrientationAxis.AXIAL,
+              background: [0, 0, 0],
+            },
           },
-        ],
-      });
-      // Set Window-Level
-      // setVolumesForViewports(
-      //   renderingEngine,
-      //   [
-      //     {
-      //       volumeId,
-      //       callback: ({ volumeActor }) => {
-      //         volumeActor
-      //           .getProperty()
-      //           .getRGBTransferFunction(0)
-      //           // .setMappingRange(-180, 220);
-      //           .setMappingRange(-500, 1500);
-      //       },
-      //     },
-      //   ],
-      //   [viewportId1]
-      // );
-      // Gán Volume cho Viewport
-        // await setVolumesForViewports(
-        //     renderingEngine,
-        //     [
-        //         {
-        //             volumeId,
-        //         },
-        //     ],
-        //     [viewportId1]
-        // );
+        ];
+
+        renderingEngine.setViewports(viewportInput);
+        await volume.load();
+
+        const toolGroup = initToolGroup();
+        toolGroup.addViewport(viewportId1, renderingEngineId);
+        toolGroup.setToolActive(BidirectionalTool.toolName, {
+          bindings: [
+            {
+              mouseButton: csToolsEnums.MouseBindings.Primary,
+            },
+          ],
+        });
         await setVolumesForViewports(
-            renderingEngine,
-            [{ volumeId }],
-            [viewportId1]
+          renderingEngine,
+          [{ volumeId }],
+          [viewportId1]
         );
-      const viewport = renderingEngine.getViewport(viewportId1);
+        const viewport = renderingEngine.getViewport(viewportId1);
 
         viewport.resetCamera();
         // Tự động Resize khi thẻ div thay đổi kích thước
         // Đây là lý do chính khiến ảnh bị bẹp hoặc vỡ hạt
         resizeObserver = new ResizeObserver(() => {
-            if (renderingEngine) {
-                renderingEngine.resize(true, false); // (immediate, keepCamera)
-            }
+          if (renderingEngine) {
+            renderingEngine.resize(true, false); // (immediate, keepCamera)
+          }
         });
-        
+
         if (axialRef.current) {
-            resizeObserver.observe(axialRef.current);
+          resizeObserver.observe(axialRef.current);
         }
-      // viewport.setDisplayArea({
-      //   type: "SCALE",
-      //   scale: 3.0, // tùy chỉnh nếu muốn zoom hơn
-      //   imageCanvasPoint: {
-      //     imagePoint: [0.5, 0.5], // center ảnh
-      //     canvasPoint: [0.5, 0.5], // center canvas
-      //   },
-      //   storeAsInitialCamera: true,
-      // });
-      // viewport.resetCamera();
-      viewport.render();
-      // renderingEngine.renderViewports([viewportId1]);
-    }
+        // renderingEngine.render();
+        viewport.render();
+        // renderingEngine.renderViewports([viewportId1]);
+        // setIsLoading(false);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
     run();
   }, [axialRef, running]);
 
@@ -292,19 +264,27 @@ function DicomViewer() {
       ) as toolsUsed
     );
   };
-
+  console.log("isLoading", isLoading);
   return (
-    <div id="content" className="relative flex flex-row w-full h-screen">
-      <div
-        ref={axialRef}
-        className="flex flex-col w-screen h-screen overflow-hidden"
-      ></div>
-      <div className="absolute top-0 right-0 w-36">
-        <Features
-          toolsUsed={toolsUsed}
-          setActiveTool={setActiveTool}
-          changeTool={changeTool}
-        />
+    <div className="relative w-full h-screen bg-black">
+      {isLoading && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black text-white">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p className="font-sans text-lg animate-pulse">Loading...</p>
+        </div>
+      )}
+      <div className="flex w-full h-full">
+        <div
+          ref={axialRef}
+          className="flex flex-col w-screen h-screen overflow-hidden"
+        ></div>
+        <div className="absolute top-0 right-0 w-36">
+          <Features
+            toolsUsed={toolsUsed}
+            setActiveTool={setActiveTool}
+            changeTool={changeTool}
+          />
+        </div>
       </div>
     </div>
   );
