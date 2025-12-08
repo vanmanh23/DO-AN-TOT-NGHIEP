@@ -1,6 +1,7 @@
 package com.manh.healthcare.controller;
 
 import com.manh.healthcare.dtos.BaseResponse;
+import com.manh.healthcare.dtos.PatientDTO;
 import com.manh.healthcare.dtos.PatientRequestDTO;
 import com.manh.healthcare.dtos.PatientResponseDTO;
 import com.manh.healthcare.entity.Patient;
@@ -46,7 +47,7 @@ public class PatientController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<BaseResponse> getPatientById(@PathVariable String id) {
-        Optional<Patient> patient = patientService.getPatientById(id);
+        PatientDTO patient = patientService.getPatientById(id);
         BaseResponse response = BaseResponse.createSuccessResponse("patient.success.findById", patient);
         return ResponseEntity.status(200).body(response);
     }

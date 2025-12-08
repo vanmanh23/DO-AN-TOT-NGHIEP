@@ -130,7 +130,7 @@ export default function OrdersRender({
                       <p>{index + 1}</p>
                     </div>
                   </td>
-                  <td className="border px-4 py-2" colSpan={3}>
+                  <td className="text-blue-700 font-medium border px-4 py-2" colSpan={3}>
                     {item.patientName}
                   </td>
                   <td className="border px-4 py-2 truncate" colSpan={5}>
@@ -148,7 +148,7 @@ export default function OrdersRender({
                   <td className="border px-4 py-2" colSpan={3}>
                     {item.status}
                   </td>
-                  <td className="border px-4 py-2" colSpan={5}>
+                  <td className="text-blue-700 font-medium border px-4 py-2" colSpan={5}>
                     {item.serviceItems
                       .map((service) => service.serviceName)
                       .join(", ")}

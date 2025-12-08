@@ -1,15 +1,23 @@
 import React, { useEffect, useState } from "react";
-import type { DoctorResponse, Patient } from "../../../../types/order";
+import type {
+  DoctorResponse,
+  Patient,
+  PatientDTO,
+} from "../../../../types/order";
 import doctorsApi from "../../../../apis/doctorApis";
 import orderApis from "../../../../apis/orderApis";
 import { z } from "zod";
 import { useFormContext } from "react-hook-form";
 import { patientSchema } from "../../../../utils/schema";
+import patientApi from "../../../../apis/patientApis";
+import { Search } from "lucide-react";
 interface Props {
   onChange: (data: Patient) => void;
   chooseDoctor?: (doctorId: string) => void;
   patientIdUpdate?: string;
   orderIdUpdate?: string;
+  isNotCreate: (status: boolean) => void;
+  patientAvailable: (patient: PatientDTO) => void;
 }
 
 export type PatientFormSchema = z.infer<typeof patientSchema>;
@@ -18,11 +26,12 @@ export default function PatientFormInfo({
   onChange,
   chooseDoctor,
   orderIdUpdate,
-  patientIdUpdate,
+  isNotCreate,
+  patientAvailable,
 }: Props) {
   const [allDoctors, setAllDoctors] = useState<DoctorResponse[]>([]);
-  // const [selectedDoctor, setSelectedDoctor] = useState<DoctorResponse>();
-
+  const [typeOfPatient, setTypeOfPatient] = useState("re_visit");
+  const [findPatient, setFindPatient] = useState("");
   const [patientInfo, setPatientInfo] = useState<Patient>({
     name: "",
     birthdate: "",
@@ -65,6 +74,27 @@ export default function PatientFormInfo({
     return age;
   };
 
+  const getNameToFindPatient = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFindPatient(e.target.value);
+  };
+
+  const selectTypeOfPatient = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setTypeOfPatient(e.target.value);
+    const { value } = e.target;
+    if(value === "re_visit") {
+      isNotCreate(true);
+    }
+    if (value === "first_visit") {
+      isNotCreate(false);
+    }
+    setPatientInfo({
+      name: "",
+      birthdate: "",
+      gender: "M",
+      address: "",
+      phoneNumber: "",
+    });
+  };
   // ------------------ Load when update ----------------------
   useEffect(() => {
     if (!orderIdUpdate) return;
@@ -94,6 +124,22 @@ export default function PatientFormInfo({
     };
     fetchAllDoctors();
   }, []);
+
+  const handleFindPatient = async () => {
+    const res = await patientApi.getById(findPatient);
+    patientAvailable(res.result);
+    const data: Patient = {
+      name: res.result.name as string,
+      birthdate: res.result.birthdate as string,
+      gender: res.result.gender as "M" | "F" | "O",
+      address: res.result.address as string,
+      phoneNumber: res.result.phoneNumber as string,
+    };
+    setPatientInfo(data);
+    setTypeOfPatient("");
+    setFindPatient("");
+  };
+
   return (
     <div className="bg-white rounded-lg shadow p-3 sm:p-4 md:p-6">
       <h2 className="text-base sm:text-lg md:text-lg font-bold mb-3 sm:mb-4 flex items-center gap-2">
@@ -106,21 +152,48 @@ export default function PatientFormInfo({
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-3 md:gap-4">
           <div className="sm:col-span-1">
             <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
-              Kiểu BN <span className="text-red-500">*</span>
+              Type of patient <span className="text-red-500">*</span>
             </label>
-            <select className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500">
-              <option>HIS</option>
+            <select
+              value={typeOfPatient}
+              onChange={selectTypeOfPatient}
+              className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500"
+            >
+              <option value={"re_visit"}>Re-visit</option>
+              <option value={"first_visit"}>First-visit</option>
             </select>
           </div>
           <div className="sm:col-span-2">
             <label className="text-sm font-medium">Họ tên *</label>
-            <input
-              type="text"
-              value={patientInfo.name}
-              {...register("name")}
-              onChange={handleInputChange}
-              className="border rounded px-3 py-2 w-full"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={
+                  typeOfPatient === "re_visit" ? findPatient : patientInfo.name
+                }
+                {...register("name")}
+                onChange={
+                  typeOfPatient === "re_visit"
+                    ? getNameToFindPatient
+                    : handleInputChange
+                }
+                placeholder={`${
+                  typeOfPatient === "re_visit" ? "Tìm kiếm mã, họ tên" : ""
+                }`}
+                // onKeyDown={(e) => {
+                //   if (e.key === "Enter") {
+                //     handleFindPatient();
+                //   }
+                // }}
+                className="border rounded px-3 py-2 w-full"
+              />
+              {typeOfPatient === "re_visit" && (
+                <Search
+                  onClick={handleFindPatient}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                />
+              )}
+            </div>
             {errors.name && (
               <p className="text-red-500 text-xs">
                 {errors.name.message as string}
@@ -148,9 +221,9 @@ export default function PatientFormInfo({
               onChange={handleInputChange}
               className="border rounded px-3 py-2 w-full"
             />
-            {errors.birthdate && (
+            {!patientInfo.birthdate && (
               <p className="text-red-500 text-xs">
-                {errors.birthdate.message as string}
+                {errors.birthdate?.message as string}
               </p>
             )}
           </div>
@@ -197,9 +270,9 @@ export default function PatientFormInfo({
               onChange={handleInputChange}
               className="border rounded px-3 py-2 w-full"
             />
-            {errors.phoneNumber && (
+            {!patientInfo.phoneNumber && (
               <p className="text-red-500 text-xs">
-                {errors.phoneNumber.message as string}
+                {errors.phoneNumber?.message as string}
               </p>
             )}
           </div>
@@ -214,9 +287,9 @@ export default function PatientFormInfo({
             onChange={handleInputChange}
             className="border rounded px-3 py-2 w-full"
           />
-          {errors.address && (
+          {!patientInfo.address && (
             <p className="text-red-500 text-xs">
-              {errors.address.message as string}
+              {errors.address?.message as string}
             </p>
           )}
         </div>

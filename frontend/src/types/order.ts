@@ -51,6 +51,18 @@ export interface PatientResponse {
   age?: number;
 }
 
+export interface PatientDTO {
+  id: string;
+  name: string;
+  birthdate: string;        
+  age: number | null;       
+  gender: string;          
+  address: string;
+  phoneNumber?: string | null;
+  orderIds: string[];
+  paymentIds: string[];
+}
+
 export interface Order {
   patientId?: "";
   priority: "ROUTINE";

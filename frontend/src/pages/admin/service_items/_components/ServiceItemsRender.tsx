@@ -114,7 +114,7 @@ export default function ServiceItemsRender({
                     <p>{index + 1}</p>
                   </div>
                 </td>
-                <td className="border px-4 py-2" colSpan={4}>
+                <td className="text-blue-700 font-medium border px-4 py-2" colSpan={4}>
                   {item.serviceName}
                 </td>
                 <td className="border px-4 py-2 truncate" colSpan={3}>

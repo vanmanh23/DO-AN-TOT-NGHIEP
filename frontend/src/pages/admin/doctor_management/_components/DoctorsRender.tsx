@@ -115,7 +115,7 @@ export default function DoctorsRender({
                     <p>{index + 1}</p>
                   </div>
                 </td>
-                <td className="border px-4 py-2" colSpan={4}>
+                <td className="text-blue-700 border px-4 py-2" colSpan={4}>
                   {item.fullName}
                 </td>
                 <td className="border px-4 py-2 truncate" colSpan={3}>

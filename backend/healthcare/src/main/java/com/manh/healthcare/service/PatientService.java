@@ -1,8 +1,11 @@
 package com.manh.healthcare.service;
 
+import com.manh.healthcare.dtos.PatientDTO;
 import com.manh.healthcare.dtos.PatientRequestDTO;
 import com.manh.healthcare.dtos.PatientResponseDTO;
+import com.manh.healthcare.entity.Orders;
 import com.manh.healthcare.entity.Patient;
+import com.manh.healthcare.entity.Payment;
 import com.manh.healthcare.repository.PatientRepository;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,6 +34,7 @@ public class PatientService {
                 .map(item -> modelMapper.map(item, PatientResponseDTO.class)).toList();
         return patientResponseDTOS;
     }
+
     public Patient patientAdmission(PatientRequestDTO patientRequestDTO) {
 
         Patient patient = new Patient();
@@ -42,6 +47,7 @@ public class PatientService {
         patient.setPhoneNumber(patientRequestDTO.getPhoneNumber());
         return patientRepository.save(patient);
     }
+
     @Transactional
     public String generateFormCode() {
         LocalDate today = LocalDate.now();
@@ -54,6 +60,7 @@ public class PatientService {
         // Format: REC + YYYYMMDD + 3-digit sequence
         return String.format("%s%03d", prefix, sequenceNumber);
     }
+
     @Transactional
     private int getNextSequenceNumber(String prefix) {
         // Get all form codes that start with the prefix
@@ -76,9 +83,11 @@ public class PatientService {
             return 1;
         }
     }
-    public Optional<Patient> getPatientById(String id) {
-        Optional<Patient> patient = patientRepository.findById(id);
-        return patient;
+
+    public PatientDTO getPatientById(String id) {
+        Patient patient = patientRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("patient not found"));
+        return convertDTO(patient);
     }
 
     /**
@@ -131,13 +140,35 @@ public class PatientService {
         List<Patient> patients = patientRepository.findByNameContainingIgnoreCase(name);
         return patients;
     }
+
     public Patient searchByPhoneNumber(String phonenumber) {
         Patient patient = patientRepository.findByPhoneNumber(phonenumber);
         return patient;
     }
-//    private void calculateAge(PatientRequestDTO patientRequestDTO) {
-//        if (patientRequestDTO.getBirthdate() != null) {
-//            patientRequestDTO.setAge(Period.between(patientRequestDTO.getBirthdate(), LocalDate.now()).getYears());
-//        }
-//    }
+
+    public PatientDTO convertDTO(Patient patient) {
+        PatientDTO patientDTO = new PatientDTO();
+        patientDTO.setId(patient.getID());
+        patientDTO.setAge(patient.getAge());
+        patientDTO.setName(patient.getName());
+        patientDTO.setBirthdate(patient.getBirthdate());
+        patientDTO.setGender(patient.getGender());
+        patientDTO.setAddress(patient.getAddress());
+        patientDTO.setPhoneNumber(patient.getPhoneNumber());
+        if (patient.getOrders() != null) {
+            List<String> orderIds = new ArrayList<>();
+            for (Orders order : patient.getOrders()) {
+                orderIds.add(order.getOrderId());
+            }
+            patientDTO.setOrderIds(orderIds);
+        }
+        if (patient.getPayments() != null) {
+            List<String> paymentIds = new ArrayList<>();
+            for (Payment payment : patient.getPayments()) {
+                paymentIds.add(payment.getId());
+            }
+            patientDTO.setPaymentIds(paymentIds);
+        }
+        return patientDTO;
+    }
 }

@@ -2,7 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Calendar, FileText, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import orderApis from "../../../apis/orderApis";
-import type { OrderResponse, Patient, ServiceItem } from "../../../types/order";
+import type {
+  OrderResponse,
+  Patient,
+  PatientDTO,
+  ServiceItem,
+} from "../../../types/order";
 import PatientFormInfo from "./_components/PatientFormInfo";
 import patientApi from "../../../apis/patientApis";
 import { toast } from "sonner";
@@ -31,6 +36,8 @@ export default function Component() {
     phoneNumber: "",
   });
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isNotCreate, setIsNotCreate] = useState(false);
+  const [patientAvailable, setPatientAvailable] = useState<PatientDTO>();
   const methods = useForm<PatientFormSchema>({
     resolver: zodResolver(patientSchema),
     defaultValues: patientInfo,
@@ -97,24 +104,47 @@ export default function Component() {
   const handleSubmit = async () => {
     try {
       setIsProcessing(true);
-      const [patientRes] = await Promise.all([patientApi.create(patientInfo)]);
-      const ids = selectedService.map((s) => s.id);
-      const orderRes = await orderApis.create({
-        patientId: patientRes?.result?.id as "",
-        serviceItemIds: ids,
-        priority: "ROUTINE",
-        status: "SCHEDULED",
-        scheduledAt: "",
-        completedAt: "",
-        doctorId: doctorPrescriptions,
-      });
-
-      if (orderRes.success) {
-        toast.success("Tạo phiếu chỉ định thành công!", {
-          duration: 2000,
-          richColors: true,
+      if (!isNotCreate) {
+        const [patientRes] = await Promise.all([
+          patientApi.create(patientInfo),
+        ]);
+        const ids = selectedService.map((s) => s.id);
+        const orderRes = await orderApis.create({
+          patientId: patientRes?.result?.id as "",
+          serviceItemIds: ids,
+          priority: "ROUTINE",
+          status: "SCHEDULED",
+          scheduledAt: "",
+          completedAt: "",
+          doctorId: doctorPrescriptions,
         });
-        window.location.reload();
+
+        if (orderRes.success) {
+          toast.success("Tạo phiếu chỉ định thành công!", {
+            duration: 2000,
+            richColors: true,
+          });
+          window.location.reload();
+        }
+      } else {
+        const ids = selectedService.map((s) => s.id);
+        const orderRes = await orderApis.create({
+          patientId: patientAvailable?.id as "",
+          serviceItemIds: ids,
+          priority: "ROUTINE",
+          status: "SCHEDULED",
+          scheduledAt: "",
+          completedAt: "",
+          doctorId: doctorPrescriptions,
+        });
+
+        if (orderRes.success) {
+          toast.success("Tạo phiếu chỉ định thành công!", {
+            duration: 2000,
+            richColors: true,
+          });
+          window.location.reload();
+        }
       }
     } catch (err) {
       toast.error("Tạo phiếu chỉ định thất bại!", {
@@ -158,7 +188,7 @@ export default function Component() {
       }
     } catch (error) {
       console.log(error);
-    } 
+    }
   };
   const handleCancel = (pathName: string): void => {
     dispatch(setOption(pathName));
@@ -175,6 +205,8 @@ export default function Component() {
                 patientIdUpdate={patientIdUpdate}
                 orderIdUpdate={OrderIdUpdate}
                 chooseDoctor={setDoctorPrescriptions}
+                isNotCreate={setIsNotCreate}
+                patientAvailable={setPatientAvailable}
               />
               {/* Service Request Section */}
               <div className="bg-white rounded-lg shadow p-3 sm:p-4 md:p-6">

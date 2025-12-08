@@ -6,11 +6,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../../components/ui/dropdown-menu";
-import type { PatientResponse } from "../../../../types/order";
+import type { OrderResponse, PatientResponse } from "../../../../types/order";
 import { toast } from "sonner";
 import { useState } from "react";
 import patientApi from "../../../../apis/patientApis";
 import FormEditPatient from "./FormEditPatient";
+import PatientHistory from "./PatientHistory";
+import orderApis from "../../../../apis/orderApis";
 
 type Props = {
   patients?: PatientResponse;
@@ -18,6 +20,8 @@ type Props = {
 
 export default function PatientsAction({ patients }: Props) {
   const [openEdit, setOpenEdit] = useState(false);
+  const [orders, setOrders] = useState<OrderResponse[]>([]);
+  const [openPatientHistory, setOpenPatientHistory] = useState(false);
   const handleDelete = async () => {
     try {
       await patientApi.delete(patients?.id as string);
@@ -29,6 +33,17 @@ export default function PatientsAction({ patients }: Props) {
     } catch (error) {
       console.log(error);
     }
+  };
+  const patientHistory = async (patientId: string) => {
+    const patientResponse = await patientApi.getById(patientId);
+    const orderIds = patientResponse?.result?.orderIds || [];
+    const Allorders = await Promise.all(
+      orderIds.map(async (id) => {
+        const orderRes = await orderApis.getById(id);
+        return orderRes.result;
+      })
+    );
+    setOrders(Allorders);
   };
   return (
     <div className="z-20 ">
@@ -47,7 +62,7 @@ export default function PatientsAction({ patients }: Props) {
                 setOpenEdit(true);
               }}
             >
-             <p>Edit</p>
+              <p>Edit</p>
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={handleDelete}
@@ -55,10 +70,30 @@ export default function PatientsAction({ patients }: Props) {
             >
               Remove patient
             </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={() => {
+                // e.preventDefault(); // ngăn Dropdown đóng
+                setOpenPatientHistory(true);
+                // patientHistory(patients?.id as string);
+              }}
+              onClick={() => patientHistory(patients?.id as string)}
+              className="cursor-pointer outline-bg-secondary"
+            >
+              Medical history
+            </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
-       <FormEditPatient open={openEdit} setOpen={setOpenEdit} patientEdit={patients} />
+      <FormEditPatient
+        open={openEdit}
+        setOpen={setOpenEdit}
+        patientEdit={patients}
+      />
+      <PatientHistory
+        open={openPatientHistory}
+        setOpen={setOpenPatientHistory}
+        orders={orders}
+      />
     </div>
   );
 }

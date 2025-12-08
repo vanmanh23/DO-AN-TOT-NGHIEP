@@ -108,7 +108,7 @@ export default function ServiceItemsRender({
                     <p>{index + 1}</p>
                   </div>
                 </td>
-                <td className="border px-4 py-2" colSpan={2}>
+                <td className="text-blue-700 border px-4 py-2" colSpan={2}>
                   {item.model}
                 </td>
                 <td className="border px-4 py-2" colSpan={2}>
