@@ -96,7 +96,6 @@ public class VnpayService {
                 fields.put(fieldName, fieldValue);
             }
         }
-
         String vnp_SecureHash = request.getParameter("vnp_SecureHash");
         if (fields.containsKey("vnp_SecureHashType")) {
             fields.remove("vnp_SecureHashType");

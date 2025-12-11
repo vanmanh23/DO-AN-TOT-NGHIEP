@@ -210,7 +210,7 @@ export default function OrdersCompeletedRender({
                         <CheckoutCard order={item} />
                       ) : (
                         // <span className="text-green-600 font-semibold">Đã thanh toán</span>
-                        <InvoiceCard />
+                        <InvoiceCard order={item} />
                       )
                     ) : (
                       "N/A"

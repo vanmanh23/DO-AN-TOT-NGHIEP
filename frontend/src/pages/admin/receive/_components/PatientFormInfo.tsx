@@ -164,7 +164,7 @@ export default function PatientFormInfo({
             </select>
           </div>
           <div className="sm:col-span-2">
-            <label className="text-sm font-medium">Họ tên *</label>
+            <label className="text-sm font-medium">Họ tên <span className="text-red-500">*</span></label>
             <div className="relative">
               <input
                 type="text"
@@ -213,7 +213,7 @@ export default function PatientFormInfo({
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Ngày sinh *</label>
+            <label className="text-sm font-medium">Ngày sinh <span className="text-red-500">*</span></label>
             <input
               type="date"
               value={patientInfo.birthdate}
@@ -228,7 +228,7 @@ export default function PatientFormInfo({
             )}
           </div>
           <div>
-            <label className="text-sm font-medium">Giới tính *</label>
+            <label className="text-sm font-medium">Giới tính <span className="text-red-500">*</span></label>
             <select
               value={patientInfo.gender}
               {...register("gender")}
@@ -249,20 +249,23 @@ export default function PatientFormInfo({
 
         {/* Mã số cccd */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-3 sm:gap-3 md:gap-4">
+           <div>
+          <label className="text-sm font-medium">Identity Card <span className="text-red-500">*</span></label>
+          <input
+            type="text"
+            // value={patientInfo.address}
+            // {...register("address")}
+            // onChange={handleInputChange}
+            className="border rounded px-3 py-2 w-full"
+          />
+          {/* {!patientInfo.address && (
+            <p className="text-red-500 text-xs">
+              {errors.address?.message as string}
+            </p>
+          )} */}
+        </div>
           <div>
-            <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
-              Mã số cccd/cmt <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="cccdCode"
-              // value={patientInfo.cccdCode}
-              // onChange={handleInputChange}
-              className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500"
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium">Phone *</label>
+            <label className="text-sm font-medium">Phone <span className="text-red-500">*</span></label>
             <input
               type="text"
               value={patientInfo.phoneNumber}
@@ -279,7 +282,7 @@ export default function PatientFormInfo({
         </div>
         {/* Địa chỉ */}
         <div>
-          <label className="text-sm font-medium">Địa chỉ *</label>
+          <label className="text-sm font-medium">Địa chỉ <span className="text-red-500">*</span></label>
           <input
             type="text"
             value={patientInfo.address}

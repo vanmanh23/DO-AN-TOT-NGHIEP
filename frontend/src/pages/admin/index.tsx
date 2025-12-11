@@ -14,6 +14,9 @@ import type { PatientProps } from "../../types/types";
 import { inforCard } from "../../constants";
 import type { User } from "./usermanagement/_components/columns";
 import { GetAllUsers } from "../../apis/authApis";
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "../../store/store";
+import { setOption } from "../../features/navbarsection/navbarSection";
 
 export default function Component() {
   const [countValue, setCountValue] = useState(0);
@@ -23,7 +26,7 @@ export default function Component() {
   const [studiesData, setStudiesData] = useState([]);
   const [patients, setPatients] = useState<PatientProps[]>([]);
   const navigate = useNavigate();
-
+   const dispatch = useDispatch<AppDispatch>();
   useEffect(() => {
     const fetchInfo = async () => {
       setLoading(true);
@@ -53,10 +56,16 @@ export default function Component() {
     };
     fetchInfo();
   }, []);
+
+     useEffect(() => {
+    dispatch(setOption("Dashboard"));
+  }, []);
+
   inforCard[0].content = patients.length.toString();
   inforCard[1].content = usersData.length.toString();
   inforCard[2].content = sizeValue.toString() + " MB";
   inforCard[3].content = studiesData.length.toString();
+
 
   return (
     <div className="mx-6 flex flex-col gap-4 ">

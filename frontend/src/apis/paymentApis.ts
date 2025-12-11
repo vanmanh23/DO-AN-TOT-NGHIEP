@@ -12,6 +12,8 @@ const paymentApis = {
   delete: (id: string) => axiosClient.delete(`/payments/${id}`),
 
   vnPay: (amount: string, orderId: string) : Promise<string> => axiosClient.post(`/vnpay?amount=${amount}&orderInfo=${orderId}`),
+
+  changeStatus: (id: string): Promise<ApiResponse<PaymentResponse>> => axiosClient.put(`/payments/status/${id}`),
 };
 
 export default paymentApis;

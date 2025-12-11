@@ -25,6 +25,11 @@ export default function CheckoutCard({ order }: Props) {
         const res = await paymentApis.vnPay(billTotal.toString(), order.payment?.id as string);
         window.open(res, "_blank");
       }
+      if (selectedMethod === "cash") {
+        await paymentApis.changeStatus(order.payment?.id as string);
+        toast.success("Payment success!", { duration: 2000, richColors: true });
+        window.location.reload();
+      }
     } catch (error) {
       toast.error("Payment failed!", { duration: 2000, richColors: true });
       console.log(error);

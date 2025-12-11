@@ -15,6 +15,8 @@ import {
   DialogFooter,
 } from "../../../../components/ui/dialog";
 import type { OrderResponse } from "../../../../types/order";
+import { useState } from "react";
+import axios from "axios";
 
 type Props = {
   open: boolean;
@@ -23,9 +25,44 @@ type Props = {
 };
 
 export default function PatientHistory({ open, setOpen, orders }: Props) {
+  const [focusOrder, setFocusOrder] = useState<OrderResponse | null>(null);
+  const onViewDicom = () => {
+    if (focusOrder?.study === null) return;
+    localStorage.setItem(
+      "studyInstanceUID",
+      focusOrder?.study.studyInstanceUID as string
+    );
+    localStorage.setItem(
+      "seriesInstanceUID",
+      focusOrder?.study.seriesInstanceUID as string
+    );
+    window.open(`/dicom-viewer`, "_blank");
+  };
+  const onViewInvoice = async () => {
+    try {
+      const id = focusOrder?.orderId as string;
+      const response = await axios.get(
+        `http://localhost:8081/api/report-results/generate_pdf/${id}`,
+        {
+          responseType: "blob", // Quan trọng!!!
+        }
+      );
+      const file = new Blob([response.data], { type: "application/pdf" });
+      const fileURL = URL.createObjectURL(file);
+
+      window.open(fileURL, "_blank");
+    } catch (error) {
+      console.error("Không thể mở file PDF:", error);
+      alert("Đã xảy ra lỗi khi tải báo cáo.");
+    }
+  };
+
+  const onOrderClick = (order: OrderResponse) => {
+    setFocusOrder(order);
+  };
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[140vh] bg-white rounded-t-xl">
+      <DialogContent className="max-h-[90vh] overflow-y-auto  sm:max-w-[140vh] bg-white rounded-t-xl">
         <div className="w-full mx-auto p-6 bg-white shadow-lg rounded-lg">
           <div className="bg-blue-50/50 px-8 py-2 mt-3 border-b border-blue-100">
             <h1 className="text-lg font-semibold text-slate-800 tracking-tight">
@@ -144,7 +181,7 @@ export default function PatientHistory({ open, setOpen, orders }: Props) {
             <div className="bg-slate-50 rounded-xl overflow-hidden border border-slate-100">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="bg-blue-100/50 text-slate-700 font-semibold border-b border-blue-100">
+                  <tr className="bg-blue-300/50 text-slate-700 font-semibold border-b border-blue-100">
                     <th className="py-4 px-6">Date</th>
                     <th className="py-4 px-6">Service</th>
                     <th className="py-4 px-6">Doctor</th>
@@ -156,8 +193,9 @@ export default function PatientHistory({ open, setOpen, orders }: Props) {
                     <tr
                       key={index}
                       // Highlight the first row to match image style usually indicating 'current selection'
+                      onClick={() => onOrderClick(order)}
                       className={`${
-                        index === 0 ? "bg-blue-50/60" : "bg-white"
+                        order.orderId === focusOrder?.orderId ? "bg-blue-100/90" : "bg-white"
                       } hover:bg-blue-50 transition-colors duration-150`}
                     >
                       <td className="py-4 px-6 text-slate-800 font-medium">
@@ -185,6 +223,7 @@ export default function PatientHistory({ open, setOpen, orders }: Props) {
           <div className="bg-gradient-to-b from-blue-50 to-blue-100 p-4 pb-6">
             <div className="bg-white/40 backdrop-blur-sm rounded-xl p-2 shadow-inner border border-white/50 flex flex-col sm:flex-row gap-3">
               <button
+                onClick={onViewDicom}
                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 
       rounded-lg font-medium text-sm shadow-md active:scale-95 transition flex items-center justify-center gap-2"
               >
@@ -192,6 +231,7 @@ export default function PatientHistory({ open, setOpen, orders }: Props) {
                 View DICOM Images
               </button>
               <button
+                onClick={onViewInvoice}
                 className="flex-1 bg-white hover:bg-slate-50 text-slate-700 py-2 px-4 
       rounded-lg font-medium text-sm border border-slate-200 shadow-sm active:scale-95 transition flex items-center justify-center gap-2"
               >

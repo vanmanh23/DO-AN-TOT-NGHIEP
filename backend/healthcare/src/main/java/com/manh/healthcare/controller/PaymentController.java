@@ -50,6 +50,13 @@ public class PaymentController {
         return ResponseEntity.status(HttpStatus.OK).body(baseResponse);
     }
 
+    @PutMapping("/status/{id}")
+    public ResponseEntity<BaseResponse> changePaymentStatus(@PathVariable String id) {
+        PaymentResponseDTO paymentResponseDTO = paymentService.changePaymentStatus(id);
+        BaseResponse baseResponse = BaseResponse.createSuccessResponse("payment.success.changeStatus", paymentResponseDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(baseResponse);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deletePayment(@PathVariable String id) {
         paymentService.deletePayment(id);

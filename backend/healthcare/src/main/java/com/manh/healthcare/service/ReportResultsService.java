@@ -17,6 +17,7 @@ import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.property.TextAlignment;
 import com.itextpdf.layout.property.UnitValue;
 import com.itextpdf.layout.property.VerticalAlignment;
+import com.manh.healthcare.dtos.NutritionInfo;
 import com.manh.healthcare.dtos.OrderDTO;
 import com.manh.healthcare.dtos.ReportResultsRequestDTO;
 import com.manh.healthcare.dtos.ReportResultsResponseDTO;
@@ -39,6 +40,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -54,7 +56,6 @@ public class ReportResultsService {
     private ModelMapper modelMapper;
 
     public ReportResultsResponseDTO createReportResult(ReportResultsRequestDTO dto) throws IOException {
-        System.out.println("===============" + dto);
         // Check if order exists
         Orders order = ordersRepository.findById(dto.getOrderId())
                 .orElseThrow(() -> new RuntimeException("Order not found with id: " + dto.getOrderId()));
@@ -153,7 +154,8 @@ public class ReportResultsService {
             Document document = new Document(pdf);
 
             Orders order = ordersRepository.findById(requestDTO.getOrderId())
-                    .orElseThrow(() -> new RuntimeException("Order not found with id: " + requestDTO.getOrderId()));;
+                    .orElseThrow(() -> new RuntimeException("Order not found with id: " + requestDTO.getOrderId()));
+            ;
 
             document.add(new Paragraph("RESULTS")
                     .setTextAlignment(TextAlignment.CENTER)
@@ -181,7 +183,7 @@ public class ReportResultsService {
             addPatientInfoRow(patientInfoTable, "Full Name:", order.getPatient().getName(), true);
             addPatientInfoRow(patientInfoTable, "Year of Birth:", String.valueOf(order.getPatient().getBirthdate()), false);
             addPatientInfoRow(patientInfoTable, "Gender:", String.valueOf(order.getPatient().getGender()), false);
-            addPatientInfoRow(patientInfoTable, "Patient ID:", order.getPatient().getID(),false);
+            addPatientInfoRow(patientInfoTable, "Patient ID:", order.getPatient().getID(), false);
             addPatientInfoRow(patientInfoTable, "Address:", order.getPatient().getAddress(), false);
             addPatientInfoRow(patientInfoTable, "Ordered By:", order.getDoctor().getPerson().getFullName(), false);
             addPatientInfoRow(patientInfoTable, "Machine:", order.getServiceItems().stream().findFirst().map(item -> item.getModality().getModel()).orElse(null), false);
@@ -244,10 +246,50 @@ public class ReportResultsService {
             document.add(detailTable);
 
             // =========================================================
+            // 5. NUTRITIONAL GUIDANCE
+            // =========================================================
+            NutritionInfo nutrition = parseNutrition(requestDTO.getAiNutriRecommen());
+            Table nutritionTable = new Table(UnitValue.createPercentArray(new float[]{33, 33, 33}));
+            nutritionTable.setWidth(UnitValue.createPercentValue(100));
+            nutritionTable.setMarginTop(20);
+            nutritionTable.setBorder(Border.NO_BORDER);
+
+            Cell c1 = new Cell().setBorder(Border.NO_BORDER);
+            c1.add(new Paragraph("NUTRITIONAL GUIDANCE").setBold());
+
+            for (String g : nutrition.guidance) {
+                c1.add(new Paragraph("• " + g));
+            }
+
+            nutritionTable.addCell(c1);
+
+            Cell c2 = new Cell().setBorder(Border.NO_BORDER);
+            c2.add(new Paragraph("RECOMMENDED FOODS").setBold());
+
+            for (String r : nutrition.recommendedFoods) {
+                c2.add(new Paragraph("• " + r));
+            }
+
+            nutritionTable.addCell(c2);
+
+            Cell c3 = new Cell().setBorder(Border.NO_BORDER);
+            c3.add(new Paragraph("FOODS TO AVOID").setBold());
+
+            for (String a : nutrition.foodsToAvoid) {
+                c3.add(new Paragraph("• " + a));
+            }
+
+            nutritionTable.addCell(c3);
+
+            // Add to PDF
+            document.add(nutritionTable);
+
+
+            // =========================================================
             // 4. CHỮ KÝ / NGÀY THÁNG (Góc dưới bên phải)
             // =========================================================
             // Để căn chỉnh sang phải, dùng một bảng 1 cột
-            float [] pointColumnWidths = {100};
+            float[] pointColumnWidths = {100};
             Table signatureTable = new Table(pointColumnWidths);
             signatureTable.setWidth(UnitValue.createPercentValue(100));
             signatureTable.setBorder(Border.NO_BORDER);
@@ -311,6 +353,68 @@ public class ReportResultsService {
 
             in.transferTo(baos);
             return baos.toByteArray();
+        }
+    }
+
+    public NutritionInfo parseNutrition(String input) {
+        List<String> guidance = new ArrayList<>();
+        List<String> recommended = new ArrayList<>();
+        List<String> avoid = new ArrayList<>();
+
+        String currentSection = "";
+
+        // Tách theo khoảng trắng nhưng giữ cấu trúc
+        String[] tokens = input.split("\\s+");
+
+        StringBuilder buffer = new StringBuilder();
+
+        for (String token : tokens) {
+            if (token.equalsIgnoreCase("NUTRITIONAL") || token.contains("NUTRITIONAL")) {
+                currentSection = "guidance";
+                continue;
+            }
+            if (token.startsWith("GUIDANCE:")) continue;
+
+            if (token.equalsIgnoreCase("RECOMMENDED") || token.contains("RECOMMENDED")) {
+                currentSection = "recommended";
+                continue;
+            }
+            if (token.startsWith("FOODS:")) continue;
+
+            if (token.equalsIgnoreCase("FOODS") || token.contains("FOODS") ||
+                    token.equalsIgnoreCase("AVOID:") || token.contains("AVOID:") || token.equalsIgnoreCase("AVOID")) {
+                currentSection = "avoid";
+                continue;
+            }
+
+            // NẾU GẶP CÂU MỚI → LƯU
+            if (token.matches("^\\d+\\.$") || token.equals("-")) {
+                if (buffer.length() > 0) {
+                    addToSection(currentSection, buffer.toString(), guidance, recommended, avoid);
+                    buffer.setLength(0);
+                }
+                continue;
+            }
+
+            buffer.append(token).append(" ");
+        }
+
+        if (buffer.length() > 0) {
+            addToSection(currentSection, buffer.toString(), guidance, recommended, avoid);
+        }
+
+        return new NutritionInfo(guidance, recommended, avoid);
+    }
+
+    private void addToSection(String section, String text,
+                              List<String> g, List<String> r, List<String> f) {
+        text = text.trim();
+        if (text.isEmpty()) return;
+
+        switch (section) {
+            case "guidance": g.add(text); break;
+            case "recommended": r.add(text); break;
+            case "avoid": f.add(text); break;
         }
     }
 

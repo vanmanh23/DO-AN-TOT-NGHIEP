@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import orderApis from "../../../../apis/orderApis";
-import type { OrderResponse, PacsUidResponse } from "../../../../types/order";
-import { Camera, Eye } from "lucide-react";
+import TextareaAutosize from 'react-textarea-autosize';
+import type {
+  AIPredict,
+  OrderResponse,
+  PacsUidResponse,
+} from "../../../../types/order";
+import { Camera, Eye, Sparkles } from "lucide-react";
 import { uploadDicomImg } from "../../../../apis/dicomApis";
 import { toast } from "sonner";
 import removeAccents from "remove-accents";
@@ -18,6 +23,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import paymentApis from "../../../../apis/paymentApis";
 import { Spinner } from "../../../../components/ui/spinner";
+import AiConsultButton from "../_components/AiConsultButton";
+import { getNutriRecommend } from "../../../../apis/AiRecommend";
 
 type ReportFormValues = z.infer<typeof reportSchema>;
 
@@ -25,18 +32,22 @@ export default function Component() {
   const [orderDetail, setOrderDetail] = useState<OrderResponse>();
   const [showModal, setShowModal] = useState<PacsUidResponse>();
   const [isUploading, setIsUploading] = useState(false);
+  const [aiProcessing, setAiProcessing] = useState(false);
   const navigate = useNavigate();
 
   const {
     register,
+    watch,
     handleSubmit,
     formState: { errors, isSubmitting },
+    setValue,
   } = useForm<ReportFormValues>({
     resolver: zodResolver(reportSchema),
     defaultValues: {
       suggestion: "",
       description: "",
       conclusion: "",
+      nutrirecomend: "",
     },
   });
 
@@ -110,6 +121,7 @@ export default function Component() {
         studyUID: showModal?.studyInstanceUID || "",
         seriesUID: showModal?.seriesInstanceUID || "",
         instances: showModal?.instanceUID || "",
+        aiNutriRecommen: data.nutrirecomend || "",
       });
 
       await orderApis.ChangeStatus({
@@ -145,6 +157,37 @@ export default function Component() {
   const handleNewOrder = () => {
     navigate("/admin/worklist/");
   };
+
+  const handleNutriRecommend = async () => {
+    try {
+      setAiProcessing(true);
+      const description = watch("description");
+      const conclusion = watch("conclusion");
+      if (!description || !conclusion) {
+        toast.error("Please fill in all fields", {
+          duration: 2000,
+          richColors: true,
+        });
+        return;
+      }
+      const ai_predict: AIPredict = {
+        mo_ta: description,
+        ket_luan: conclusion,
+      };
+      const res = await getNutriRecommend(ai_predict);
+      const textFormat = formatNutriText(res.result);
+      setValue("nutrirecomend", textFormat);
+    } catch (error) {
+      toast.error("Failed to complete the nomination form!", {
+        duration: 2000,
+        richColors: true,
+      });
+      console.log(error);
+    } finally {
+      setAiProcessing(false);
+    }
+  };
+
   return (
     <div className=" bg-gray-100 px-4 py-1 text-sm">
       <div className="bg-white shadow rounded p-4 border h-full flex flex-col">
@@ -307,6 +350,26 @@ export default function Component() {
                 </p>
               )}
             </div>
+
+            <div className="mt-3">
+              <label className="font-medium">Đề xuất chế độ dinh dưỡng:</label>
+              <TextareaAutosize
+                {...register("nutrirecomend")}
+                className={`w-full border p-2  h-20 rounded  mt-1 outline-none ${
+                  errors.nutrirecomend
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                }`}
+              ></TextareaAutosize>
+              {errors.nutrirecomend && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.nutrirecomend.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <AiConsultButton onClick={handleNutriRecommend} isLoading={aiProcessing}/>
+            </div>
           </form>
 
           {/* </div> */}
@@ -314,6 +377,7 @@ export default function Component() {
             <div className="h-48 border rounded bg-gray-200 mb-3"></div>
 
             <h3 className="font-medium mb-2">Danh sách ảnh đã chụp</h3>
+            {!showModal && <div className="flex-1"></div>}
             {showModal && (
               <div className="flex-1 border rounded mb-3">
                 <img
@@ -324,8 +388,8 @@ export default function Component() {
               </div>
             )}
 
-            <h3 className="font-medium mb-2">Danh sách video</h3>
-            <div className="flex-1 border rounded"></div>
+            {/* <h3 className="font-medium mb-2">Danh sách video</h3>
+            <div className="flex-1 border rounded"></div> */}
             <div className="flex flex-row justify-around mt-3">
               <div className="relative">
                 <input
@@ -392,4 +456,23 @@ export default function Component() {
       </div>
     </div>
   );
+}
+function formatNutriText(text: string) {
+   return text
+    .replace(/NUTRITIONAL GUIDANCE:/g, "NUTRITIONAL GUIDANCE:\n")
+    .replace(/RECOMMENDED FOODS:/g, "\nRECOMMENDED FOODS:\n")
+    .replace(/FOODS TO AVOID:/g, "\nFOODS TO AVOID:\n")
+    
+    // Tự tách số thứ tự (1. 2. 3.)
+    .replace(/(\d+\.)\s*/g, "$1 ")
+    
+    // Mỗi câu kết thúc bằng dấu chấm → xuống dòng
+    .replace(/(?<!\b\d)\. ?/g, ".\n")
+
+    // Tách dấu gạch đầu dòng
+    .replace(/-\s*/g, "- ")
+
+    // Xóa khoảng trống thừa
+    .replace(/\n\s*\n\s*\n/g, "\n\n")
+    .trim();
 }

@@ -1,18 +1,24 @@
-import React from "react";
 import {
   Dialog,
   DialogContent,
   DialogTrigger,
 } from "../../../../components/ui/dialog";
-import { Button } from "../../../../components/ui/button";
 import { ArrowRight } from "lucide-react";
+import type {
+  OrderResponse,
+} from "../../../../types/order";
 
-export default function InvoiceCard() {
+type Props = {
+  order: OrderResponse;
+};
+
+export default function InvoiceCard({ order }: Props) {
+  console.log("order", order);
   return (
     <Dialog>
       <form>
         <DialogTrigger asChild>
-            <button
+          <button
             className="
         flex items-center justify-center 
         gap-1 px-3 py-2 
@@ -33,11 +39,10 @@ export default function InvoiceCard() {
             />
           </button>
         </DialogTrigger>
-        <DialogContent className="max-h-[90vh] max-w-[70vw] overflow-scroll bg-gray-50 p-4  font-sans text-gray-800 flex justify-center">
-          <div>
+        <DialogContent className="max-h-[90vh] max-w-[50vw] overflow-y-auto bg-gray-50 p-4  font-sans text-gray-800 flex justify-center">
+          <div className="w-full ">
             {/* Invoice Card Container */}
             <div className="bg-white max-w-4xl w-full p-10 rounded-xl shadow-lg font-sans">
-              {/* Header Section */}
               <div className="flex justify-between gap-8 items-start">
                 <div>
                   <InvoiceHeader />
@@ -45,32 +50,29 @@ export default function InvoiceCard() {
                     INVOICE
                   </h1>
                   <p className="text-sm mt-4 text-gray-700">
-                    <strong>Invoice No:</strong> {invoiceData.invoiceNo}
+                    <strong>Invoice No:</strong> {order?.patient?.id}
                     <br />
-                    <strong>Date:</strong> {invoiceData.date}
+                    <strong>Date:</strong>{" "}
+                    {new Date(
+                      order?.payment?.paidAt as string
+                    ).toLocaleDateString("vi-VN")}
                   </p>
                 </div>
                 <div>
-                  <CustomerDetails customer={invoiceData.customer} />
+                  <CustomerDetails order={order} />
                 </div>
               </div>
 
               {/* Service Items Table */}
-              <InvoiceTable
-                items={invoiceData.items}
-                subtotal={invoiceData.subtotal}
-                tax={invoiceData.tax}
-                grandTotal={invoiceData.grandTotal}
-              />
+              <InvoiceTable order={order} />
 
               {/* PAID Status and Footer */}
               <div className="flex justify-between items-end mt-8 pt-4 border-t border-gray-100">
                 <p className="text-sm text-gray-500">
-                  Thank you for your business!
+                  Thank you for choosing
+                  <br /> our medical examination and treatment services!
                 </p>
-
-                {/* PAID Badge */}
-                <div className="bg-slate-500 px-8 py-3 text-white text-xl font-bold rounded-full shadow-lg opacity-85">
+                <div className="bg-slate-500 px-8 py-2 text-white text-lg font-bold rounded-full shadow-lg opacity-85">
                   PAID
                 </div>
               </div>
@@ -82,39 +84,11 @@ export default function InvoiceCard() {
   );
 }
 // --- Helper Functions ---
-const formatVND = (amount) => {
+const formatVND = (amount: number) => {
   return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" })
     .format(amount)
     .replace("₫", "VND");
 };
-
-// --- Mock Data ---
-const invoiceData = {
-  invoiceNo: "INV-2024-1026",
-  date: "October 26, 2024",
-  customer: {
-    customerName: "Nguyen Van A",
-    patientName: "Tran Thi B",
-    address: "123 Health Street, Hanoi, Vietnam",
-    paymentDetails: "Bank Transfer, Acct: 1234567890",
-    bank: "VCB",
-  },
-  items: [
-    { no: 1, service: "General Consultation", quantity: 1, unitPrice: 500000 },
-    { no: 2, service: "Blood Test (CBC)", quantity: 1, unitPrice: 300000 },
-    { no: 3, service: "X-Ray (Chest)", quantity: 1, unitPrice: 400000 },
-    {
-      no: 4,
-      service: "Medication (Prescription 1)",
-      quantity: 1,
-      unitPrice: 200000,
-    },
-  ],
-  subtotal: 1400000,
-  tax: 112000,
-  grandTotal: 1512000,
-};
-
 // --- Sub-Components ---
 
 const InvoiceHeader = () => (
@@ -137,52 +111,48 @@ const InvoiceHeader = () => (
   </div>
 );
 
-const CustomerDetails = ({ customer }) => (
+const CustomerDetails = ({ order }: Props) => (
   <div className="text-sm space-y-1">
     <h3 className="font-bold text-lg mb-2 text-slate-700">Customer Details</h3>
     <p>
-      <strong>Customer Name:</strong> {customer.customerName}
+      <strong>Patient Name:</strong> {order?.patient?.patientName}
     </p>
     <p>
-      <strong>Patient Name:</strong> {customer.patientName}
+      <strong>Address:</strong> {order?.patient?.address}
     </p>
     <p>
-      <strong>Address:</strong> {customer.address}
+      <strong>Phone Number:</strong> {order?.patient?.phoneNumber}
     </p>
     <p>
-      <strong>Payment Details:</strong> {customer.paymentDetails}
-    </p>
-    <p>
-      <strong>Bank:</strong> {customer.bank}
+      <strong>Payment Method:</strong> {order?.payment?.method}
     </p>
   </div>
 );
 
-const InvoiceTable = ({ items, subtotal, tax, grandTotal }) => (
+const InvoiceTable = ({ order }: Props) => (
   <div className="mt-8">
     {/* Table Header */}
-    <div className="grid grid-cols-[5%_40%_15%_20%_20%] text-white font-semibold text-sm bg-slate-500 rounded-t-lg">
+    <div className="grid grid-cols-[5%_30%_25%_20%_20%] text-white font-semibold text-sm bg-slate-500 rounded-t-lg">
       <div className="p-3 text-center rounded-tl-lg">No.</div>
       <div className="p-3">Service Item</div>
-      <div className="p-3 text-right">Quantity</div>
+      <div className="p-3 text-right">Service Code</div>
       <div className="p-3 text-right">Unit Price</div>
       <div className="p-3 text-right rounded-tr-lg">Total</div>
     </div>
-
     {/* Table Rows */}
-    {items.map((item, index) => (
+    {order?.serviceItems.map((item, index) => (
       <div
         key={index}
-        className={`grid grid-cols-[5%_40%_15%_20%_20%] text-sm ${
+        className={`grid grid-cols-[5%_30%_25%_20%_20%] text-sm ${
           index % 2 === 0 ? "bg-white" : "bg-gray-50"
         } border-b border-gray-100`}
       >
-        <div className="p-3 text-center text-gray-600">{item.no}</div>
-        <div className="p-3 text-gray-800">{item.service}</div>
-        <div className="p-3 text-right">{item.quantity}</div>
+        <div className="p-3 text-center text-gray-600">{index + 1}</div>
+        <div className="p-3 text-gray-800 truncate">{item.serviceName}</div>
+        <div className="p-3 text-right">{item.serviceCode}</div>
         <div className="p-3 text-right">{formatVND(item.unitPrice)}</div>
         <div className="p-3 text-right font-medium">
-          {formatVND(item.quantity * item.unitPrice)}
+          {formatVND(item.unitPrice)}
         </div>
       </div>
     ))}
@@ -190,11 +160,9 @@ const InvoiceTable = ({ items, subtotal, tax, grandTotal }) => (
     {/* Totals Summary */}
     <div className="flex justify-end mt-4">
       <div className="w-full max-w-xs text-sm space-y-2">
-        <SummaryRow label="Subtotal" value={formatVND(subtotal)} />
-        <SummaryRow label="Tax (VAT 8%)" value={formatVND(tax)} />
         <SummaryRow
           label="Grand Total"
-          value={formatVND(grandTotal)}
+          value={formatVND(order?.payment?.amount as number)}
           isGrandTotal
         />
       </div>

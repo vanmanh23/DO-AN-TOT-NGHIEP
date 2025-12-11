@@ -140,6 +140,7 @@ public OrderDTO updateOrder(String orderId, OrdersRequestDTO request) {
                 .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
 
         order.setStatus(new_status);
+        order.setCompletedAt(LocalDateTime.now());
         orderRepository.save(order);
         return;
     }

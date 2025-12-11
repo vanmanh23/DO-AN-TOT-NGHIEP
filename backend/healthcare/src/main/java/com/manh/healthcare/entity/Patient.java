@@ -33,6 +33,8 @@ public class Patient {
     private String address;
     @Column(name = "patient_phonenumber")
     private String phoneNumber;
+    @Column(name = "identity_card")
+    private String identityCard;
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference

@@ -52,6 +52,7 @@ export default function Header({handleOpenNavbar}: NavbarProps) {
         getUserFromJWT(jwt);
       }
     }, [])
+    
   return (
     <div className="relative py-1 px-6">
       <div className="">

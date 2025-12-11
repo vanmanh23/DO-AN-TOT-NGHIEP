@@ -153,6 +153,7 @@ export interface ReportResult {
   studyUID: string;
   seriesUID: string;
   instances: string;
+  aiNutriRecommen?: string;
 }
 
 export interface ApiResponse<T> {
@@ -160,4 +161,9 @@ export interface ApiResponse<T> {
   result: T;
   errors: string[] | null;
   success: boolean;
+}
+
+export interface AIPredict {
+  mo_ta: string;
+  ket_luan: string;
 }

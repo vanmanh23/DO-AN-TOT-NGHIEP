@@ -13,4 +13,6 @@ public class ReportResultsRequestDTO {
     private String studyUID;
     private String seriesUID ;
     private String instances;
+
+    private String aiNutriRecommen;
 }

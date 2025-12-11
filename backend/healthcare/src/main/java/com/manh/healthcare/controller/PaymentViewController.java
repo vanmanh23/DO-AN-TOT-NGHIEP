@@ -2,6 +2,7 @@ package com.manh.healthcare.controller;
 
 import com.manh.healthcare.dtos.PaymentRequestDTO;
 import com.manh.healthcare.dtos.PaymentResponseDTO;
+import com.manh.healthcare.entity.EPaymentMethod;
 import com.manh.healthcare.entity.EPaymentStatus;
 import com.manh.healthcare.service.PaymentService;
 import com.manh.healthcare.service.VnpayService;
@@ -33,18 +34,16 @@ public class PaymentViewController {
     public String returnPayment(HttpServletRequest request, Model model)  throws ServletException, IOException {
         int paymentStatus = vnpayService.handlePaymentReturn(request);
         String paymentId = request.getParameter("vnp_OrderInfo");
-        System.out.println("---------paymentId------------" + paymentId);
         if (paymentId == null) {
             throw new IllegalArgumentException("ID cannot be null");
         }
         PaymentResponseDTO payment = paymentService.getPaymentById(paymentId);
-        System.out.println("-------payment--------------" + payment);
         payment.setStatus(EPaymentStatus.valueOf("PAID"));
+        payment.setMethod(EPaymentMethod.VNPAY);
         payment.setPaidAt(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
         PaymentRequestDTO paymentRequest = modelMapper.map(payment, PaymentRequestDTO.class);
-        System.out.println("--------paymentRequest-------------" + paymentRequest);
         PaymentResponseDTO paymentResponseDTO = paymentService.updatePayment(paymentId, paymentRequest);
-        System.out.println("--------paymentResponseDTO-------------" + paymentResponseDTO);
+
         model.addAttribute("paymentId", paymentId);
         model.addAttribute("totalPrice", paymentResponseDTO.getAmount());
         model.addAttribute("paymentTime", paymentResponseDTO.getPaidAt());

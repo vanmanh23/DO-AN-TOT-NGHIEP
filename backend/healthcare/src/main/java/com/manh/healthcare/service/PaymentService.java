@@ -2,10 +2,7 @@ package com.manh.healthcare.service;
 
 import com.manh.healthcare.dtos.PaymentRequestDTO;
 import com.manh.healthcare.dtos.PaymentResponseDTO;
-import com.manh.healthcare.entity.Orders;
-import com.manh.healthcare.entity.Patient;
-import com.manh.healthcare.entity.Payment;
-import com.manh.healthcare.entity.ServiceItem;
+import com.manh.healthcare.entity.*;
 import com.manh.healthcare.repository.OrderRepository;
 import com.manh.healthcare.repository.PatientRepository;
 import com.manh.healthcare.repository.PaymentRepository;
@@ -13,6 +10,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -101,4 +100,14 @@ public class PaymentService {
         paymentRepository.delete(payment);
     }
 
+    public PaymentResponseDTO changePaymentStatus(String id) {
+        Payment payment = paymentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+        payment.setStatus(EPaymentStatus.PAID);
+        payment.setMethod(EPaymentMethod.CASH);
+        payment.setPaidAt(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+        paymentRepository.save(payment);
+
+        return  modelMapper.map(payment, PaymentResponseDTO.class);
+    }
 }
