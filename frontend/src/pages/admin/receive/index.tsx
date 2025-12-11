@@ -34,6 +34,7 @@ export default function Component() {
     gender: "M",
     address: "",
     phoneNumber: "",
+    identityCard: "",
   });
   const [isProcessing, setIsProcessing] = useState(false);
   const [isNotCreate, setIsNotCreate] = useState(false);

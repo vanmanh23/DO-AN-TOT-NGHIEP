@@ -38,6 +38,7 @@ export default function PatientFormInfo({
     gender: "M",
     address: "",
     phoneNumber: "",
+    identityCard: "",
   });
 
   const {
@@ -108,6 +109,7 @@ export default function PatientFormInfo({
         gender: res.result.patient?.gender as "M" | "F" | "O",
         address: res.result.patient?.address as string,
         phoneNumber: res.result.patient?.phoneNumber as string,
+        identityCard: res.result.patient?.identityCard as string,
       };
 
       setPatientInfo(data);
@@ -134,6 +136,7 @@ export default function PatientFormInfo({
       gender: res.result.gender as "M" | "F" | "O",
       address: res.result.address as string,
       phoneNumber: res.result.phoneNumber as string,
+      identityCard: res.result.identityCard as string,
     };
     setPatientInfo(data);
     setTypeOfPatient("");
@@ -253,16 +256,16 @@ export default function PatientFormInfo({
           <label className="text-sm font-medium">Identity Card <span className="text-red-500">*</span></label>
           <input
             type="text"
-            // value={patientInfo.address}
-            // {...register("address")}
-            // onChange={handleInputChange}
+            value={patientInfo.identityCard}
+            {...register("identityCard")}
+            onChange={handleInputChange}
             className="border rounded px-3 py-2 w-full"
           />
-          {/* {!patientInfo.address && (
+          {!patientInfo.identityCard && (
             <p className="text-red-500 text-xs">
-              {errors.address?.message as string}
+              {errors.identityCard?.message as string}
             </p>
-          )} */}
+          )}
         </div>
           <div>
             <label className="text-sm font-medium">Phone <span className="text-red-500">*</span></label>

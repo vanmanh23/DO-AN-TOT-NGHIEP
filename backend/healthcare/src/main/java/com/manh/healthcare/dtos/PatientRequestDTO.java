@@ -31,4 +31,8 @@ public class PatientRequestDTO {
 
     @Pattern(regexp = "^(\\+84|0)[0-9]{9,10}$", message = "Số điện thoại không hợp lệ")
     private String phoneNumber;
+
+    @NotBlank(message = "Identity card cannot be blank")
+    @Size(min = 12, max = 12, message = "Identity card must be exactly 12 characters")
+    private String identityCard;
 }

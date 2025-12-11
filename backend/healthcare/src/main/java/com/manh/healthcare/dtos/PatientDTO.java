@@ -19,6 +19,7 @@ public class PatientDTO {
     private EGender gender;
     private String address;
     private String phoneNumber;
+    private String identityCard;
     private List<String> orderIds;
     private List<String> paymentIds;
 }

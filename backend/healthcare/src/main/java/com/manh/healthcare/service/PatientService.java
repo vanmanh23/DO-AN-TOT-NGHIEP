@@ -40,11 +40,11 @@ public class PatientService {
         Patient patient = new Patient();
         patient.setID(generateFormCode());
         patient.setName(patientRequestDTO.getName());
-//        patient.setAge(patientRequestDTO.getAge());
         patient.setAddress(patientRequestDTO.getAddress());
         patient.setGender(patientRequestDTO.getGender());
         patient.setBirthdate(patientRequestDTO.getBirthdate());
         patient.setPhoneNumber(patientRequestDTO.getPhoneNumber());
+        patient.setIdentityCard(patientRequestDTO.getIdentityCard());
         return patientRepository.save(patient);
     }
 
@@ -103,8 +103,8 @@ public class PatientService {
         patient.setGender(patientDetails.getGender());
         patient.setAddress(patientDetails.getAddress());
         patient.setPhoneNumber(patientDetails.getPhoneNumber());
+        patient.setIdentityCard(patientDetails.getIdentityCard());
 
-//        calculateAge(patient);
         return patientRepository.save(patient);
     }
 
@@ -155,6 +155,7 @@ public class PatientService {
         patientDTO.setGender(patient.getGender());
         patientDTO.setAddress(patient.getAddress());
         patientDTO.setPhoneNumber(patient.getPhoneNumber());
+        patientDTO.setIdentityCard(patient.getIdentityCard());
         if (patient.getOrders() != null) {
             List<String> orderIds = new ArrayList<>();
             for (Orders order : patient.getOrders()) {

@@ -14,6 +14,7 @@ export const patientSchema = z.object({
   gender: z.enum(["M", "F", "O"]),
   address: z.string().min(1, "Địa chỉ không được để trống"),
   phoneNumber: z.string().regex(/^[0-9]{9,11}$/, "Số điện thoại không hợp lệ"),
+  identityCard: z.string().length(12, "Identity card must be exactly 12 characters"),
 });
 
 export const serviceItemSchema = z.object({

@@ -39,6 +39,7 @@ export interface Patient {
   gender: "M" | "F" | "O";
   address: string;
   phoneNumber: string;
+  identityCard?: string;
 }
 
 export interface PatientResponse {
@@ -49,6 +50,7 @@ export interface PatientResponse {
   address: string;
   phoneNumber: string;
   age?: number;
+  identityCard?: string;
 }
 
 export interface PatientDTO {
@@ -58,6 +60,7 @@ export interface PatientDTO {
   age: number | null;       
   gender: string;          
   address: string;
+  identityCard?: string;
   phoneNumber?: string | null;
   orderIds: string[];
   paymentIds: string[];
