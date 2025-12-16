@@ -87,7 +87,7 @@ export default function OrdersRender({
           {headTableforPatients.isHeadTitle && (
             <tr className=" overflow-hidden text-xs">
               <th className="px-1 py-2 text-center" colSpan={1}>
-                STT
+                No.
               </th>
               <th className="px-1 py-2 text-center" colSpan={3}>
                 Patient Name
@@ -96,7 +96,7 @@ export default function OrdersRender({
                 order ID
               </th>
               <th className="px-1 py-2 text-center" colSpan={2}>
-                ngày nhận phiếu
+                Date Received
               </th>
               <th className="px-1 py-2 text-center" colSpan={3}>
                 Patient ID
@@ -108,10 +108,10 @@ export default function OrdersRender({
                 status
               </th>
               <th className="px-1 py-2 text-center" colSpan={5}>
-                dịch vụ
+                Services
               </th>
               <th className="px-1 py-2 text-center" colSpan={1}>
-                ưu tiên
+                Priority
               </th>
               <th className="px-1 py-2 text-center" colSpan={1}>
                 action
@@ -182,20 +182,20 @@ export default function OrdersRender({
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[625px]  bg-white">
                   <DialogHeader>
-                    <DialogTitle>Thông tin chi tiết ca chụp</DialogTitle>
+                    <DialogTitle>Study Details</DialogTitle>
                   </DialogHeader>
                   <div className="grid grid-cols-2 ">
                     <div className="grid grid-cols-1 gap-2 w-full h-full">
-                      <p>Ma BN:</p>
-                      <p>Ten BN:</p>
-                      <p>Nam sinh:</p>
-                      <p>Dia chi:</p>
+                      <p>Patient ID:</p>
+                      <p>Patient Name:</p>
+                      <p>Birth Year:</p>
+                      <p>Address:</p>
                       <p className="py-2"></p>
-                      <p>ma phieu:</p>
-                      <p>ngay nhan phieu:</p>
-                      <p>thiet bi:</p>
-                      <p>ma dich vu:</p>
-                      <p>dich vu:</p>
+                      <p>Order ID:</p>
+                      <p>Date Received:</p>
+                      <p>Device:</p>
+                      <p>Service Code:</p>
+                      <p>Service Name:</p>
                       <p></p>
                     </div>
                     <div className="grid grid-cols-1 gap-2 w-full h-full">
@@ -212,8 +212,8 @@ export default function OrdersRender({
                     </div>
                   </div>
                   <div className="cursor-pointer items-center text-blue-600 hover:text-blue-800">
-                    <Link to={`/admin/worklist/${item.orderId}`} className="gap-2 flex flex-row justify-end mt-4">
-                      <p>Vào chụp</p>
+                      <Link to={`/admin/worklist/${item.orderId}`} className="gap-2 flex flex-row justify-end mt-4">
+                      <p>Proceed to Scan</p>
                       <CircleArrowRight />
                     </Link>
                   </div>

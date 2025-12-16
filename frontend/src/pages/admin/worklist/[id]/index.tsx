@@ -192,11 +192,11 @@ export default function Component() {
     <div className=" bg-gray-100 px-4 py-1 text-sm">
       <div className="bg-white shadow rounded p-4 border h-full flex flex-col">
         <div className="flex items-center  border-b pb-2 mb-3">
-          <h1 className="font-semibold text-lg">Bệnh nhân thực hiện</h1>
+          <h1 className="font-semibold text-lg">Patient details</h1>
         </div>
         <div className="grid grid-cols-4 gap-x-2 border p-3 rounded bg-gray-50">
           <div className="col-span-1">
-            <label className="font-medium">Mã BN:</label>
+            <label className="font-medium">Patient ID:</label>
             <input
               type="text"
               value={orderDetail?.patient?.id}
@@ -204,7 +204,7 @@ export default function Component() {
             />
           </div>
           <div className="col-span-1">
-            <label className="font-medium">Họ và tên:</label>
+            <label className="font-medium">Full name:</label>
             <input
               type="text"
               value={orderDetail?.patient?.patientName}
@@ -212,7 +212,7 @@ export default function Component() {
             />
           </div>
           <div className="col-span-1">
-            <label className="font-medium">Năm sinh:</label>
+            <label className="font-medium">Date of birth:</label>
             <input
               type="date"
               value={orderDetail?.patient?.patientBirthDate}
@@ -220,18 +220,18 @@ export default function Component() {
             />
           </div>
           <div className="col-span-1">
-            <label className="font-medium">Giới tính:</label>
+            <label className="font-medium">Gender:</label>
             <select
               value={orderDetail?.patient?.gender}
               className="w-full border p-1 rounded mt-1"
             >
-              <option>Nam</option>
-              <option>Nữ</option>
+              <option>Male</option>
+              <option>Female</option>
             </select>
           </div>
 
           <div className="col-span-2">
-            <label className="font-medium">Địa chỉ:</label>
+            <label className="font-medium">Address:</label>
             <input
               type="text"
               value={orderDetail?.patient?.address}
@@ -239,7 +239,7 @@ export default function Component() {
             />
           </div>
           <div className="col-span-2">
-            <label className="font-medium">SĐT:</label>
+            <label className="font-medium">Phone number:</label>
             <input
               type="text"
               value={orderDetail?.patient?.phoneNumber}
@@ -256,11 +256,11 @@ export default function Component() {
             className="flex-1 border rounded p-3 overflow-y-auto bg-white"
             onSubmit={handleSubmit(onSubmit)}
           >
-            <h2 className="font-medium mb-2">Kết quả</h2>
+            <h2 className="font-medium mb-2">Result</h2>
 
             <div className="grid grid-cols-4 gap-4 mb-3">
               <div>
-                <label className="font-medium">Ngày:</label>
+                <label className="font-medium">Date:</label>
                 <input
                   type="datetime-local"
                   readOnly
@@ -273,7 +273,7 @@ export default function Component() {
                 />
               </div>
               <div>
-                <label className="font-medium">Máy:</label>
+                <label className="font-medium">Machines:</label>
                 <select
                   disabled
                   value={orderDetail?.patientName ?? ""}
@@ -285,7 +285,7 @@ export default function Component() {
                 </select>
               </div>
               <div>
-                <label className="font-medium">Bác sĩ:</label>
+                <label className="font-medium">Doctor:</label>
                 <input
                   readOnly
                   value={orderDetail?.doctor.fullName}
@@ -293,27 +293,27 @@ export default function Component() {
                 />
               </div>
               <div>
-                <label className="font-medium">KTV/ĐD:</label>
+                <label className="font-medium">Tech/Nurse:</label>
                 <input className="w-full border p-1 rounded mt-1" />
               </div>
               <div>
-                <label className="font-medium">Dịch vụ:</label>
+                <label className="font-medium">Service:</label>
                 <p>{orderDetail?.serviceItems?.[0]?.serviceName}</p>
               </div>
             </div>
 
             <div>
-              <label className="font-medium">Chẩn đoán:</label>
+              <label className="font-medium">Diagnosis:</label>
               <textarea
                 {...register("suggestion")}
                 className="w-full border outline-blue-400 p-2 rounded h-20 mt-1 focus:ring-1 focus:ring-blue-500"
-                placeholder="Nhập chẩn đoán sơ bộ..."
+                placeholder="Enter diagnosis..."
               ></textarea>
             </div>
 
             <div className="mt-3">
               <label className="font-medium">
-                Mô tả: <span className="text-red-500">*</span>
+                Description: <span className="text-red-500">*</span>
               </label>
               <textarea
                 {...register("description")}
@@ -322,7 +322,7 @@ export default function Component() {
                     ? "border-red-500 focus:ring-red-500"
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 }`}
-                placeholder="Mô tả chi tiết hình ảnh..."
+                placeholder="Describe image details..."
               ></textarea>
               {errors.description && (
                 <p className="text-red-500 text-xs mt-1">
@@ -333,7 +333,7 @@ export default function Component() {
 
             <div className="mt-3">
               <label className="font-medium">
-                Kết luận: <span className="text-red-500">*</span>
+                Conclusion: <span className="text-red-500">*</span>
               </label>
               <textarea
                 {...register("conclusion")}
@@ -342,7 +342,7 @@ export default function Component() {
                     ? "border-red-500 focus:ring-red-500"
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 }`}
-                placeholder="Kết luận bệnh..."
+                placeholder="Final diagnosis..."
               ></textarea>
               {errors.conclusion && (
                 <p className="text-red-500 text-xs mt-1">
@@ -352,7 +352,7 @@ export default function Component() {
             </div>
 
             <div className="mt-3">
-              <label className="font-medium">Đề xuất chế độ dinh dưỡng:</label>
+              <label className="font-medium">Nutritional recommendation:</label>
               <TextareaAutosize
                 {...register("nutrirecomend")}
                 className={`w-full border p-2  h-20 rounded  mt-1 outline-none ${
@@ -376,7 +376,7 @@ export default function Component() {
           <div className="w-80 border rounded p-3 bg-white flex flex-col">
             <div className="h-48 border rounded bg-gray-200 mb-3"></div>
 
-            <h3 className="font-medium mb-2">Danh sách ảnh đã chụp</h3>
+            <h3 className="font-medium mb-2">Captured images</h3>
             {!showModal && <div className="flex-1"></div>}
             {showModal && (
               <div className="flex-1 border rounded mb-3">
@@ -409,12 +409,12 @@ export default function Component() {
                   {isUploading ? (
                     <>
                       <Spinner className="w-4 h-4 animate-spin text-blue-500" />
-                      <p>Đang tải...</p>
+                      <p>Uploading...</p>
                     </>
                   ) : (
                     <>
                       <Camera className="w-4 h-4" />
-                      <p>Chụp ảnh</p>
+                      <p>Take photo</p>
                     </>
                   )}
                 </label>
@@ -436,13 +436,13 @@ export default function Component() {
             onClick={handleNewOrder}
             className="px-4 py-2 bg-green-600 text-white rounded"
           >
-            Mới
+            New
           </button>
           <button
             onClick={handleExit}
             className="px-4 py-2 bg-gray-600 text-white rounded"
           >
-            Thoát
+            Exit
           </button>
           <button
             type="submit"
@@ -450,7 +450,7 @@ export default function Component() {
             disabled={isSubmitting}
             className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors disabled:opacity-50"
           >
-            {isSubmitting ? "Đang xử lý..." : "Kết thúc"}
+            {isSubmitting ? "Processing..." : "Complete"}
           </button>
         </div>
       </div>

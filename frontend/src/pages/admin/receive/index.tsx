@@ -121,7 +121,7 @@ export default function Component() {
         });
 
         if (orderRes.success) {
-          toast.success("Tạo phiếu chỉ định thành công!", {
+          toast.success("Created order successfully!", {
             duration: 2000,
             richColors: true,
           });
@@ -140,7 +140,7 @@ export default function Component() {
         });
 
         if (orderRes.success) {
-          toast.success("Tạo phiếu chỉ định thành công!", {
+          toast.success("Created order successfully!", {
             duration: 2000,
             richColors: true,
           });
@@ -148,7 +148,7 @@ export default function Component() {
         }
       }
     } catch (err) {
-      toast.error("Tạo phiếu chỉ định thất bại!", {
+      toast.error("Failed to create order!", {
         duration: 2000,
         richColors: true,
       });
@@ -181,7 +181,7 @@ export default function Component() {
         }
       );
       if (orderRes.success) {
-        toast.success("update phiếu chỉ định thành công!", {
+        toast.success("Order updated successfully!", {
           duration: 2000,
           richColors: true,
         });
@@ -213,14 +213,13 @@ export default function Component() {
               <div className="bg-white rounded-lg shadow p-3 sm:p-4 md:p-6">
                 <h2 className="text-base sm:text-lg md:text-lg font-bold mb-3 sm:mb-4 flex items-center gap-2">
                   <span className="text-blue-600 text-lg sm:text-xl">📋</span>
-                  <span className="truncate">DỊCH VỤ CHẨN ĐOÁN HÌNH ẢNH</span>
+                  <span className="truncate">Diagnostic Imaging Services</span>
                 </h2>
 
                 <div className="space-y-3 sm:space-y-3 md:space-y-4">
-                  {/* Loại thiết bị */}
                   <div>
                     <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
-                      Loại thiết bị <span className="text-red-500">*</span>
+                      Device Type <span className="text-red-500">*</span>
                     </label>
                     <select
                       value={serviceType}
@@ -234,10 +233,10 @@ export default function Component() {
                     </select>
                   </div>
 
-                  {/* Dịch vụ */}
+                  {/* Services */}
                   <div>
                     <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
-                      Dịch vụ <span className="text-red-500">*</span>
+                      Services <span className="text-red-500">*</span>
                     </label>
 
                     <div className="flex gap-1 sm:gap-2">
@@ -246,7 +245,7 @@ export default function Component() {
                         onChange={(e) => setCurrentService(e.target.value)}
                         className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500 "
                       >
-                        <option value="">-- Chọn dịch vụ --</option>
+                        <option value="">-- Select service --</option>
                         {serviceList?.map((service) => (
                           <option
                             key={service.serviceCode}
@@ -267,7 +266,7 @@ export default function Component() {
                   <div className="border-t pt-3 sm:pt-4">
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
                       <h3 className="text-xs sm:text-sm font-medium">
-                        Danh sách dịch vụ
+                        Service List
                       </h3>
                       {isUpdate ? (
                         <div>
@@ -280,7 +279,7 @@ export default function Component() {
                               UPDATE
                             </button>
                             <button className="bg-red-500 text-white px-3 sm:px-4 py-2 rounded hover:bg-green-700 transition flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap flex-1 sm:flex-none">
-                              HỦY
+                              CANCEL
                             </button>
                           </div>
                         </div>
@@ -306,12 +305,12 @@ export default function Component() {
                                 <span>Processing...</span>
                               </>
                             ) : (
-                              <>LƯU YÊU CẦU</>
+                              <>Save Request</>
                             )}
                           </button>
                           <button className="bg-green-600 text-white px-3 sm:px-4 py-2 rounded hover:bg-green-700 transition flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap flex-1 sm:flex-none">
                             <Calendar size={14} className="sm:w-4 sm:h-4" />
-                            LƯU & LẬP LỊCH
+                            Save & Schedule
                           </button>
                         </div>
                       )}
@@ -323,13 +322,13 @@ export default function Component() {
                           <thead className="bg-gray-50">
                             <tr>
                               <th className="text-left px-2 sm:px-4 py-2 border-b">
-                                Mã dịch vụ
+                                Service Code
                               </th>
                               <th className="text-left px-2 sm:px-4 py-2 border-b">
-                                Tên dịch vụ
+                                Service Name
                               </th>
                               <th className="text-left px-2 sm:px-4 py-2 border-b">
-                                Thao tác
+                                Actions
                               </th>
                             </tr>
                           </thead>
@@ -354,7 +353,7 @@ export default function Component() {
                                     }
                                     className="text-red-600 hover:text-red-800 transition font-medium"
                                   >
-                                    Xóa
+                                    Remove
                                   </button>
                                 </td>
                               </tr>
@@ -364,7 +363,7 @@ export default function Component() {
                       </div>
                     ) : (
                       <div className=" border rounded p-4 sm:p-8 text-center text-xs sm:text-sm text-gray-500">
-                        Chưa có dịch vụ nào được chọn
+                        No service selected
                       </div>
                     )}
                   </div>
@@ -376,7 +375,7 @@ export default function Component() {
                 onClick={() => handleCancel("Dashboard")}
                 className="bg-gray-300 text-gray-700 px-4 sm:px-8 py-2.5 sm:py-2 rounded-lg hover:bg-gray-400 transition font-medium text-sm sm:text-base"
               >
-                HỦY BỎ
+                Cancel
               </button>
             </div>
           </div>

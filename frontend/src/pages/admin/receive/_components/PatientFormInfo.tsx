@@ -94,6 +94,7 @@ export default function PatientFormInfo({
       gender: "M",
       address: "",
       phoneNumber: "",
+      identityCard: "",
     });
   };
   // ------------------ Load when update ----------------------
@@ -147,11 +148,11 @@ export default function PatientFormInfo({
     <div className="bg-white rounded-lg shadow p-3 sm:p-4 md:p-6">
       <h2 className="text-base sm:text-lg md:text-lg font-bold mb-3 sm:mb-4 flex items-center gap-2">
         <span className="text-blue-600 text-lg sm:text-xl">👤</span>
-        <span className="truncate">THÔNG TIN BỆNH NHÂN</span>
+        <span className="truncate">Patient Information</span>
       </h2>
 
       <div className="space-y-3 sm:space-y-3 md:space-y-4">
-        {/* Kiểu BN & Họ tên */}
+        {/* Patient Type & Full Name */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-3 md:gap-4">
           <div className="sm:col-span-1">
             <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
@@ -167,7 +168,7 @@ export default function PatientFormInfo({
             </select>
           </div>
           <div className="sm:col-span-2">
-            <label className="text-sm font-medium">Họ tên <span className="text-red-500">*</span></label>
+            <label className="text-sm font-medium">Full Name <span className="text-red-500">*</span></label>
             <div className="relative">
               <input
                 type="text"
@@ -181,7 +182,7 @@ export default function PatientFormInfo({
                     : handleInputChange
                 }
                 placeholder={`${
-                  typeOfPatient === "re_visit" ? "Tìm kiếm mã, họ tên" : ""
+                  typeOfPatient === "re_visit" ? "Search by ID or name" : ""
                 }`}
                 // onKeyDown={(e) => {
                 //   if (e.key === "Enter") {
@@ -207,7 +208,7 @@ export default function PatientFormInfo({
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
           <div>
-            <label className="text-sm font-medium">Tuổi</label>
+            <label className="text-sm font-medium">Age</label>
             <input
               type="number"
               className="border rounded px-3 py-2 w-full"
@@ -216,7 +217,7 @@ export default function PatientFormInfo({
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Ngày sinh <span className="text-red-500">*</span></label>
+            <label className="text-sm font-medium">Date of Birth <span className="text-red-500">*</span></label>
             <input
               type="date"
               value={patientInfo.birthdate}
@@ -231,16 +232,16 @@ export default function PatientFormInfo({
             )}
           </div>
           <div>
-            <label className="text-sm font-medium">Giới tính <span className="text-red-500">*</span></label>
+            <label className="text-sm font-medium">Gender <span className="text-red-500">*</span></label>
             <select
               value={patientInfo.gender}
               {...register("gender")}
               onChange={handleInputChange}
               className="border rounded px-3 py-2 w-full"
             >
-              <option value="M">Nam</option>
-              <option value="F">Nữ</option>
-              <option value="O">Khác</option>
+              <option value="M">Male</option>
+              <option value="F">Female</option>
+              <option value="O">Other</option>
             </select>
             {errors.gender && (
               <p className="text-red-500 text-xs">
@@ -250,7 +251,7 @@ export default function PatientFormInfo({
           </div>
         </div>
 
-        {/* Mã số cccd */}
+        {/* Identity number */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-3 sm:gap-3 md:gap-4">
            <div>
           <label className="text-sm font-medium">Identity Card <span className="text-red-500">*</span></label>
@@ -285,7 +286,7 @@ export default function PatientFormInfo({
         </div>
         {/* Địa chỉ */}
         <div>
-          <label className="text-sm font-medium">Địa chỉ <span className="text-red-500">*</span></label>
+          <label className="text-sm font-medium">Address <span className="text-red-500">*</span></label>
           <input
             type="text"
             value={patientInfo.address}
@@ -300,15 +301,15 @@ export default function PatientFormInfo({
           )}
         </div>
 
-        {/* Bác sĩ chỉ định & Khoa chỉ định */}
+        {/* Assigned Doctor & Assigned Department */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3 md:gap-4">
           <div>
-            <label className="text-sm font-medium">Bác sĩ chỉ định</label>
+            <label className="text-sm font-medium">Assigned Doctor</label>
             <select
               onChange={handleGetDoctor}
               className="border rounded px-3 py-2 w-full"
             >
-              <option value="">-- Chọn bác sĩ --</option>
+              <option value="">-- Select doctor --</option>
               {allDoctors.map((doctor) => (
                 <option key={doctor.id} value={doctor.id}>
                   {doctor.fullName}
@@ -318,7 +319,7 @@ export default function PatientFormInfo({
           </div>
           <div>
             <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
-              Khoa chỉ định
+              Assigned Department
             </label>
             <select
               name="department"
@@ -326,7 +327,7 @@ export default function PatientFormInfo({
               // onChange={handleInputChange}
               className="w-full border rounded px-2 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-blue-500"
             >
-              <option>Khoa CĐHA</option>
+              <option>Diagnostic Imaging</option>
             </select>
           </div>
         </div>

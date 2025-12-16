@@ -79,7 +79,7 @@ export default function OrdersRender({
           {headTableforPatients.isHeadTitle && (
             <tr className=" overflow-hidden text-xs">
               <th className="px-1 py-2 text-center" colSpan={1}>
-                STT
+                No.
               </th>
               <th className="px-1 py-2 text-center" colSpan={3}>
                 Patient Name
@@ -88,7 +88,7 @@ export default function OrdersRender({
                 order ID
               </th>
               <th className="px-1 py-2 text-center" colSpan={2}>
-                ngày nhận phiếu
+                Date Received
               </th>
               <th className="px-1 py-2 text-center" colSpan={4}>
                 Patient ID
@@ -100,10 +100,10 @@ export default function OrdersRender({
                 status
               </th>
               <th className="px-1 py-2 text-center" colSpan={5}>
-                dịch vụ
+                Services
               </th>
               <th className="px-1 py-2 text-center" colSpan={1}>
-                ưu tiên
+                Priority
               </th>
               <th className="px-1 py-2 text-center" colSpan={1}>
                 action
