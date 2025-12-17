@@ -11,21 +11,21 @@ import java.util.Set;
 @Data
 public class OrderCreateRequest {
 
-    @NotNull(message = "Priority không được để trống")
+    @NotNull(message = "Priority must not be empty")
     private EPriority priority;
 
-    @NotNull(message = "Status không được để trống")
+    @NotNull(message = "Status must not be empty")
     private EOrderStatus status;
 
     private LocalDateTime scheduledAt;
 
-    @NotNull(message = "Patient ID không được để trống")
+    @NotNull(message = "Patient ID must not be empty")
     private String patientId;
 
 //    private String studyId;
 //    private Study
 
-    private Set<String> serviceItemIds; // Danh sách ID của ServiceItem
+    private Set<String> serviceItemIds; // List of ServiceItem IDs
 
     private String doctorId;
 }

@@ -11,25 +11,25 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class PatientRequestDTO {
 
-    @NotBlank(message = "Tên bệnh nhân không được để trống")
-    @Size(min = 2, max = 100, message = "Tên phải từ 2-100 ký tự")
+    @NotBlank(message = "Patient name must not be empty")
+    @Size(min = 2, max = 100, message = "Name must be between 2-100 characters")
     private String name;
 
-    @NotNull(message = "Ngày sinh không được để trống")
-    @Past(message = "Ngày sinh phải là ngày trong quá khứ")
+    @NotNull(message = "Birthdate must not be empty")
+    @Past(message = "Birthdate must be a past date")
     private LocalDate birthdate;
 
-    @NotNull(message = "Giới tính không được để trống")
+    @NotNull(message = "Gender must not be empty")
     private EGender gender;
 
-//    @NotNull(message = "tuổi không được để trống.")
+//    @NotNull(message = "Age must not be empty.")
 //    private Integer age;
 
-    @NotBlank(message = "Địa chỉ không được để trống")
-    @Size(max = 255, message = "Địa chỉ không quá 255 ký tự")
+    @NotBlank(message = "Address must not be empty")
+    @Size(max = 255, message = "Address must not exceed 255 characters")
     private String address;
 
-    @Pattern(regexp = "^(\\+84|0)[0-9]{9,10}$", message = "Số điện thoại không hợp lệ")
+    @Pattern(regexp = "^(\\+84|0)[0-9]{9,10}$", message = "Phone number is invalid")
     private String phoneNumber;
 
     @NotBlank(message = "Identity card cannot be blank")
