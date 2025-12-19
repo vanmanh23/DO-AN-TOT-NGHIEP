@@ -19,4 +19,6 @@ public class PatientResponseDTO {
     private String address;
     private String phoneNumber;
     private PaymentResponseDTO payments;
+
+    private String gmail;
 }

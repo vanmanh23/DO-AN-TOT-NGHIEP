@@ -35,6 +35,8 @@ public class Patient {
     private String phoneNumber;
     @Column(name = "identity_card")
     private String identityCard;
+    @Column(name = "gmail")
+    private String gmail;
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference

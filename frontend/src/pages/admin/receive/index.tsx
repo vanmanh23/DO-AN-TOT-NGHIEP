@@ -37,7 +37,7 @@ export default function Component() {
     identityCard: "",
   });
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isNotCreate, setIsNotCreate] = useState(false);
+  const [isNotCreate, setIsNotCreate] = useState(true);
   const [patientAvailable, setPatientAvailable] = useState<PatientDTO>();
   const methods = useForm<PatientFormSchema>({
     resolver: zodResolver(patientSchema),

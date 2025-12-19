@@ -25,6 +25,7 @@ import paymentApis from "../../../../apis/paymentApis";
 import { Spinner } from "../../../../components/ui/spinner";
 import AiConsultButton from "../_components/AiConsultButton";
 import { getNutriRecommend } from "../../../../apis/AiRecommend";
+import patientApi from "../../../../apis/patientApis";
 
 type ReportFormValues = z.infer<typeof reportSchema>;
 
@@ -128,8 +129,11 @@ export default function Component() {
         order_id: orderDetail?.orderId as string,
         new_status: "COMPLETED",
       });
+      
+      // const patientRecent = await patientApi.getById(orderDetail?.patientId as string);
 
-      await paymentApis.create({
+      // if (patientRecent.result.paymentIds.length === 0) {
+         await paymentApis.create({
         status: "PENDING",
         createdAt: new Date().toISOString(),
         paidAt: null,
@@ -137,6 +141,11 @@ export default function Component() {
         orderId: orderDetail?.orderId as string,
         patientId: orderDetail?.patientId as string,
       });
+      // } else {
+        
+      // }
+
+     
 
       toast.success("Successful completion of nomination form!", {
         duration: 2000,

@@ -35,4 +35,6 @@ public class PatientRequestDTO {
     @NotBlank(message = "Identity card cannot be blank")
     @Size(min = 12, max = 12, message = "Identity card must be exactly 12 characters")
     private String identityCard;
+
+    private String gmail;
 }

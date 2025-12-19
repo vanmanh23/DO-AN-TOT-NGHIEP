@@ -1,5 +1,6 @@
 package com.manh.healthcare.service;
 
+import com.manh.healthcare.dtos.PatientDTO;
 import com.manh.healthcare.dtos.PaymentRequestDTO;
 import com.manh.healthcare.dtos.PaymentResponseDTO;
 import com.manh.healthcare.entity.*;
@@ -33,6 +34,8 @@ public class PaymentService {
         Patient patient = patientRepository.findById(dto.getPatientId())
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
+//        double totalAmount = calculateTotalPaymentByPatientId(patient);
+
         double totalAmount = order.getServiceItems()
                 .stream()
                 .mapToDouble(ServiceItem::getUnitPrice)
@@ -50,6 +53,29 @@ public class PaymentService {
         paymentRepository.save(payment);
 
         return modelMapper.map(payment, PaymentResponseDTO.class);
+    }
+
+//    public PaymentResponseDTO updateTotalAmount(PatientDTO patientDTO) {
+//        Payment payment = paymentRepository.findById(patientDTO.getPaymentIds())
+//                .orElseThrow(() -> new RuntimeException("Payment not found"));
+//
+//        Patient patient = patientRepository.findById(dto.getPatientId())
+//                .orElseThrow(() -> new RuntimeException("Patient not found"));
+//
+//        double totalAmount = order.getServiceItems()
+//                .stream()
+//                .mapToDouble(ServiceItem::getUnitPrice)
+//                .sum();
+//    }
+
+    public double calculateTotalPaymentByPatientId(Patient patient) {
+        List<Orders> orders = patient.getOrders();
+
+        return orders.stream()
+                .filter(o -> o.getServiceItems() != null)
+                .flatMap(o -> o.getServiceItems().stream())
+                .mapToDouble(ServiceItem::getUnitPrice)
+                .sum();
     }
 
     public PaymentResponseDTO getPaymentById(String id) {

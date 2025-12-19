@@ -131,6 +131,7 @@ export default function PatientFormInfo({
   const handleFindPatient = async () => {
     const res = await patientApi.getById(findPatient);
     patientAvailable(res.result);
+    console.log("res: ", res)
     const data: Patient = {
       name: res.result.name as string,
       birthdate: res.result.birthdate as string,
