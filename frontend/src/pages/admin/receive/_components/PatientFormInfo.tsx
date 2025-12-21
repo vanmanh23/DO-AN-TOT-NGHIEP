@@ -12,7 +12,6 @@ import { patientSchema } from "../../../../utils/schema";
 import patientApi from "../../../../apis/patientApis";
 import { Search } from "lucide-react";
 interface Props {
-  onChange: (data: Patient) => void;
   chooseDoctor?: (doctorId: string) => void;
   patientIdUpdate?: string;
   orderIdUpdate?: string;
@@ -23,7 +22,6 @@ interface Props {
 export type PatientFormSchema = z.infer<typeof patientSchema>;
 
 export default function PatientFormInfo({
-  onChange,
   chooseDoctor,
   orderIdUpdate,
   isNotCreate,
@@ -32,31 +30,12 @@ export default function PatientFormInfo({
   const [allDoctors, setAllDoctors] = useState<DoctorResponse[]>([]);
   const [typeOfPatient, setTypeOfPatient] = useState("re_visit");
   const [findPatient, setFindPatient] = useState("");
-  const [patientInfo, setPatientInfo] = useState<Patient>({
-    name: "",
-    birthdate: "",
-    gender: "M",
-    address: "",
-    phoneNumber: "",
-    identityCard: "",
-  });
-
   const {
     register,
+    reset,
+    watch,
     formState: { errors },
   } = useFormContext();
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-
-    const newForm = { ...patientInfo, [name]: value };
-    setPatientInfo(newForm);
-
-    // báo ra parent
-    onChange(newForm);
-  };
 
   // ------------------ Doctor select -------------------------
   const handleGetDoctor = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -82,19 +61,20 @@ export default function PatientFormInfo({
   const selectTypeOfPatient = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setTypeOfPatient(e.target.value);
     const { value } = e.target;
-    if(value === "re_visit") {
+    if (value === "re_visit") {
       isNotCreate(true);
     }
     if (value === "first_visit") {
       isNotCreate(false);
     }
-    setPatientInfo({
+    reset({
       name: "",
       birthdate: "",
       gender: "M",
       address: "",
       phoneNumber: "",
       identityCard: "",
+      gmail: "",
     });
   };
   // ------------------ Load when update ----------------------
@@ -111,9 +91,19 @@ export default function PatientFormInfo({
         address: res.result.patient?.address as string,
         phoneNumber: res.result.patient?.phoneNumber as string,
         identityCard: res.result.patient?.identityCard as string,
+        gmail: res.result.patient?.gmail as string,
       };
 
-      setPatientInfo(data);
+      // setPatientInfo(data);
+      reset({
+        name: data.name,
+        birthdate: data.birthdate,
+        gender: data.gender,
+        address: data.address,
+        phoneNumber: data.phoneNumber,
+        identityCard: data.identityCard,
+        gmail: data.gmail,
+      });
       // setSelectedDoctor(res.result.doctor);
     };
 
@@ -131,7 +121,6 @@ export default function PatientFormInfo({
   const handleFindPatient = async () => {
     const res = await patientApi.getById(findPatient);
     patientAvailable(res.result);
-    console.log("res: ", res)
     const data: Patient = {
       name: res.result.name as string,
       birthdate: res.result.birthdate as string,
@@ -139,8 +128,18 @@ export default function PatientFormInfo({
       address: res.result.address as string,
       phoneNumber: res.result.phoneNumber as string,
       identityCard: res.result.identityCard as string,
+      gmail: res.result.gmail as string,
     };
-    setPatientInfo(data);
+    reset({
+      name: data.name,
+      birthdate: data.birthdate,
+      gender: data.gender,
+      address: data.address,
+      phoneNumber: data.phoneNumber,
+      identityCard: data.identityCard,
+      gmail: data.gmail,
+    });
+    // setPatientInfo(data);
     setTypeOfPatient("");
     setFindPatient("");
   };
@@ -169,27 +168,32 @@ export default function PatientFormInfo({
             </select>
           </div>
           <div className="sm:col-span-2">
-            <label className="text-sm font-medium">Full Name <span className="text-red-500">*</span></label>
+            <label className="text-sm font-medium">
+              Full Name <span className="text-red-500">*</span>
+            </label>
             <div className="relative">
               <input
                 type="text"
-                value={
-                  typeOfPatient === "re_visit" ? findPatient : patientInfo.name
+                defaultValue={
+                  typeOfPatient === "re_visit" ? findPatient : ""
                 }
+                // value={
+                //   typeOfPatient === "re_visit" ? findPatient : patientInfo.name
+                // }
                 {...register("name")}
                 onChange={
                   typeOfPatient === "re_visit"
                     ? getNameToFindPatient
-                    : handleInputChange
+                    : undefined
                 }
                 placeholder={`${
                   typeOfPatient === "re_visit" ? "Search by ID or name" : ""
                 }`}
-                // onKeyDown={(e) => {
-                //   if (e.key === "Enter") {
-                //     handleFindPatient();
-                //   }
-                // }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && typeOfPatient === "re_visit") {
+                    handleFindPatient();
+                  }
+                }}
                 className="border rounded px-3 py-2 w-full"
               />
               {typeOfPatient === "re_visit" && (
@@ -213,32 +217,34 @@ export default function PatientFormInfo({
             <input
               type="number"
               className="border rounded px-3 py-2 w-full"
-              value={generateAgeFromBirthdate(patientInfo.birthdate)}
+              value={generateAgeFromBirthdate(watch("birthdate"))}
               disabled
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Date of Birth <span className="text-red-500">*</span></label>
+            <label className="text-sm font-medium">
+              Date of Birth <span className="text-red-500">*</span>
+            </label>
             <input
               type="date"
-              value={patientInfo.birthdate}
               {...register("birthdate")}
-              onChange={handleInputChange}
-              className="border rounded px-3 py-2 w-full"
+              readOnly={typeOfPatient === "re_visit" ? true : false}
+              className="border rounded px-3 py-2 w-full outline-blue-500"
             />
-            {!patientInfo.birthdate && (
+            {errors.birthdate && (
               <p className="text-red-500 text-xs">
                 {errors.birthdate?.message as string}
               </p>
             )}
           </div>
           <div>
-            <label className="text-sm font-medium">Gender <span className="text-red-500">*</span></label>
+            <label className="text-sm font-medium">
+              Gender <span className="text-red-500">*</span>
+            </label>
             <select
-              value={patientInfo.gender}
               {...register("gender")}
-              onChange={handleInputChange}
-              className="border rounded px-3 py-2 w-full"
+              disabled={typeOfPatient === "re_visit"}
+              className="border rounded px-3 py-2 w-full outline-blue-500"
             >
               <option value="M">Male</option>
               <option value="F">Female</option>
@@ -252,50 +258,68 @@ export default function PatientFormInfo({
           </div>
         </div>
 
+        <div className="grid grid-cols-1 gap-2 sm:gap-3 md:gap-4">
+          <div>
+            <label className="text-sm font-medium">Email</label>
+            <input
+              type="email"
+              {...register("gmail")}
+              className="border rounded px-3 py-2 w-full outline-blue-500"
+              readOnly={typeOfPatient === "re_visit" ? true : false}
+            ></input>
+            {errors.gmail && (
+              <p className="text-red-500 text-xs">
+                {errors.gmail?.message as string}
+              </p>
+            )}
+          </div>
+        </div>
         {/* Identity number */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-3 sm:gap-3 md:gap-4">
-           <div>
-          <label className="text-sm font-medium">Identity Card <span className="text-red-500">*</span></label>
-          <input
-            type="text"
-            value={patientInfo.identityCard}
-            {...register("identityCard")}
-            onChange={handleInputChange}
-            className="border rounded px-3 py-2 w-full"
-          />
-          {!patientInfo.identityCard && (
-            <p className="text-red-500 text-xs">
-              {errors.identityCard?.message as string}
-            </p>
-          )}
-        </div>
           <div>
-            <label className="text-sm font-medium">Phone <span className="text-red-500">*</span></label>
+            <label className="text-sm font-medium">
+              Identity Card <span className="text-red-500">*</span>
+            </label>
             <input
               type="text"
-              value={patientInfo.phoneNumber}
-              {...register("phoneNumber")}
-              onChange={handleInputChange}
-              className="border rounded px-3 py-2 w-full"
+              {...register("identityCard")}
+              readOnly={typeOfPatient === "re_visit" ? true : false}
+              className="border rounded px-3 py-2 w-full outline-blue-500"
             />
-            {!patientInfo.phoneNumber && (
+            {errors.identityCard && (
+              <p className="text-red-500 text-xs">
+                {errors.identityCard?.message as string}
+              </p>
+            )}
+          </div>
+          <div>
+            <label className="text-sm font-medium">
+              Phone <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              {...register("phoneNumber")}
+              readOnly={typeOfPatient === "re_visit" ? true : false}
+              className="border rounded px-3 py-2 w-full outline-blue-500"
+            />
+            {errors.phoneNumber && (
               <p className="text-red-500 text-xs">
                 {errors.phoneNumber?.message as string}
               </p>
             )}
           </div>
         </div>
-        {/* Địa chỉ */}
         <div>
-          <label className="text-sm font-medium">Address <span className="text-red-500">*</span></label>
+          <label className="text-sm font-medium">
+            Address <span className="text-red-500">*</span>
+          </label>
           <input
             type="text"
-            value={patientInfo.address}
             {...register("address")}
-            onChange={handleInputChange}
-            className="border rounded px-3 py-2 w-full"
+            readOnly={typeOfPatient === "re_visit" ? true : false}
+            className="border rounded px-3 py-2 w-full outline-blue-500"
           />
-          {!patientInfo.address && (
+          {errors.address && (
             <p className="text-red-500 text-xs">
               {errors.address?.message as string}
             </p>

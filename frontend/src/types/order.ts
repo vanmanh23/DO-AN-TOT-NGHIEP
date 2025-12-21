@@ -40,6 +40,7 @@ export interface Patient {
   address: string;
   phoneNumber: string;
   identityCard?: string;
+  gmail?: string;
 }
 
 export interface PatientResponse {
@@ -51,6 +52,7 @@ export interface PatientResponse {
   phoneNumber: string;
   age?: number;
   identityCard?: string;
+  gmail?: string;
 }
 
 export interface PatientDTO {
@@ -64,6 +66,7 @@ export interface PatientDTO {
   phoneNumber?: string | null;
   orderIds: string[];
   paymentIds: string[];
+  gmail?: string;
 }
 
 export interface Order {

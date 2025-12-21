@@ -45,6 +45,7 @@ public class PatientService {
         patient.setBirthdate(patientRequestDTO.getBirthdate());
         patient.setPhoneNumber(patientRequestDTO.getPhoneNumber());
         patient.setIdentityCard(patientRequestDTO.getIdentityCard());
+        patient.setGmail(patientRequestDTO.getGmail());
         return patientRepository.save(patient);
     }
 
@@ -104,6 +105,7 @@ public class PatientService {
         patient.setAddress(patientDetails.getAddress());
         patient.setPhoneNumber(patientDetails.getPhoneNumber());
         patient.setIdentityCard(patientDetails.getIdentityCard());
+        patient.setGmail(patientDetails.getGmail());
 
         return patientRepository.save(patient);
     }
@@ -156,6 +158,10 @@ public class PatientService {
         patientDTO.setAddress(patient.getAddress());
         patientDTO.setPhoneNumber(patient.getPhoneNumber());
         patientDTO.setIdentityCard(patient.getIdentityCard());
+        if(patient.getGmail() != null) {
+            patientDTO.setGmail(patient.getGmail());
+        }
+
         if (patient.getOrders() != null) {
             List<String> orderIds = new ArrayList<>();
             for (Orders order : patient.getOrders()) {

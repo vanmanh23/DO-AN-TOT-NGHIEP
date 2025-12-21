@@ -13,7 +13,6 @@ type Props = {
 };
 
 export default function InvoiceCard({ order }: Props) {
-  console.log("order", order);
   return (
     <Dialog>
       <form>

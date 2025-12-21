@@ -1,9 +1,12 @@
 package com.manh.healthcare.controller;
 
+import com.manh.healthcare.dtos.OrderDTO;
 import com.manh.healthcare.dtos.PaymentRequestDTO;
 import com.manh.healthcare.dtos.PaymentResponseDTO;
 import com.manh.healthcare.entity.EPaymentMethod;
 import com.manh.healthcare.entity.EPaymentStatus;
+import com.manh.healthcare.service.MailService;
+import com.manh.healthcare.service.OrderService;
 import com.manh.healthcare.service.PaymentService;
 import com.manh.healthcare.service.VnpayService;
 import jakarta.servlet.ServletException;
@@ -30,6 +33,11 @@ public class PaymentViewController {
     private PaymentService paymentService;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private OrderService orderService;
+    @Autowired
+    private MailService mailService;
+
     @GetMapping("/return")
     public String returnPayment(HttpServletRequest request, Model model)  throws ServletException, IOException {
         int paymentStatus = vnpayService.handlePaymentReturn(request);
@@ -43,6 +51,16 @@ public class PaymentViewController {
         payment.setPaidAt(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
         PaymentRequestDTO paymentRequest = modelMapper.map(payment, PaymentRequestDTO.class);
         PaymentResponseDTO paymentResponseDTO = paymentService.updatePayment(paymentId, paymentRequest);
+
+        OrderDTO order = orderService.findById(paymentResponseDTO.getOrderId());
+        if (order.getPatient().getGmail() != null){
+            String html = mailService.buildInvoiceHtml(order);
+            byte[] pdf = mailService.htmlToPdf(html);
+            mailService.sendInvoiceEmail(
+                    order.getPatient().getGmail(),
+                    pdf
+            );
+        }
 
         model.addAttribute("paymentId", paymentId);
         model.addAttribute("totalPrice", paymentResponseDTO.getAmount());

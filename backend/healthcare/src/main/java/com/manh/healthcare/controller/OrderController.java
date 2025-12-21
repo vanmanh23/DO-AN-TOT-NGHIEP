@@ -2,6 +2,7 @@ package com.manh.healthcare.controller;
 
 import com.manh.healthcare.dtos.*;
 import com.manh.healthcare.entity.EOrderStatus;
+import com.manh.healthcare.service.MailService;
 import com.manh.healthcare.service.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

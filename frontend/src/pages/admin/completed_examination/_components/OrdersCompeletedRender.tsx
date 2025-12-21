@@ -9,14 +9,14 @@ import { renderSkeletonRows } from "../../../../components/renderSkeletonRows";
 
 type OrdersProps = {
   patientName?: string;
-  patient_type?: string;
+  statusPayment?: string;
   order_id?: string;
   getOrdersCount: (count: number) => void;
 };
 
 export default function OrdersCompeletedRender({
   patientName,
-  patient_type,
+  statusPayment,
   order_id,
   getOrdersCount,
 }: OrdersProps) {
@@ -54,7 +54,12 @@ export default function OrdersCompeletedRender({
             patient.patientName?.toLocaleLowerCase().includes(q)
           );
         }
-
+        if (statusPayment?.trim()) {
+          const q = statusPayment.toUpperCase();
+          filtered = filtered.filter((patient: OrderResponse) =>
+            patient.payment?.status?.toUpperCase().includes(q)
+          );
+        }
         if (order_id?.trim()) {
           const q = order_id.toUpperCase();
           filtered = filtered.filter((patient: OrderResponse) =>
@@ -65,7 +70,7 @@ export default function OrdersCompeletedRender({
         setOrder(filtered);
       });
     }
-  }, [patientName, patient_type, order_id]);
+  }, [patientName, statusPayment, order_id]);
 
   if (order && typeof getOrdersCount === "function") {
     getOrdersCount(order.length);

@@ -34,8 +34,7 @@ public class MailController {
         byte[] pdf = mailService.htmlToPdf(html);
 
         mailService.sendInvoiceEmail(
-//                order.getPatient().getGmail(),
-                "manhnv.21it@vku.udn.vn",
+                order.getPatient().getGmail(),
                 pdf
         );
     }

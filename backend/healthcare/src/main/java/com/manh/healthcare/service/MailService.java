@@ -11,6 +11,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,68 +60,27 @@ public class MailService {
         }
     }
 
-    //    public String buildInvoiceHtml(OrderDTO order) {
-//        String itemsHtml = order.getServiceItems().stream()
-//                .map(item -> """
-//                    <tr>
-//                        <td>%s</td>
-//                        <td>%s</td>
-//                        <td align="right">%s VND</td>
-//                    </tr>
-//                """.formatted(
-//                        item.getServiceName(),
-//                        item.getServiceCode(),
-//                        item.getUnitPrice()
-//                ))
-//                .toList()
-//                .toString();
-//
-//        return """
-//        <html>
-//        <body style="font-family:Arial">
-//            <h1>INVOICE</h1>
-//            <p>Patient: %s</p>
-//            <p>Date: %s</p>
-//
-//            <table border="1" width="100%%">
-//                <tr>
-//                    <th>Service</th>
-//                    <th>Code</th>
-//                    <th>Price</th>
-//                </tr>
-//                %s
-//            </table>
-//
-//            <h3>Total: %s VND</h3>
-//        </body>
-//        </html>
-//        """.formatted(
-//                order.getPatient().getPatientName(),
-//                order.getPayment().getPaidAt(),
-//                itemsHtml,
-//                order.getPayment().getAmount()
-//        );
-//    }
     public String buildInvoiceHtml(OrderDTO order) {
-
         String itemsHtml = order.getServiceItems().stream()
                 .map(item -> """
-                            <tr>
-                                <td style="padding:8px">%s</td>
-                                <td style="padding:8px">%s</td>
-                                <td style="padding:8px; text-align:right">%s VND</td>
-                            </tr>
+                        <tr>
+                            <td style="padding:8px">%s</td>
+                            <td style="padding:8px">%s</td>
+                            <td style="padding:8px; text-align:right">%s VND</td>
+                        </tr>
                         """.formatted(
                         item.getServiceName(),
                         item.getServiceCode(),
-                        String.format("%,d", item.getUnitPrice())
+                        String.format("%,.0f", item.getUnitPrice())
                 ))
                 .collect(Collectors.joining());
 
         return """
-                <html>
+                <!DOCTYPE html>
+                <html xmlns="http://www.w3.org/1999/xhtml">
                 <head>
-                    <style>
+                    <meta charset="UTF-8" />
+                    <style type="text/css">
                         body {
                             font-family: Arial, sans-serif;
                             background-color: #f4f6f8;
@@ -149,7 +110,7 @@ public class MailService {
                             margin: 4px 0;
                         }
                         table {
-                            width: 100%;
+                            width: 100%%;
                             border-collapse: collapse;
                         }
                         th {
@@ -160,6 +121,7 @@ public class MailService {
                         }
                         td {
                             border-bottom: 1px solid #e0e0e0;
+                            padding: 8px;
                         }
                         .total {
                             text-align: right;
@@ -179,42 +141,45 @@ public class MailService {
                 <body>
                     <div class="invoice-container">
 
-                        <div class="header">
-                            <h1>HÓA ĐƠN THANH TOÁN</h1>
-                        </div>
+                            <div class="header">
+                                    <h1>INVOICE</h1>
+                                </div>
 
-                        <div class="info">
-                            <p><b>Bệnh nhân:</b> %s</p>
-                            <p><b>Ngày thanh toán:</b> %s</p>
-                        </div>
+                            <div class="info">
+                                    <p><b>Patient:</b> %s</p>
+                                    <p><b>Payment Date:</b> %s</p>
+                                </div>
 
-                        <table>
-                            <tr>
-                                <th>Dịch vụ</th>
-                                <th>Mã DV</th>
-                                <th style="text-align:right">Đơn giá</th>
-                            </tr>
-                            %s
-                        </table>
+                            <table>
+                                <tr>
+                                        <th>Service</th>
+                                        <th>Service Code</th>
+                                        <th style="text-align:right">Unit Price</th>
+                                    </tr>
+                                %s
+                            </table>
 
-                        <div class="total">
-                            Tổng tiền: %s VND
-                        </div>
+                            <div class="total">
+                                    Total: %s VND
+                                </div>
 
-                        <div class="footer">
-                            Cảm ơn Quý khách đã sử dụng dịch vụ của chúng tôi.<br/>
-                            Chúc Quý khách sức khỏe!
-                        </div>
+                            <div class="footer">
+                                    Thank you for using our services.<br />
+                                    Wishing you good health!
+                                </div>
 
                     </div>
                 </body>
                 </html>
                 """.formatted(
                 order.getPatient().getPatientName(),
-                order.getPayment().getPaidAt(),
+//                order.getPayment().getPaidAt(),
+                order.getPayment().getPaidAt()
+                        .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
                 itemsHtml,
-                String.format("%,d", order.getPayment().getAmount())
+                String.format("%,.0f", order.getPayment().getAmount())
         );
+
     }
 
 }

@@ -5,7 +5,6 @@ export const reportSchema = z.object({
   description: z.string().min(1, "Mô tả không được để trống"),
   conclusion: z.string().min(1, "Kết luận không được để trống"),
   nutrirecomend: z.string().optional(),
-
 });
 
 export const patientSchema = z.object({
@@ -14,7 +13,15 @@ export const patientSchema = z.object({
   gender: z.enum(["M", "F", "O"]),
   address: z.string().min(1, "Địa chỉ không được để trống"),
   phoneNumber: z.string().regex(/^[0-9]{9,11}$/, "Số điện thoại không hợp lệ"),
-  identityCard: z.string().length(12, "Identity card must be exactly 12 characters"),
+  identityCard: z
+    .string()
+    .length(12, "Identity card must be exactly 12 characters"),
+  gmail: z
+  .string()
+  .email("Email không hợp lệ")
+  .optional()
+  .or(z.literal(""))
+
 });
 
 export const serviceItemSchema = z.object({
@@ -80,4 +87,12 @@ export const patientEdtSchema = z.object({
     .min(8, "Phone number must be at least 8 digits")
     .max(15, "Phone number must be at most 15 digits"),
   age: z.number().min(0, "Age must be a positive number").optional(),
+  identityCard: z
+    .string()
+    .length(12, "Identity card must be exactly 12 characters"),
+  gmail: z
+  .string()
+  .email("Email không hợp lệ")
+  .optional()
+  .or(z.literal(""))
 });

@@ -22,4 +22,5 @@ public class PatientDTO {
     private String identityCard;
     private List<String> orderIds;
     private List<String> paymentIds;
+    private String gmail;
 }

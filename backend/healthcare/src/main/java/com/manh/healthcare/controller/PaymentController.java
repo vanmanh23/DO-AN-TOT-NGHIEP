@@ -1,8 +1,11 @@
 package com.manh.healthcare.controller;
 
 import com.manh.healthcare.dtos.BaseResponse;
+import com.manh.healthcare.dtos.OrderDTO;
 import com.manh.healthcare.dtos.PaymentRequestDTO;
 import com.manh.healthcare.dtos.PaymentResponseDTO;
+import com.manh.healthcare.service.MailService;
+import com.manh.healthcare.service.OrderService;
 import com.manh.healthcare.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,6 +21,10 @@ import java.util.List;
 public class PaymentController {
     @Autowired
     private PaymentService paymentService;
+    @Autowired
+    private MailService mailService;
+    @Autowired
+    private OrderService orderService;
 
     @PostMapping
     public ResponseEntity<BaseResponse> createPayment(@RequestBody PaymentRequestDTO dto) {
@@ -53,6 +60,15 @@ public class PaymentController {
     @PutMapping("/status/{id}")
     public ResponseEntity<BaseResponse> changePaymentStatus(@PathVariable String id) {
         PaymentResponseDTO paymentResponseDTO = paymentService.changePaymentStatus(id);
+        OrderDTO order = orderService.findById(paymentResponseDTO.getOrderId());
+        if (order.getPatient().getGmail() != null){
+            String html = mailService.buildInvoiceHtml(order);
+            byte[] pdf = mailService.htmlToPdf(html);
+            mailService.sendInvoiceEmail(
+                    order.getPatient().getGmail(),
+                    pdf
+            );
+        }
         BaseResponse baseResponse = BaseResponse.createSuccessResponse("payment.success.changeStatus", paymentResponseDTO);
         return ResponseEntity.status(HttpStatus.OK).body(baseResponse);
     }

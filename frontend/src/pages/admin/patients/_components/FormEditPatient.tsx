@@ -43,8 +43,9 @@ export default function FormEditPatient({
         birthdate: patientEdit.patientBirthDate,
         gender: patientEdit.gender as "M" | "F" | "O",
         phoneNumber: patientEdit.phoneNumber,
-        // email: patientEdit.email,
         address: patientEdit.address,
+        gmail: patientEdit.gmail,
+        identityCard: patientEdit.identityCard,
       });
     }
   }, [patientEdit, isCreate, reset]);
@@ -107,7 +108,7 @@ export default function FormEditPatient({
             }
           >
             <div className="mb-4">
-              <label className="block text-sm font-medium">Patient Name</label>
+              <label className="block text-sm font-medium">Patient Name <span className="text-red-500">*</span></label>
               <input
                 type="text"
                 {...register("name")}
@@ -119,7 +120,7 @@ export default function FormEditPatient({
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium">Gender</label>
+              <label className="block text-sm font-medium">Gender <span className="text-red-500">*</span></label>
               <select
                 {...register("gender")}
                 className="mt-1 block w-full px-3 py-2 border rounded-md"
@@ -135,7 +136,7 @@ export default function FormEditPatient({
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium">Date of Birth</label>
+              <label className="block text-sm font-medium">Date of Birth <span className="text-red-500">*</span></label>
               <input
                 type="date"
                 {...register("birthdate")}
@@ -149,7 +150,7 @@ export default function FormEditPatient({
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium">Phone Number</label>
+              <label className="block text-sm font-medium">Phone Number <span className="text-red-500">*</span></label>
               <input
                 {...register("phoneNumber")}
                 className="mt-1 block w-full px-3 py-2 border rounded-md"
@@ -161,7 +162,7 @@ export default function FormEditPatient({
               )}
             </div>
             <div className="mb-6">
-              <label className="block text-sm font-medium">Address</label>
+              <label className="block text-sm font-medium">Address <span className="text-red-500">*</span></label>
               <textarea
                 rows={3}
                 {...register("address")}
@@ -169,6 +170,28 @@ export default function FormEditPatient({
               ></textarea>
               {errors.address && (
                 <p className="text-red-500 text-sm">{errors.address.message}</p>
+              )}
+            </div>
+            <div className="mb-6">
+              <label className="block text-sm font-medium">Gmail</label>
+              <input
+                type="email"
+                {...register("gmail")}
+                className="mt-1 block w-full px-3 py-2 border rounded-md"
+              ></input>
+              {errors.gmail && (
+                <p className="text-red-500 text-sm">{errors.gmail.message}</p>
+              )}
+            </div>
+            <div className="mb-6">
+              <label className="block text-sm font-medium">Identity Card <span className="text-red-500">*</span></label>
+              <input
+                type="text"
+                {...register("identityCard")}
+                className="mt-1 block w-full px-3 py-2 border rounded-md"
+              ></input>
+              {errors.identityCard && (
+                <p className="text-red-500 text-sm">{errors.identityCard.message}</p>
               )}
             </div>
             <button
