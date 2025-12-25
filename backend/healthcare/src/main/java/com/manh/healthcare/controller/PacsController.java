@@ -34,20 +34,19 @@ public class PacsController {
             }
             BaseResponse baseResponse = BaseResponse.createSuccessResponse("pacsdcm.success.update", listRespone);
             return ResponseEntity.status(HttpStatus.OK).body(baseResponse);
-//            return ResponseEntity.ok(listRespone.toString());
-//            return ResponseEntity.ok("update dicom file successfully!");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Upload failed: " + e.getMessage());
         }
+    }
 
-//        try {
-//            PacsUidResponse respon = pacsService.uploadDicomFile(file, newName, sex);
-//            BaseResponse baseResponse = BaseResponse.createSuccessResponse("pacsdcm.success.update", respon);
-//            return ResponseEntity.status(HttpStatus.OK).body(baseResponse);
-////            return ResponseEntity.ok("update dicom file successfully!");
-//        } catch (Exception e) {
-//            return ResponseEntity.internalServerError().body("Upload failed: " + e.getMessage());
-//        }
-
+    @GetMapping("/studies/count")
+    public ResponseEntity<?> getStudyCount() {
+        int res = pacsService.countStudies();
+        return ResponseEntity.ok(res);
+    }
+    @GetMapping("/studies/size")
+    public ResponseEntity<?> getStudySize() {
+        int res = pacsService.sizeStudies();
+        return ResponseEntity.ok(res);
     }
 }

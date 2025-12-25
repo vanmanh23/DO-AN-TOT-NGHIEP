@@ -243,6 +243,7 @@ export default function Component() {
                       <option>XRAY</option>
                       <option>MRI</option>
                       <option>MAMMO</option>
+                      <option>US</option>
                     </select>
                   </div>
 

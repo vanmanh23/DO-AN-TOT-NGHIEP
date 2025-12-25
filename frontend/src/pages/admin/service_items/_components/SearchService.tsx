@@ -86,6 +86,9 @@ export default function SearchService({
           <option value="" className="text-gray-400">Modality</option>
           <option value="CT">CT</option>
           <option value="XRAY">XRAY</option>
+          <option value="MRI">MRI</option>
+          <option value="MAMMO">MAMMO</option>
+          <option value="US">US</option>
         </select>
         <button
           onClick={searchClick}

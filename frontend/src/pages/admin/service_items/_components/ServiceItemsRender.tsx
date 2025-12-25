@@ -136,13 +136,14 @@ export default function ServiceItemsRender({
             </React.Fragment>
           ))}
           {serviceItems?.length === 0 && (
-            <React.Fragment>
-              <tr>
-                <td colSpan={12} className="text-center">
-                  Not found
-                </td>
-              </tr>
-            </React.Fragment>
+             <tr className="block md:table-row">
+              <td
+                colSpan={14}
+                className="p-4 text-center border text-gray-500 block md:table-cell"
+              >
+                Not found
+              </td>
+            </tr>
           )}
         </tbody>
       </table>

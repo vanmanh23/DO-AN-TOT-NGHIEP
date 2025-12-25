@@ -4,27 +4,24 @@ import MyChart from "../../components/LineChart";
 import MoreInforCard from "./_components/MoreInforCard";
 import { useEffect, useState } from "react";
 import {
-  getPatients,
   getStudies,
   getStudyCount,
   getStudySize,
 } from "../../apis/dicomApis";
 import { useNavigate } from "react-router-dom";
-import type { PatientProps } from "../../types/types";
 import { inforCard } from "../../constants";
-import type { User } from "./usermanagement/_components/columns";
-import { GetAllUsers } from "../../apis/authApis";
+import { GetAllUsers, type UserResponseDTO } from "../../apis/authApis";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../store/store";
 import { setOption } from "../../features/navbarsection/navbarSection";
+import patientApi from "../../apis/patientApis";
 
 export default function Component() {
   const [countValue, setCountValue] = useState(0);
   const [sizeValue, setSizeValue] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [usersData, setUsersData] = useState<User[]>([]);
-  const [studiesData, setStudiesData] = useState([]);
-  const [patients, setPatients] = useState<PatientProps[]>([]);
+  const [usersData, setUsersData] = useState<UserResponseDTO[]>([]);
+  const [numOfPatients, setNumOfPatients] = useState(0);
   const navigate = useNavigate();
    const dispatch = useDispatch<AppDispatch>();
   useEffect(() => {
@@ -35,17 +32,18 @@ export default function Component() {
         if (token === null) {
           navigate("/");
         } else {
-          const [count, size, studies, patients, users] = await Promise.all([
+          const [count, size, numOfPatient, users] = await Promise.all([
             getStudyCount(),
             getStudySize(),
-            getStudies(),
-            getPatients(token),
-            GetAllUsers(),
+            // getStudies(),
+            (await patientApi.patientCount()).result,
+            (await GetAllUsers()).result,
           ]);
           setCountValue(count);
           setSizeValue(size);
-          setStudiesData(studies);
-          setPatients(patients);
+          // setStudiesData(studies);
+          // setPatients(patients);
+          setNumOfPatients(numOfPatient);
           setUsersData(users);
         }
       } catch (error) {
@@ -61,11 +59,10 @@ export default function Component() {
     dispatch(setOption("Dashboard"));
   }, []);
 
-  inforCard[0].content = patients.length.toString();
+  inforCard[0].content = numOfPatients.toString() ;
   inforCard[1].content = usersData.length.toString();
   inforCard[2].content = sizeValue.toString() + " MB";
-  inforCard[3].content = studiesData.length.toString();
-
+  inforCard[3].content = countValue.toString();
 
   return (
     <div className="mx-6 flex flex-col gap-4 ">

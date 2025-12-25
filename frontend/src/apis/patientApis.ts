@@ -12,6 +12,8 @@ const patientApi = {
   update: (id: string, data: Patient) => axiosClient.put(`/patients/${id}`, data),
 
   delete: (id: string) => axiosClient.delete(`/patients/${id}`),
+
+  patientCount: (): Promise<ApiResponse<number>> => axiosClient.get("/patients/count"),
 };
 
 export default patientApi;

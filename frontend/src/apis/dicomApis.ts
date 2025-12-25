@@ -8,8 +8,8 @@ import type {
 } from "../types/types";
 import type { ApiResponse, PacsUidResponse } from "../types/order";
 
-// const url = import.meta.env.VITE_DICOM_APIS;
 const url = "http://localhost:8081/api/pacsdcm";
+const baseURL = import.meta.env.VITE_USER_URL;
 
 export const GetStudiesByStudyInstanceUID = async (
   studyInstanceUID: string
@@ -50,14 +50,14 @@ export const getStudyCount = async () => {
     .get(`${url}/studies/count`)
     .then((res) => res.data)
     .catch((err) => console.log(err));
-  return res.count;
+  return res;
 };
 export const getStudySize = async () => {
   const res = await axios
     .get(`${url}/studies/size`)
     .then((res) => res.data)
     .catch((err) => console.log(err));
-  return res.size;
+  return res;
 };
 export const getStudies = async () => {
   const res = await axios
@@ -121,15 +121,15 @@ export const getInstances = async (
     .catch((err) => console.log(err));
   return res;
 };
-export const getPatients = async (token: string): Promise<PatientProps[]> => {
-  const res = await axios
-    .get(`${url}/patients`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    .then((res) => res.data)
-    .catch((err) => console.log(err));
-    return res;
-}
+// export const getPatients = async (token: string): Promise<PatientProps[]> => {
+//   const res = await axios
+//     .get(`${url}/patients`, {
+//       headers: { Authorization: `Bearer ${token}` },
+//     })
+//     .then((res) => res.data)
+//     .catch((err) => console.log(err));
+//     return res;
+// }
 export const updateDiagnose = async (data: DiagnoseProps) => {
   const res = await axios
     .put(`${url}/diagnose`, data)

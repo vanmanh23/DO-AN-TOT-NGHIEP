@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.json.JSONObject;
 
 @Service
 public class PacsService {
@@ -103,36 +104,6 @@ public class PacsService {
         return null;
     }
 
-//    public void updatePatientInfo(String priorPatientID) {
-//        try {
-//            HttpHeaders headers = new HttpHeaders();
-////            headers.set("Accept", "multipart/related; type=application/dicom");
-//            headers.set("Accept", "application/dicom+json");
-//            HttpEntity<Void> entity = new HttpEntity<>(headers);
-//
-//            ResponseEntity<String> response = restTemplate.exchange(
-//                    STOW_RS_URL + "/patients/" + priorPatientID,
-//                    HttpMethod.PUT,
-//                    entity,
-//                    String.class
-//            );
-//            String body = response.getBody();
-//            if (response.getStatusCode() == HttpStatus.OK && body != null && !body.isBlank()) {
-//                try {
-//                    System.out.println("======="+body);
-//                } catch (Exception e) {
-//                    System.err.println("Error parsing DICOM JSON: " + e.getMessage());
-//                    System.err.println("Response body: " + body);
-//                    throw new RuntimeException("Error parsing DICOM JSON: " + e.getMessage());
-//                }
-//            } else {
-//                throw new RuntimeException("Failed to fetch instances: " + response.getStatusCode());
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            throw new RuntimeException("Error fetching study by UID: " + e.getMessage());
-//        }
-//    }
 public void updatePatientInfo(String priorPatientID, String newName, String newSex) {
     try {
         // Tạo DICOM JSON object để update
@@ -181,4 +152,50 @@ public void updatePatientInfo(String priorPatientID, String newName, String newS
         e.printStackTrace();
     }
 }
+    public int countStudies() {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Accept", "application/json");
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
+            ResponseEntity<String> response = restTemplate.exchange(
+                    STOW_RS_URL + "/studies/count",
+                    HttpMethod.GET,
+                    entity,
+                    String.class
+            );
+            String body = response.getBody();
+            System.out.println("========body: " + body);
+            if (response.getStatusCode() == HttpStatus.OK) {
+                JSONObject json = new JSONObject(response.getBody());
+                return json.getInt("count");
+            }  else {
+                throw new RuntimeException("Failed to fetch studies count: " + response.getStatusCode());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error fetching studies count with DICOM tags: " + e.getMessage());
+        }
+    }
+    public int sizeStudies() {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Accept", "application/json");
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
+            ResponseEntity<String> response = restTemplate.exchange(
+                    STOW_RS_URL + "/studies/size",
+                    HttpMethod.GET,
+                    entity,
+                    String.class
+            );
+            String body = response.getBody();
+            System.out.println("========body: " + body);
+            if (response.getStatusCode() == HttpStatus.OK) {
+                JSONObject json = new JSONObject(response.getBody());
+                return json.getInt("size");
+            }  else {
+                throw new RuntimeException("Failed to fetch studies size: " + response.getStatusCode());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error fetching studies size with DICOM tags: " + e.getMessage());
+        }
+    }
 }
