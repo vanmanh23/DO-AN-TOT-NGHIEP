@@ -1,5 +1,6 @@
 package com.manh.healthcare.service;
 
+import com.manh.healthcare.dtos.MonthlyRevenueDTO;
 import com.manh.healthcare.dtos.PatientDTO;
 import com.manh.healthcare.dtos.PaymentRequestDTO;
 import com.manh.healthcare.dtos.PaymentResponseDTO;
@@ -135,5 +136,10 @@ public class PaymentService {
         paymentRepository.save(payment);
 
         return  modelMapper.map(payment, PaymentResponseDTO.class);
+    }
+
+    public List<MonthlyRevenueDTO> monthlyRevenue() {
+        List<MonthlyRevenueDTO> monthlyRevenueDTOList = paymentRepository.getMonthlyRevenue();
+        return  monthlyRevenueDTOList;
     }
 }

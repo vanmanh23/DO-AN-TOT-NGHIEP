@@ -1,9 +1,6 @@
 package com.manh.healthcare.controller;
 
-import com.manh.healthcare.dtos.BaseResponse;
-import com.manh.healthcare.dtos.OrderDTO;
-import com.manh.healthcare.dtos.PaymentRequestDTO;
-import com.manh.healthcare.dtos.PaymentResponseDTO;
+import com.manh.healthcare.dtos.*;
 import com.manh.healthcare.service.MailService;
 import com.manh.healthcare.service.OrderService;
 import com.manh.healthcare.service.PaymentService;
@@ -77,5 +74,11 @@ public class PaymentController {
     public ResponseEntity<String> deletePayment(@PathVariable String id) {
         paymentService.deletePayment(id);
         return ResponseEntity.ok("Payment deleted successfully");
+    }
+    @GetMapping("/monthly_revenue")
+    public ResponseEntity<BaseResponse> monthlyRevenue() {
+        List<MonthlyRevenueDTO> monthlyRevenueDTOList = paymentService.monthlyRevenue();
+        BaseResponse baseResponse = BaseResponse.createSuccessResponse("payment.success.monthlyRevenue", monthlyRevenueDTOList);
+        return ResponseEntity.status(HttpStatus.OK).body(baseResponse);
     }
 }

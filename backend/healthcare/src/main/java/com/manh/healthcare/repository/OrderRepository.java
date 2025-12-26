@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,4 +17,18 @@ public interface OrderRepository extends JpaRepository<Orders, String> {
     Orders findByOrderId(@Param("id") String id);
 
     List<Orders> findByStatus(EOrderStatus status);
+
+    @Query(value = """
+        SELECT 
+            DATE(created_at) AS date,
+            COUNT(DISTINCT patient_id) AS totalPatients
+        FROM orders
+        WHERE created_at BETWEEN :startDate AND :endDate
+        GROUP BY DATE(created_at)
+        ORDER BY DATE(created_at)
+    """, nativeQuery = true)
+    List<Object[]> countPatientsByDate(
+            LocalDateTime startDate,
+            LocalDateTime endDate
+    );
 }

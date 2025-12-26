@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -76,6 +77,16 @@ public class OrderController {
     public ResponseEntity<BaseResponse> changeStatus(@RequestBody ChangeStatusRequestDTO req) {
         orderService.changeStatus(req.getNew_status(), req.getOrder_id());
         BaseResponse baseResponse = BaseResponse.createSuccessResponse("order_success_changestatus");
+        return ResponseEntity.status(HttpStatus.OK).body(baseResponse);
+    }
+
+    @GetMapping("/patients-by-day")
+    public ResponseEntity<BaseResponse> getPatientsByDay(
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate
+    ) {
+        List<DailyPatientCountDTO> dailyPatientCountDTOList = orderService.getPatientCountLast7Days(startDate, endDate);
+        BaseResponse baseResponse = BaseResponse.createSuccessResponse("order_success_getPatientCountLast7Days", dailyPatientCountDTOList);
         return ResponseEntity.status(HttpStatus.OK).body(baseResponse);
     }
 }

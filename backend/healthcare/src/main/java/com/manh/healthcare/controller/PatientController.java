@@ -1,9 +1,6 @@
 package com.manh.healthcare.controller;
 
-import com.manh.healthcare.dtos.BaseResponse;
-import com.manh.healthcare.dtos.PatientDTO;
-import com.manh.healthcare.dtos.PatientRequestDTO;
-import com.manh.healthcare.dtos.PatientResponseDTO;
+import com.manh.healthcare.dtos.*;
 import com.manh.healthcare.entity.Patient;
 import com.manh.healthcare.service.PatientService;
 import jakarta.validation.Valid;
@@ -111,6 +108,13 @@ public class PatientController {
     public ResponseEntity<BaseResponse> existsById(@PathVariable String id) {
         boolean exists = patientService.existsById(id);
         BaseResponse response = BaseResponse.createSuccessResponse("patient.success.exists", exists);
+        return ResponseEntity.status(200).body(response);
+    }
+
+    @GetMapping("/age-groups")
+    public ResponseEntity<BaseResponse> getPatientAgeGroups() {
+        List<AgeGroupPatientDTO> ageGroupPatientDTOList = patientService.getPatientCountByAgeGroup();
+        BaseResponse response = BaseResponse.createSuccessResponse("patient.success.ageGroupPatient", ageGroupPatientDTOList);
         return ResponseEntity.status(200).body(response);
     }
 }

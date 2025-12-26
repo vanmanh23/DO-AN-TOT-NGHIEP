@@ -173,3 +173,19 @@ export interface AIPredict {
   mo_ta: string;
   ket_luan: string;
 }
+
+export interface DailyPatientCount {
+  date: string;
+  totalPatients: number;
+}
+
+export interface AgeGroupPatient {
+  ageGroup: string;
+  totalPatients: number;
+}
+
+export interface MonthlyRevenue {
+  year: number;
+  month: number;
+  totalRevenue: number;
+}

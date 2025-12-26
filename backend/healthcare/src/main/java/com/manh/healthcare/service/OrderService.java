@@ -13,7 +13,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.print.Doc;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -216,5 +218,40 @@ public OrderDTO updateOrder(String orderId, OrdersRequestDTO request) {
         }
 
         return dto;
+    }
+
+    public List<DailyPatientCountDTO> getPatientCountLast7Days(
+            LocalDate startDate,
+            LocalDate endDate
+    ) {
+        List<Object[]> rawData = orderRepository.countPatientsByDate(
+                startDate.atStartOfDay(),
+                endDate.atTime(23, 59, 59)
+        );
+
+        // Map dữ liệu từ DB
+        Map<LocalDate, Long> dataMap = new HashMap<>();
+        for (Object[] row : rawData) {
+            LocalDate date = ((java.sql.Date) row[0]).toLocalDate();
+            Long total = ((Number) row[1]).longValue();
+            dataMap.put(date, total);
+        }
+
+        // Formatter dd/MM
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM");
+
+        // Fill đủ 7 ngày
+        List<DailyPatientCountDTO> result = new ArrayList<>();
+        LocalDate current = startDate;
+
+        while (!current.isAfter(endDate)) {
+            result.add(new DailyPatientCountDTO(
+                    current.format(formatter),
+                    dataMap.getOrDefault(current, 0L)
+            ));
+            current = current.plusDays(1);
+        }
+
+        return result;
     }
 }

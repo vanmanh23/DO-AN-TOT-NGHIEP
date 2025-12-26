@@ -1,5 +1,6 @@
 package com.manh.healthcare.service;
 
+import com.manh.healthcare.dtos.AgeGroupPatientDTO;
 import com.manh.healthcare.dtos.PatientDTO;
 import com.manh.healthcare.dtos.PatientRequestDTO;
 import com.manh.healthcare.dtos.PatientResponseDTO;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class PatientService {
@@ -177,5 +179,15 @@ public class PatientService {
             patientDTO.setPaymentIds(paymentIds);
         }
         return patientDTO;
+    }
+
+    public List<AgeGroupPatientDTO> getPatientCountByAgeGroup() {
+        return patientRepository.countPatientsByAgeGroup()
+                .stream()
+                .map(obj -> new AgeGroupPatientDTO(
+                        (String) obj[0],
+                        ((Number) obj[1]).longValue()
+                ))
+                .collect(Collectors.toList());
     }
 }
