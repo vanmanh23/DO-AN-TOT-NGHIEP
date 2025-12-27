@@ -1,9 +1,6 @@
 package com.manh.healthcare.service;
 
-import com.manh.healthcare.dtos.AgeGroupPatientDTO;
-import com.manh.healthcare.dtos.PatientDTO;
-import com.manh.healthcare.dtos.PatientRequestDTO;
-import com.manh.healthcare.dtos.PatientResponseDTO;
+import com.manh.healthcare.dtos.*;
 import com.manh.healthcare.entity.Orders;
 import com.manh.healthcare.entity.Patient;
 import com.manh.healthcare.entity.Payment;
@@ -16,10 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -177,6 +171,12 @@ public class PatientService {
                 paymentIds.add(payment.getId());
             }
             patientDTO.setPaymentIds(paymentIds);
+        }
+        if (patient.getOrders() != null) {
+            List<OrderWithoutPatientDTO> orderDTOList = patient.getOrders().stream().map(
+                    order -> modelMapper.map(order, OrderWithoutPatientDTO.class)
+            ).toList();
+            patientDTO.setOrders(orderDTOList);
         }
         return patientDTO;
     }

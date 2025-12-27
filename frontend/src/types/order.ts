@@ -53,6 +53,24 @@ export interface PatientResponse {
   age?: number;
   identityCard?: string;
   gmail?: string;
+  orders?: OrderWithoutPatientDTO[];
+}
+
+export interface OrderWithoutPatientDTO {
+  orderId: string;
+  priority: string;
+  status: string;
+  createdAt: string;        // ISO datetime string
+  scheduledAt: string | null;
+  completedAt: string | null;
+  patientId: string;
+  patientBirthday: string;
+  patientName: string;
+  studyId: string | null;
+  study: StudyResponse;
+  serviceItems: ServiceItem[];
+  doctor: DoctorResponse;
+  payment?: PaymentResponse;
 }
 
 export interface PatientDTO {

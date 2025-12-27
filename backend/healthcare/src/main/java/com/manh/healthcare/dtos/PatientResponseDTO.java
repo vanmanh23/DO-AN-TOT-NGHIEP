@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -21,4 +22,5 @@ public class PatientResponseDTO {
     private PaymentResponseDTO payments;
 
     private String gmail;
+    private List<OrderWithoutPatientDTO> orders;
 }

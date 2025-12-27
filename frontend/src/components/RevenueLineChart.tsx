@@ -44,7 +44,7 @@ export default function RevenueLineChart({ apiData }) {
             dataKey="revenue"
             name="Revenue (VND)"
             stroke="#2563eb"
-            strokeWidth={3}
+            strokeWidth={2}
             dot={{ r: 5 }}
             activeDot={{ r: 7 }}
           />

@@ -23,4 +23,6 @@ public class PatientDTO {
     private List<String> orderIds;
     private List<String> paymentIds;
     private String gmail;
+
+    private List<OrderWithoutPatientDTO> orders;
 }

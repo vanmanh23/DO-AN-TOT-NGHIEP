@@ -14,18 +14,23 @@ import {
   DialogContent,
   DialogFooter,
 } from "../../../../components/ui/dialog";
-import type { OrderResponse } from "../../../../types/order";
+import type {
+  OrderWithoutPatientDTO,
+  PatientResponse,
+} from "../../../../types/order";
 import { useState } from "react";
 import axios from "axios";
 
 type Props = {
   open: boolean;
   setOpen: (open: boolean) => void;
-  orders: OrderResponse[];
+  patient: PatientResponse;
 };
 
-export default function PatientHistory({ open, setOpen, orders }: Props) {
-  const [focusOrder, setFocusOrder] = useState<OrderResponse | null>(null);
+export default function PatientHistory({ open, setOpen, patient }: Props) {
+  const [focusOrder, setFocusOrder] = useState<OrderWithoutPatientDTO | null>(
+    patient?.orders?.[0] || null
+  );
   const onViewDicom = () => {
     if (focusOrder?.study === null) return;
     localStorage.setItem(
@@ -41,6 +46,7 @@ export default function PatientHistory({ open, setOpen, orders }: Props) {
   const onViewInvoice = async () => {
     try {
       const id = focusOrder?.orderId as string;
+      console.log(id);
       const response = await axios.get(
         `http://localhost:8081/api/report-results/generate_pdf/${id}`,
         {
@@ -52,12 +58,12 @@ export default function PatientHistory({ open, setOpen, orders }: Props) {
 
       window.open(fileURL, "_blank");
     } catch (error) {
-      console.error("Không thể mở file PDF:", error);
-      alert("Đã xảy ra lỗi khi tải báo cáo.");
+      console.error("Cannot open PDF file:", error);
+      alert("An error occurred while loading the report.");
     }
   };
 
-  const onOrderClick = (order: OrderResponse) => {
+  const onOrderClick = (order: OrderWithoutPatientDTO) => {
     setFocusOrder(order);
   };
   return (
@@ -88,7 +94,7 @@ export default function PatientHistory({ open, setOpen, orders }: Props) {
                         Name
                       </p>
                       <p className="text-sm font-semibold text-slate-900">
-                        John Doe
+                        {patient?.patientName}
                       </p>
                     </div>
                   </div>
@@ -102,7 +108,7 @@ export default function PatientHistory({ open, setOpen, orders }: Props) {
                         ID
                       </p>
                       <p className="text-sm font-semibold text-slate-900">
-                        1234567890
+                        {patient?.id}
                       </p>
                     </div>
                   </div>
@@ -117,7 +123,7 @@ export default function PatientHistory({ open, setOpen, orders }: Props) {
                         Gender
                       </p>
                       <p className="text-sm font-semibold text-slate-900">
-                        Male
+                        {patient?.gender}
                       </p>
                     </div>
                   </div>
@@ -131,7 +137,7 @@ export default function PatientHistory({ open, setOpen, orders }: Props) {
                       <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
                         Age
                       </p>
-                      <p className="text-sm font-semibold text-slate-900">45</p>
+                      <p className="text-sm font-semibold text-slate-900">{patient?.age}</p>
                     </div>
                   </div>
                 </div>
@@ -147,30 +153,30 @@ export default function PatientHistory({ open, setOpen, orders }: Props) {
                   <div>
                     <p className="text-slate-500 text-sm mb-1">Order ID</p>
                     <p className="font-semibold text-slate-900">
-                      #ORD-2024-5567
+                      {focusOrder?.orderId}
                     </p>
                   </div>
                   <div>
                     <p className="text-slate-500 text-sm mb-1">Service Name</p>
                     <p className="font-semibold text-slate-900">
-                      MRI Scan - Brain
+                      {focusOrder?.serviceItems[0].serviceName}
                     </p>
                   </div>
                   <div>
                     <p className="text-slate-500 text-sm mb-1">Doctor</p>
                     <p className="font-semibold text-slate-900">
-                      Dr. Sarah Chen
+                      {focusOrder?.doctor.doctorCode}
                     </p>
                   </div>
                   <div>
                     <p className="text-slate-500 text-sm mb-1">Date</p>
-                    <p className="font-semibold text-slate-900">Oct 26, 2024</p>
+                    <p className="font-semibold text-slate-900">{new Date(focusOrder?.createdAt as string).toLocaleDateString()}</p>
                   </div>
                   <div className="col-span-2 mt-2">
                     <p className="text-slate-500 text-sm mb-1">Status</p>
                     <div className="flex items-center gap-1.5 text-green-600 font-medium">
                       <CheckCircle2 size={18} />
-                      <span>Completed</span>
+                      <span>{focusOrder?.status}</span>
                     </div>
                   </div>
                 </div>
@@ -189,32 +195,38 @@ export default function PatientHistory({ open, setOpen, orders }: Props) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
-                  {orders.map((order: OrderResponse, index) => (
-                    <tr
-                      key={index}
-                      // Highlight the first row to match image style usually indicating 'current selection'
-                      onClick={() => onOrderClick(order)}
-                      className={`${
-                        order.orderId === focusOrder?.orderId ? "bg-blue-100/90" : "bg-white"
-                      } hover:bg-blue-50 transition-colors duration-150`}
-                    >
-                      <td className="py-4 px-6 text-slate-800 font-medium">
-                        {new Date(order.createdAt).toLocaleDateString("vi-VN")}
-                      </td>
-                      <td className="py-4 px-6 text-slate-600">
-                        {order.serviceItems[0].serviceName}
-                      </td>
-                      <td className="py-4 px-6 text-slate-600">
-                        {order.doctor.fullName}
-                      </td>
-                      <td className="py-4 px-6">
-                        <span className="text-green-600 font-medium bg-green-50 px-3 py-1 rounded-full border border-green-100 inline-flex items-center gap-1">
-                          <CheckCircle2 size={18} />
-                          <span>Completed</span>
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                  {patient?.orders?.map(
+                    (order: OrderWithoutPatientDTO, index) => (
+                      <tr
+                        key={index}
+                        // Highlight the first row to match image style usually indicating 'current selection'
+                        onClick={() => onOrderClick(order)}
+                        className={`${
+                          order.orderId === focusOrder?.orderId
+                            ? "bg-blue-100/90"
+                            : "bg-white"
+                        } hover:bg-blue-50 transition-colors duration-150`}
+                      >
+                        <td className="py-4 px-6 text-slate-800 font-medium">
+                          {new Date(order.createdAt).toLocaleDateString(
+                            "vi-VN"
+                          )}
+                        </td>
+                        <td className="py-4 px-6 text-slate-600">
+                          {order.serviceItems[0].serviceName}
+                        </td>
+                        <td className="py-4 px-6 text-slate-600">
+                          {order.doctor.doctorCode}
+                        </td>
+                        <td className="py-4 px-6">
+                          <span className="text-green-600 font-medium bg-green-50 px-3 py-1 rounded-full border border-green-100 inline-flex items-center gap-1">
+                            <CheckCircle2 size={18} />
+                            <span>Completed</span>
+                          </span>
+                        </td>
+                      </tr>
+                    )
+                  )}
                 </tbody>
               </table>
             </div>

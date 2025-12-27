@@ -6,13 +6,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../../components/ui/dropdown-menu";
-import type { OrderResponse, PatientResponse } from "../../../../types/order";
+import type {  PatientResponse } from "../../../../types/order";
 import { toast } from "sonner";
 import { useState } from "react";
 import patientApi from "../../../../apis/patientApis";
 import FormEditPatient from "./FormEditPatient";
 import PatientHistory from "./PatientHistory";
-import orderApis from "../../../../apis/orderApis";
 
 type Props = {
   patients?: PatientResponse;
@@ -20,7 +19,6 @@ type Props = {
 
 export default function PatientsAction({ patients }: Props) {
   const [openEdit, setOpenEdit] = useState(false);
-  const [orders, setOrders] = useState<OrderResponse[]>([]);
   const [openPatientHistory, setOpenPatientHistory] = useState(false);
   const handleDelete = async () => {
     try {
@@ -33,17 +31,6 @@ export default function PatientsAction({ patients }: Props) {
     } catch (error) {
       console.log(error);
     }
-  };
-  const patientHistory = async (patientId: string) => {
-    const patientResponse = await patientApi.getById(patientId);
-    const orderIds = patientResponse?.result?.orderIds || [];
-    const Allorders = await Promise.all(
-      orderIds.map(async (id) => {
-        const orderRes = await orderApis.getById(id);
-        return orderRes.result;
-      })
-    );
-    setOrders(Allorders);
   };
   return (
     <div className="z-20 ">
@@ -76,7 +63,7 @@ export default function PatientsAction({ patients }: Props) {
                 setOpenPatientHistory(true);
                 // patientHistory(patients?.id as string);
               }}
-              onClick={() => patientHistory(patients?.id as string)}
+              // onClick={() => patientHistory(patients?.id as string)}
               className="cursor-pointer outline-bg-secondary"
             >
               Medical history
@@ -92,7 +79,7 @@ export default function PatientsAction({ patients }: Props) {
       <PatientHistory
         open={openPatientHistory}
         setOpen={setOpenPatientHistory}
-        orders={orders}
+        patient={patients as PatientResponse}
       />
     </div>
   );
