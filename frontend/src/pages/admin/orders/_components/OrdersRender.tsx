@@ -6,14 +6,14 @@ import { renderSkeletonRows } from "../../../../components/renderSkeletonRows";
 
 type OrdersProps = {
   patientName?: string;
-  patient_type?: string;
+  dateCreated?: string;
   order_id?: string;
   getOrdersCount: (count: number) => void;
 };
 
 export default function OrdersRender({
   patientName,
-  patient_type,
+  dateCreated,
   order_id,
   getOrdersCount,
 }: OrdersProps) {
@@ -29,7 +29,7 @@ export default function OrdersRender({
       isKey: orderID,
     });
   };
-
+console.log("Rendered OrdersRender", patientName, dateCreated, order_id);
   // Fetch all patients once on mount
   useEffect(() => {
     const fetchOrder = async () => {
@@ -63,11 +63,16 @@ export default function OrdersRender({
           patient?.orderId?.toUpperCase().includes(q)
         );
       }
+      if (dateCreated?.trim()) {
+        filtered = filtered.filter((patient: OrderResponse) =>
+          patient?.createdAt?.includes(dateCreated)
+        );
+      }
 
       setOrder(filtered);
       setLoading(false);
     });
-  }, [patientName, patient_type, order_id]);
+  }, [patientName, dateCreated, order_id]);
   if (order && typeof getOrdersCount === "function") {
     getOrdersCount(order.length);
   }

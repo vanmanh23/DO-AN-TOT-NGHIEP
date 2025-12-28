@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, FileText, Plus } from "lucide-react";
+import { FileText, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import orderApis from "../../../apis/orderApis";
 import type {
@@ -28,23 +28,16 @@ type Props = {
 export type PatientFormSchema = z.infer<typeof patientSchema>;
 
 export default function Component() {
-  // const [patientInfo, setPatientInfo] = useState<Patient>({
-  //   name: "",
-  //   birthdate: "",
-  //   gender: "M",
-  //   address: "",
-  //   phoneNumber: "",
-  //   identityCard: "",
-  //   gmail: "",
-  // });
   const [isProcessing, setIsProcessing] = useState(false);
   const [isNotCreate, setIsNotCreate] = useState(true);
   const [patientAvailable, setPatientAvailable] = useState<PatientDTO>();
-  
+  const [priorityState, setPriorityState] = useState<"ROUTINE" | "URGENT">("ROUTINE");
+
+
   const methods = useForm<PatientFormSchema>({
     resolver: zodResolver(patientSchema),
     // defaultValues: patientInfo,
-     defaultValues: {
+    defaultValues: {
       name: "",
       birthdate: "",
       gender: "M",
@@ -68,7 +61,6 @@ export default function Component() {
   const state = location.state as Props;
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-
 
   useEffect(() => {
     if (state?.orderUpdate?.patientId) {
@@ -105,7 +97,9 @@ export default function Component() {
     queryKey: ["modalities", serviceType], // unique key cho query này
     queryFn: getAllServices, // hàm fetch data
   });
-
+  useEffect(() => {
+    dispatch(setOption("Receive"));
+  }, []);
   // Xử lý loading state
   if (isLoading) {
     return <div>Đang tải dữ liệu...</div>;
@@ -120,14 +114,12 @@ export default function Component() {
       console.log("Submitted data:", data);
       setIsProcessing(true);
       if (!isNotCreate) {
-        const [patientRes] = await Promise.all([
-          patientApi.create(data),
-        ]);
+        const [patientRes] = await Promise.all([patientApi.create(data)]);
         const ids = selectedService.map((s) => s.id);
         const orderRes = await orderApis.create({
           patientId: patientRes?.result?.id as "",
           serviceItemIds: ids,
-          priority: "ROUTINE",
+          priority: priorityState as "ROUTINE" | "URGENT",
           status: "SCHEDULED",
           scheduledAt: "",
           completedAt: "",
@@ -146,7 +138,7 @@ export default function Component() {
         const orderRes = await orderApis.create({
           patientId: patientAvailable?.id as "",
           serviceItemIds: ids,
-          priority: "ROUTINE",
+          priority: priorityState as "ROUTINE" | "URGENT",
           status: "SCHEDULED",
           scheduledAt: "",
           completedAt: "",
@@ -174,10 +166,7 @@ export default function Component() {
   const handleUpdate = async (data: Patient) => {
     try {
       if (data.name !== "") {
-        const patientUpdate = await patientApi.update(
-          patientIdUpdate,
-          data
-        );
+        const patientUpdate = await patientApi.update(patientIdUpdate, data);
         console.log("patientUpdate", patientUpdate);
       }
 
@@ -211,7 +200,9 @@ export default function Component() {
   };
   return (
     <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(isUpdate ? handleUpdate : handleSubmit)}>
+      <form
+        onSubmit={methods.handleSubmit(isUpdate ? handleUpdate : handleSubmit)}
+      >
         <div className="min-h-screen bg-gray-50">
           <div className="p-3 sm:p-4 md:p-6 lg:p-6">
             <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
@@ -314,10 +305,44 @@ export default function Component() {
                               <>Save Request</>
                             )}
                           </button>
-                          <button className="bg-green-600 text-white px-3 sm:px-4 py-2 rounded hover:bg-green-700 transition flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap flex-1 sm:flex-none">
+                          {/* <button className="bg-green-600 text-white px-3 sm:px-4 py-2 rounded hover:bg-green-700 transition flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap flex-1 sm:flex-none">
                             <Calendar size={14} className="sm:w-4 sm:h-4" />
                             Save & Schedule
-                          </button>
+                          </button> */}
+                         
+<div className="flex gap-4">
+  {/* ROUTINE */}
+  <label className="flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer
+                    hover:bg-gray-50 transition
+                    border-gray-300">
+    <input
+      type="checkbox"
+      checked={priorityState === "ROUTINE"}
+      onChange={() => setPriorityState("ROUTINE")}
+      className="accent-blue-600 w-4 h-4"
+    />
+    <span className="text-sm font-medium text-gray-700">
+      Routine
+    </span>
+  </label>
+
+  {/* URGENT */}
+  <label className="flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer
+                    hover:bg-red-50 transition
+                    border-red-300">
+    <input
+      type="checkbox"
+      checked={priorityState === "URGENT"}
+      onChange={() => setPriorityState("URGENT")}
+      className="accent-red-600 w-4 h-4"
+    />
+    <span className="text-sm font-medium text-red-600">
+      Urgent
+    </span>
+  </label>
+</div>
+
+
                         </div>
                       )}
                     </div>

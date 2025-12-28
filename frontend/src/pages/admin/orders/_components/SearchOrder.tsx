@@ -3,7 +3,7 @@ import { useState } from "react";
 
 export type patientSearch = {
   patientNameValue: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  patientType: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  dateCreated: (e: React.ChangeEvent<HTMLInputElement>) => void;
   orderId: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSearch: () => void;
   ordersNumber?: number;
@@ -11,7 +11,7 @@ export type patientSearch = {
 };
 export default function SearchOrder({
   patientNameValue,
-  patientType,
+  dateCreated,
   handleSearch,
   orderId,
   ordersNumber,
@@ -20,16 +20,18 @@ export default function SearchOrder({
   const [found, setFound] = useState(false);
   const resetClick = () => {
     handleReset();
-    // handleSearch();
-    // (document.getElementById("patientName") as HTMLInputElement)!.value = "";
-    // (document.getElementById("patient_type") as HTMLSelectElement).value = "";
-    // (document.getElementById("order_id") as HTMLInputElement).value = "";
-    const patientNameEl = document.getElementById("patientName") as HTMLInputElement | null;
-    const patient_typeEl = document.getElementById("patient_type") as HTMLSelectElement | null;
-    const orderIdEl = document.getElementById("order_id") as HTMLInputElement | null;
-    
+    const patientNameEl = document.getElementById(
+      "patientName"
+    ) as HTMLInputElement | null;
+    const dateCreatedEl = document.getElementById(
+      "date_created"
+    ) as HTMLInputElement | null;
+    const orderIdEl = document.getElementById(
+      "order_id"
+    ) as HTMLInputElement | null;
+
     if (patientNameEl) patientNameEl.value = "";
-    if (patient_typeEl) patient_typeEl.value = "";
+    if (dateCreatedEl) dateCreatedEl.value = "";
     if (orderIdEl) orderIdEl.value = "";
     setFound(false);
   };
@@ -75,19 +77,15 @@ export default function SearchOrder({
             className="outline-bg-secondary  pl-2"
           />
         </div>
-        <select
-          onChange={(e) => patientType(e)}
-          name="patient_type"
-          id="patient_type"
-          className="w-full px-3 py-1 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        >
-          <option value="" className="text-gray-400">Patient type</option>
-          <option value="OUTPATIENT">Outpatient</option>
-          <option value="INPATIENT">Inpatient</option>
-          <option value="EMERGENCY">Emergency</option>
-          <option value="VIP">Vip</option>
-          <option value="FOLLOW UP">Follow up</option>
-        </select>
+        <input
+          type="date"
+          onChange={(e) => dateCreated(e)}
+          name="date_created"
+          id="date_created"
+          placeholder="Search by date created"
+          className="w-full px-3 py-1 border border-gray-300 rounded-lg shadow-sm 
+             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        />
         <button
           onClick={searchClick}
           className="flex flex-row items-center gap-1 bg-bg-secondary font-semibold text-white md:px-2 p-1 w-28 rounded-md hover:bg-bg-secondary/70"

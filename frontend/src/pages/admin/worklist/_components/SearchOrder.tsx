@@ -3,7 +3,7 @@ import { useState } from "react";
 
 export type patientSearch = {
   patientNameValue: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  patientType: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  priorityValue: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   orderId: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSearch: () => void;
   ordersNumber?: number;
@@ -11,7 +11,7 @@ export type patientSearch = {
 };
 export default function SearchOrder({
   patientNameValue,
-  patientType,
+  priorityValue,
   handleSearch,
   orderId,
   ordersNumber,
@@ -20,16 +20,12 @@ export default function SearchOrder({
   const [found, setFound] = useState(false);
   const resetClick = () => {
     handleReset();
-    // handleSearch();
-    // (document.getElementById("patientName") as HTMLInputElement)!.value = "";
-    // (document.getElementById("patient_type") as HTMLSelectElement).value = "";
-    // (document.getElementById("order_id") as HTMLInputElement).value = "";
     const patientNameEl = document.getElementById("patientName") as HTMLInputElement | null;
-    const patient_typeEl = document.getElementById("patient_type") as HTMLSelectElement | null;
+    const priorityEl = document.getElementById("priority") as HTMLSelectElement | null;
     const orderIdEl = document.getElementById("order_id") as HTMLInputElement | null;
     
     if (patientNameEl) patientNameEl.value = "";
-    if (patient_typeEl) patient_typeEl.value = "";
+    if (priorityEl) priorityEl.value = "";
     if (orderIdEl) orderIdEl.value = "";
     setFound(false);
   };
@@ -76,17 +72,20 @@ export default function SearchOrder({
           />
         </div>
         <select
-          onChange={(e) => patientType(e)}
-          name="patient_type"
-          id="patient_type"
+          onChange={(e) => priorityValue(e)}
+          name="priority"
+          id="priority"
+           onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                searchClick();
+              }
+            }}
           className="w-full px-3 py-1 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         >
-          <option value="" className="text-gray-400">Patient type</option>
-          <option value="OUTPATIENT">Outpatient</option>
-          <option value="INPATIENT">Inpatient</option>
-          <option value="EMERGENCY">Emergency</option>
-          <option value="VIP">Vip</option>
-          <option value="FOLLOW UP">Follow up</option>
+          <option value="" className="text-gray-400">Priority</option>
+          <option value="STAT">STAT</option>
+          <option value="ROUTINE">ROUTINE</option>
+          <option value="URGENT">URGENT</option>
         </select>
         <button
           onClick={searchClick}

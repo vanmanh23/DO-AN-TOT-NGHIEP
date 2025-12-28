@@ -14,14 +14,14 @@ import { Link, useNavigate } from "react-router-dom";
 
 type OrdersProps = {
   patientName?: string;
-  patient_type?: string;
+  priority?: string;
   order_id?: string;
   getOrdersCount: (count: number) => void;
 };
 
 export default function OrdersRender({
   patientName,
-  patient_type,
+  priority,
   order_id,
   getOrdersCount,
 }: OrdersProps) {
@@ -58,28 +58,28 @@ export default function OrdersRender({
         );
       }
 
-      // if (patient_type?.trim()) {
-      //   const q = patient_type.toUpperCase();
-      //   filtered = filtered.filter((patient: OrderResponse) =>
-      //     patient?.?.toUpperCase().includes(q)
-      //   );
-      // }
+      if (priority?.trim()) {
+        const q = priority.toUpperCase();
+        filtered = filtered.filter((patient: OrderResponse) =>
+          patient?.priority?.toUpperCase().includes(q)
+        );
+      }
       if (order_id?.trim()) {
         const q = order_id.toUpperCase();
         filtered = filtered.filter((patient: OrderResponse) =>
           patient?.orderId?.toUpperCase().includes(q)
         );
       }
-
+  
       setOrder(filtered);
     });
-  }, [patientName, patient_type, order_id]);
+  }, [patientName, priority, order_id]);
   if (order && typeof getOrdersCount === "function") {
     getOrdersCount(order.length);
   }
-  const proceedToTakeAPhoto = () => {
-    navigate("/admin/worklist/");
-  };
+  // const proceedToTakeAPhoto = () => {
+  //   navigate("/admin/worklist/");
+  // };
   return (
     <div className="container overflow-x-auto mx-auto w-full flex justify-center">
       <table className="w-full min-w-[600px] table-fixed">

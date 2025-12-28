@@ -89,7 +89,7 @@ export interface PatientDTO {
 
 export interface Order {
   patientId?: "";
-  priority: "ROUTINE";
+  priority: "ROUTINE" | "URGENT";
   status: "SCHEDULED";
   studyId?: "";
   scheduledAt: "";

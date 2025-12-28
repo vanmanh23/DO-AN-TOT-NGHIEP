@@ -1,13 +1,15 @@
 import {
+  BriefcaseMedical,
   ClipboardCheck,
   ClipboardPaste,
   FileUser,
   Info,
-  Layers,
   LayoutDashboard,
   ListCheck,
+  MonitorCog,
   Rows3,
   Settings,
+  Stethoscope,
   Users,
 } from "lucide-react";
 import PatientIcon from "./../assets/patient-profile-people-svgrepo-com.svg";
@@ -16,58 +18,6 @@ import sizefilesIcon from "./../assets/size-svgrepo-com.svg";
 import studiesIcon from "./../assets/phase6-svgrepo-com.svg";
 import type { JSX } from "react";
 
-// export const menuItems = [
-//   {
-//     name: "Dashboard",
-//     link: "/admin",
-//     icon: <LayoutDashboard size={18}/>,
-//   },
-//   {
-//     name: "Receive",
-//     link: "/admin/receive",
-//     icon: <ClipboardPaste size={18}/>,
-//   },
-//   {
-//     name: "Patients",
-//     link: "/admin/patients",
-//     icon: <FileUser size={18}/>,
-//   },
-//   {
-//     name: "Orders",
-//     link: "/admin/orders",
-//     icon: <ListCheck size={18}/>,
-//   },
-//   {
-//     name: "Worklist",
-//     link: "/admin/worklist",
-//     icon: <Rows3 size={18}/>,
-//   },
-//   {
-//     name: "Completed examination",
-//     link: "/admin/completed_examination",
-//     icon: <ClipboardCheck size={18}/>,
-//   },
-//   {
-//     name: "Service Items",
-//     link: "/admin/service_items",
-//     icon: <ClipboardCheck size={18}/>,
-//   },
-//   {
-//     name: "Doctors Management",
-//     link: "/admin/doctor_management",
-//     icon: <ClipboardCheck size={18}/>,
-//   },
-//   {
-//     name: "Studies",
-//     link: "/admin/studies",
-//     icon: <Layers size={18}/>,
-//   },
-//   {
-//     name: "User management",
-//     link: "/admin/usermanagement",
-//     icon: <Users size={18}/>,
-//   },
-// ];
 export interface MenuItem {
   name: string;
   link: string;
@@ -109,23 +59,23 @@ export const menuItems: readonly MenuItem[] = [
   {
     name: "Service Items",
     link: "/admin/service_items",
-    icon: <ClipboardCheck size={18}/>,
+    icon: <Stethoscope  size={18}/>,
   },
   {
     name: "Device Management",
     link: "/admin/device_management",
-    icon: <ClipboardCheck size={18}/>,
+    icon: <MonitorCog  size={18}/>,
   },
   {
     name: "Doctors Management",
     link: "/admin/doctor_management",
-    icon: <ClipboardCheck size={18}/>,
+    icon: <BriefcaseMedical size={18}/>,
   },
-  {
-    name: "Studies",
-    link: "/admin/studies",
-    icon: <Layers size={18}/>,
-  },
+  // {
+  //   name: "Studies",
+  //   link: "/admin/studies",
+  //   icon: <Layers size={18}/>,
+  // },
   {
     name: "User management",
     link: "/admin/usermanagement",

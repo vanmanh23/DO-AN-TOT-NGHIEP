@@ -9,19 +9,19 @@ export default function Component() {
   const [getOrdersCount, setOrdersCount] = useState(0);
   const [formValues, setFormValues] = useState<{
     patientName: string;
-    patientType: string;
+    priority: string;
     findById?: string;
-  }>({ patientName: "", patientType: "", findById: "" });
+  }>({ patientName: "", priority: "", findById: "" });
   const [searchValues, setSearchValues] = useState<{
     patientName: string;
-    patientType: string;
+    priority: string;
     findById?: string;
-  }>({ patientName: "", patientType: "", findById: "" });
+  }>({ patientName: "", priority: "", findById: "" });
   const patientNameValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormValues({ ...formValues, patientName: e.target.value });
   };
-  const patientType = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setFormValues({ ...formValues, patientType: e.target.value });
+  const priorityValue = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFormValues({ ...formValues, priority: e.target.value });
   };
   const findByIdValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormValues({ ...formValues, findById: e.target.value });
@@ -36,12 +36,12 @@ export default function Component() {
   const handleReset = () => {
     setFormValues({
       patientName: "",
-      patientType: "",
+      priority: "",
       findById: "",
     })
     setSearchValues({
       patientName: "",
-      patientType: "",
+      priority: "",
       findById: "",
     });
   };
@@ -56,14 +56,14 @@ export default function Component() {
           handleSearch={handleSearch}
           ordersNumber={getOrdersCount}
           handleReset={handleReset}
-          patientType={patientType}
+          priorityValue={priorityValue}
           orderId={findByIdValue}
         />
       </div>
       <div>
           <OrdersRender
             patientName={searchValues.patientName}
-            patient_type={searchValues.patientType}
+            priority={searchValues.priority}
             order_id={searchValues.findById}
             getOrdersCount={handleGetOrdersCount}
           />
