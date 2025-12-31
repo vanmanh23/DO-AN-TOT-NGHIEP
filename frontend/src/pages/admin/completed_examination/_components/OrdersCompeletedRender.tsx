@@ -10,14 +10,14 @@ import { renderSkeletonRows } from "../../../../components/renderSkeletonRows";
 type OrdersProps = {
   patientName?: string;
   statusPayment?: string;
-  order_id?: string;
+  orderCode?: string;
   getOrdersCount: (count: number) => void;
 };
 
 export default function OrdersCompeletedRender({
   patientName,
   statusPayment,
-  order_id,
+  orderCode,
   getOrdersCount,
 }: OrdersProps) {
   const [order, setOrder] = useState<OrderResponse[]>();
@@ -60,17 +60,17 @@ export default function OrdersCompeletedRender({
             patient.payment?.status?.toUpperCase().includes(q)
           );
         }
-        if (order_id?.trim()) {
-          const q = order_id.toUpperCase();
+        if (orderCode?.trim()) {
+          const q = orderCode.toUpperCase();
           filtered = filtered.filter((patient: OrderResponse) =>
-            patient?.orderId?.toUpperCase().includes(q)
+            patient?.orderCode?.toUpperCase().includes(q)
           );
         }
 
         setOrder(filtered);
       });
     }
-  }, [patientName, statusPayment, order_id]);
+  }, [patientName, statusPayment, orderCode]);
 
   if (order && typeof getOrdersCount === "function") {
     getOrdersCount(order.length);
@@ -93,15 +93,15 @@ export default function OrdersCompeletedRender({
         <thead className="hidden md:table-header-group bg-bg-secondary text-white overflow-hidden">
           {headTableforPatients.isHeadTitle && (
             <tr className="overflow-hidden text-xs">
-              <th className="px-2 py-3 text-center">STT</th>
+              <th className="px-2 py-3 text-center">No.</th>
               <th className="px-2 py-3 text-left">Patient Name</th>
-              <th className="px-2 py-3 text-left">Order ID</th>
-              <th className="px-2 py-3 text-left">Bác sĩ chỉ định</th>
+              <th className="px-2 py-3 text-left">Order Code</th>
+              <th className="px-2 py-3 text-left">Doctor's prescription</th>
               <th className="px-2 py-3 text-left">Patient ID</th>
               <th className="px-2 py-3 text-center">Study</th>
-              <th className="px-2 py-3 text-left">Dịch vụ</th>
-              <th className="px-2 py-3 text-center">Báo cáo</th>
-              <th className="px-2 py-3 text-center">Thanh toán</th>
+              <th className="px-2 py-3 text-left">Services</th>
+              <th className="px-2 py-3 text-center">Report Results</th>
+              <th className="px-2 py-3 text-center">Payment status</th>
             </tr>
           )}
         </thead>
@@ -127,7 +127,7 @@ export default function OrdersCompeletedRender({
                 {/* STT */}
                 <td className="p-3 md:border md:text-center block md:table-cell flex justify-between items-center border-b md:border-b-0 last:border-b-0">
                   <span className="font-bold text-gray-600 md:hidden">
-                    STT:
+                    No.
                   </span>
                   <span className="font-semibold">{index + 1}</span>
                 </td>
@@ -135,7 +135,7 @@ export default function OrdersCompeletedRender({
                 {/* Patient Name */}
                 <td className="p-3 md:border block md:table-cell flex justify-between items-center border-b md:border-b-0">
                   <span className="font-bold text-gray-600 md:hidden">
-                    Tên BN:
+                    Patient Name:
                   </span>
                   <span className="text-blue-700 font-medium">
                     {item.patientName}
@@ -145,15 +145,15 @@ export default function OrdersCompeletedRender({
                 {/* Order ID */}
                 <td className="p-3 md:border block md:table-cell flex justify-between items-center border-b md:border-b-0">
                   <span className="font-bold text-gray-600 md:hidden">
-                    Order ID:
+                    Order Code:
                   </span>
-                  <span className="truncate max-w-[150px]">{item.orderId}</span>
+                  <span className="truncate max-w-[150px]">{item.orderCode}</span>
                 </td>
 
                 {/* Doctor */}
                 <td className="p-3 md:border block md:table-cell flex justify-between items-center border-b md:border-b-0">
                   <span className="font-bold text-gray-600 md:hidden">
-                    Bác sĩ:
+                    Doctor:
                   </span>
                   <span>{item.doctor.fullName}</span>
                 </td>
@@ -161,7 +161,7 @@ export default function OrdersCompeletedRender({
                 {/* Patient ID */}
                 <td className="p-3 md:border block md:table-cell flex justify-between items-center border-b md:border-b-0">
                   <span className="font-bold text-gray-600 md:hidden">
-                    Mã BN:
+                    Patient ID:
                   </span>
                   <span>{item.patientId}</span>
                 </td>
@@ -169,7 +169,7 @@ export default function OrdersCompeletedRender({
                 {/* Study - Icon */}
                 <td className="p-3 md:border md:text-center block md:table-cell flex justify-between items-center border-b md:border-b-0">
                   <span className="font-bold text-gray-600 md:hidden">
-                    Xem ảnh:
+                    View Images:
                   </span>
                   <MonitorPlay
                     onClick={() =>
@@ -182,10 +182,10 @@ export default function OrdersCompeletedRender({
                   />
                 </td>
 
-                {/* Dịch vụ */}
+                {/* Services */}
                 <td className="p-3 md:border block md:table-cell border-b md:border-b-0">
                   <span className="font-bold text-gray-600 block md:hidden mb-1">
-                    Dịch vụ:
+                    Services:
                   </span>
                   <div className="break-words text-sm">
                     {item.serviceItems
@@ -194,20 +194,20 @@ export default function OrdersCompeletedRender({
                   </div>
                 </td>
 
-                {/* Báo cáo */}
+                {/* Report */}
                 <td className="p-3 md:border md:text-center block md:table-cell flex justify-between items-center border-b md:border-b-0">
                   <span className="font-bold text-gray-600 md:hidden">
-                    Báo cáo:
+                    Report:
                   </span>
                   <div className="z-20">
                     <ReportAction order={item} />
                   </div>
                 </td>
 
-                {/* Thanh toán */}
+                {/* Payment */}
                 <td className="p-3 md:border md:text-center block md:table-cell border-b md:border-b-0">
                   <span className="font-bold text-gray-600 block md:hidden mb-2 text-left">
-                    Thanh toán:
+                    Payment:
                   </span>
                   <div className="w-full md:w-auto">
                     {item.payment ? (

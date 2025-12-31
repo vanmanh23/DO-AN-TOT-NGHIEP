@@ -64,6 +64,7 @@ export interface OrderWithoutPatientDTO {
   scheduledAt: string | null;
   completedAt: string | null;
   patientId: string;
+  orderCode: string;
   patientBirthday: string;
   patientName: string;
   studyId: string | null;
@@ -132,6 +133,7 @@ export interface OrderResponse {
   patientId: string;
   patientBirthday: string;
   patientName: string;
+  orderCode: string;
   patient?: PatientResponse;
   studyId: string | null;
   study: StudyResponse;

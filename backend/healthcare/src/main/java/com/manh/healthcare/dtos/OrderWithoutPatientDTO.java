@@ -23,6 +23,7 @@ public class OrderWithoutPatientDTO {
         private String patientId;
         private LocalDate patientBirthday;
         private String patientName;
+        private String orderCode;
         private PaymentResponseDTO payment;
         private StudyDTO study;
         private String doctorId;

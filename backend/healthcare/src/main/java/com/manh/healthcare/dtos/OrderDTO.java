@@ -19,6 +19,7 @@ public class OrderDTO {
     private String patientId;
     private LocalDate patientBirthday;
     private String patientName;
+    private String orderCode;
 //    private String studyId;
     private PaymentResponseDTO payment;
     private StudyDTO study;

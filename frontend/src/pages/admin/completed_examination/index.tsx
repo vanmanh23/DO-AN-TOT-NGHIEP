@@ -10,21 +10,21 @@ export default function Component() {
   const [formValues, setFormValues] = useState<{
     patientName: string;
     statusPayment: string;
-    findById?: string;
-  }>({ patientName: "", statusPayment: "", findById: "" });
+    orderCode?: string;
+  }>({ patientName: "", statusPayment: "", orderCode: "" });
   const [searchValues, setSearchValues] = useState<{
     patientName: string;
     statusPayment: string;
-    findById?: string;
-  }>({ patientName: "", statusPayment: "", findById: "" });
+    orderCode?: string;
+  }>({ patientName: "", statusPayment: "", orderCode: "" });
   const patientNameValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormValues({ ...formValues, patientName: e.target.value });
   };
   const statusPaymentValue = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setFormValues({ ...formValues, statusPayment: e.target.value });
   };
-  const findByIdValue = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormValues({ ...formValues, findById: e.target.value });
+  const orderCodeValue = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormValues({ ...formValues, orderCode: e.target.value });
   };
   const dispatch = useDispatch<AppDispatch>();
   const handleSearch = () => {
@@ -37,18 +37,17 @@ export default function Component() {
     setFormValues({
       patientName: "",
       statusPayment: "",
-      findById: "",
+      orderCode: "",
     })
     setSearchValues({
       patientName: "",
       statusPayment: "",
-      findById: "",
+      orderCode: "",
     });
   };
   useEffect(() => {
     dispatch(setOption("Completed examination"));
   }, []);
-  console.log("render completed examination page", searchValues);
   return (
     <div className="flex flex-col gap-3 px-6">
       <div>
@@ -58,14 +57,14 @@ export default function Component() {
           ordersNumber={getOrdersCount}
           handleReset={handleReset}
           statusPayment={statusPaymentValue}
-          orderId={findByIdValue}
+          orderCode={orderCodeValue}
         />
       </div>
       <div>
           <OrdersCompeletedRender
             patientName={searchValues.patientName}
             statusPayment={searchValues.statusPayment}
-            order_id={searchValues.findById}
+            orderCode={searchValues.orderCode}
             getOrdersCount={handleGetOrdersCount}
           />
       </div>

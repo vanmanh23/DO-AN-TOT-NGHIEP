@@ -36,6 +36,9 @@ public class Orders {
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
 
+    @Column(name = "order_code", unique = true, nullable = false, length = 20)
+    private String orderCode;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id", nullable = false)
     @JsonBackReference

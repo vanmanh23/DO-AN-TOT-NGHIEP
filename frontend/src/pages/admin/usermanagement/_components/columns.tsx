@@ -1,19 +1,9 @@
-// This type is used to define the shape of our data.
 
 import type { ColumnDef } from "@tanstack/react-table";
 import PatientDetailsDialog from "./EditUserForm";
 import RemoveHandle from "./RemoveHandle";
 import type { UserResponseDTO } from "../../../../apis/authApis";
 
-// export type User = {
-//   id: number;
-//   username: string;
-//   password?: string;
-//   roles: Role[];
-//   role?: ["admin" | "user"];
-//   email?: string;
-//   phoneNumber?: string;
-// };
 
 export const columns: ColumnDef<UserResponseDTO>[] = [
   {

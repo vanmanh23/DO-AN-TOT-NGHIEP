@@ -4,7 +4,7 @@ import { useState } from "react";
 export type patientSearch = {
   patientNameValue: (e: React.ChangeEvent<HTMLInputElement>) => void;
   statusPayment: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  orderId: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  orderCode: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSearch: () => void;
   ordersNumber?: number;
   handleReset: () => void;
@@ -13,7 +13,7 @@ export default function SearchOrderCompeleted({
   patientNameValue,
   statusPayment,
   handleSearch,
-  orderId,
+  orderCode,
   ordersNumber,
   handleReset,
 }: patientSearch) {
@@ -22,11 +22,11 @@ export default function SearchOrderCompeleted({
     handleReset();
     const patientNameEl = document.getElementById("patientName") as HTMLInputElement | null;
     const StatusPaymentEl = document.getElementById("status_payment") as HTMLSelectElement | null;
-    const orderIdEl = document.getElementById("order_id") as HTMLInputElement | null;
+    const orderCodeEl = document.getElementById("order_code") as HTMLInputElement | null;
     
     if (patientNameEl) patientNameEl.value = "";
     if (StatusPaymentEl) StatusPaymentEl.value = "";
-    if (orderIdEl) orderIdEl.value = "";
+    if (orderCodeEl) orderCodeEl.value = "";
     setFound(false);
   };
   const searchClick = () => {
@@ -44,10 +44,10 @@ export default function SearchOrderCompeleted({
         <div className="flex flex-row items-center h-full gap-2 pl-2 border-slate-200 rounded-md border">
           <Search className="text-secondary" size={16} />
           <input
-            id="order_id"
+            id="order_code"
             type="text"
             placeholder="Search by order ID"
-            onChange={(e) => orderId(e)}
+            onChange={(e) => orderCode(e)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 searchClick();

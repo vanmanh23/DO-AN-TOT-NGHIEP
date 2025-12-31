@@ -25,6 +25,8 @@ const orderApis = {
   createStudy: (data: StudyResponse) => axiosClient.post(`/studies`, data),
 
   patientsByDay: (startDate: string, endDate: string): Promise<ApiResponse<DailyPatientCount[]>> => axiosClient.get(`/orders/patients-by-day?startDate=${startDate}&endDate=${endDate}`),
+
+  findQueueByStatusOrder: (status: string): Promise<ApiResponse<OrderResponse[]>> => axiosClient.get(`/orders/queue/${status}`),
 };
 
 export default orderApis;

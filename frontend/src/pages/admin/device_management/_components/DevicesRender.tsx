@@ -64,26 +64,26 @@ export default function ServiceItemsRender({
 
   return (
     <div className="container overflow-x-auto mx-auto w-full flex justify-center">
-      <table className="w-full min-w-[600px] table-fixed">
-        <thead className="bg-bg-secondary text-white overflow-hidden">
+      <table className="w-full table-fixed">
+        <thead className="bg-bg-secondary text-white ">
           {!isLoading && headTableforDevices.isHeadTitle && (
-            <tr className=" overflow-hidden text-xs">
+            <tr className=" text-xs">
               <th className="px-1 py-2 text-center" colSpan={1}>
                 STT
               </th>
               <th className="px-1 py-2 text-center" colSpan={2}>
                 Model
               </th>
-              <th className="px-1 py-2 text-center" colSpan={2}>
+              <th className="hidden lg:table-cell px-1 py-2 text-center" colSpan={2}>
                 manufacturer
               </th>
-              <th className="px-1 py-2 text-center" colSpan={2}>
+              <th className="px-1 py-2 text-center" colSpan={1}>
                 Type
               </th>
               <th className="px-1 py-2 text-center" colSpan={4}>
                 Department
               </th>
-              <th className="px-1 py-2 text-center" colSpan={2}>
+              <th className="hidden lg:table-cell px-1 py-2 text-center" colSpan={2}>
                 Status
               </th>
               <th className="px-1 py-2 text-center" colSpan={1}>
@@ -98,7 +98,7 @@ export default function ServiceItemsRender({
             <React.Fragment key={index}>
               <tr
                 key={index}
-                className={`overflow-hidden text-xs h-11 ${
+                className={`text-xs h-11 ${
                   headTableforDevices.isKey === item.id ? "bg-gray-200" : ""
                 }`}
                 onMouseMove={() => forcusOnPatients(item.id || "")}
@@ -111,16 +111,16 @@ export default function ServiceItemsRender({
                 <td className="text-blue-700 border px-4 py-2" colSpan={2}>
                   {item.model}
                 </td>
-                <td className="border px-4 py-2" colSpan={2}>
+                <td className="hidden lg:table-cell border px-4 py-2" colSpan={2}>
                   {item.manufacturer}
                 </td>
-                <td className="border px-4 py-2" colSpan={2}>
+                <td className="border px-4 py-2" colSpan={1}>
                   {item.type}
                 </td>
-                <td className="border px-4 py-2" colSpan={4}>
+                <td className=" border px-4 py-2" colSpan={4}>
                   {item.department?.name} - {item.department?.location}
                 </td>
-                <td className="border px-4 py-2 truncate " colSpan={2}>
+                <td className="hidden lg:table-cell border px-4 py-2 truncate " colSpan={2}>
                   {item.status === "Active" ? (
                    <div className="inline-block  h-2 w-2 bg-green-500 rounded-full shadow-blue-500"></div>
                   ) : (

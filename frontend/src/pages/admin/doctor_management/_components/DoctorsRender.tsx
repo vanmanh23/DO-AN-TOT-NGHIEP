@@ -72,10 +72,10 @@ export default function DoctorsRender({
 
   return (
     <div className="container overflow-x-auto mx-auto w-full flex justify-center">
-      <table className="w-full min-w-[600px] table-fixed">
-        <thead className="bg-bg-secondary text-white overflow-hidden">
+      <table className="w-full table-fixed">
+        <thead className="bg-bg-secondary text-white ">
           {headTableforDoctors.isHeadTitle && (
-            <tr className=" overflow-hidden text-xs">
+            <tr className=" text-xs">
               <th className="px-1 py-2 text-center" colSpan={1}>
                 STT
               </th>
@@ -103,7 +103,7 @@ export default function DoctorsRender({
             <React.Fragment key={index}>
               <tr
                 key={index}
-                className={`overflow-hidden text-xs h-11 ${
+                className={` text-xs h-11 ${
                   headTableforDoctors.isKey === item.id
                     ? "bg-gray-200"
                     : ""

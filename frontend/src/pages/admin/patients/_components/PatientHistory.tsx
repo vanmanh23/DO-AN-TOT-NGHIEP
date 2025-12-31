@@ -153,7 +153,7 @@ export default function PatientHistory({ open, setOpen, patient }: Props) {
                   <div>
                     <p className="text-slate-500 text-sm mb-1">Order ID</p>
                     <p className="font-semibold text-slate-900">
-                      {focusOrder?.orderId}
+                      {focusOrder?.orderCode}
                     </p>
                   </div>
                   <div>

@@ -10,21 +10,26 @@ export default function Component() {
   const [formValues, setFormValues] = useState<{
     patientName: string;
     priority: string;
-    findById?: string;
-  }>({ patientName: "", priority: "", findById: "" });
+    orderCode?: string;
+    dateCreated?: string;
+  }>({ patientName: "", priority: "", orderCode: "", dateCreated: new Date().toISOString().split("T")[0] });
   const [searchValues, setSearchValues] = useState<{
     patientName: string;
     priority: string;
-    findById?: string;
-  }>({ patientName: "", priority: "", findById: "" });
+    orderCode?: string;
+    dateCreated?: string;
+  }>({ patientName: "", priority: "", orderCode: "", dateCreated: new Date().toISOString().split("T")[0] });
   const patientNameValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormValues({ ...formValues, patientName: e.target.value });
   };
   const priorityValue = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setFormValues({ ...formValues, priority: e.target.value });
   };
-  const findByIdValue = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormValues({ ...formValues, findById: e.target.value });
+  const orderCodeValue = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormValues({ ...formValues, orderCode: e.target.value });
+  };
+  const dateCreatedValue = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormValues({ ...formValues, dateCreated: e.target.value });
   };
   const dispatch = useDispatch<AppDispatch>();
   const handleSearch = () => {
@@ -37,12 +42,14 @@ export default function Component() {
     setFormValues({
       patientName: "",
       priority: "",
-      findById: "",
+      orderCode: "",
+      dateCreated: new Date().toISOString().split("T")[0],
     })
     setSearchValues({
       patientName: "",
       priority: "",
-      findById: "",
+      orderCode: "",
+      dateCreated: new Date().toISOString().split("T")[0],
     });
   };
   useEffect(() => {
@@ -57,15 +64,18 @@ export default function Component() {
           ordersNumber={getOrdersCount}
           handleReset={handleReset}
           priorityValue={priorityValue}
-          orderId={findByIdValue}
+          orderCode={orderCodeValue}
+          dateCreated={dateCreatedValue}
+          dateCreatedValue={formValues.dateCreated}
         />
       </div>
       <div>
           <OrdersRender
             patientName={searchValues.patientName}
             priority={searchValues.priority}
-            order_id={searchValues.findById}
+            orderCode={searchValues.orderCode}
             getOrdersCount={handleGetOrdersCount}
+            dateCreated={searchValues.dateCreated}
           />
       </div>
     </div>

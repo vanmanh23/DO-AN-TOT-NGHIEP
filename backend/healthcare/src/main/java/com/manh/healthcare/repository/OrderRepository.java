@@ -31,4 +31,19 @@ public interface OrderRepository extends JpaRepository<Orders, String> {
             LocalDateTime startDate,
             LocalDateTime endDate
     );
+
+    @Query("""
+        SELECT o
+        FROM Orders o
+        WHERE o.status = :status
+        ORDER BY 
+            CASE 
+                WHEN o.priority = com.manh.healthcare.entity.EPriority.URGENT THEN 0
+                ELSE 1
+            END,
+            o.createdAt ASC
+    """)
+    List<Orders> findQueueByStatusOrderByPriority(
+            @Param("status") EOrderStatus status
+    );
 }

@@ -6,6 +6,7 @@ import com.manh.healthcare.repository.DoctorRepository;
 import com.manh.healthcare.repository.OrderRepository;
 import com.manh.healthcare.repository.PatientRepository;
 import com.manh.healthcare.repository.ServiceItemRepository;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -29,8 +30,6 @@ public class OrderService {
     private DoctorRepository doctorRepository;
     @Autowired
     private ModelMapper modelMapper;
-//    @Autowired
-//    private StudyRepository studyRepository;
     @Autowired
     private ServiceItemRepository serviceItemRepository;
 
@@ -45,17 +44,6 @@ public class OrderService {
         return convertToDTO(order);
     }
 
-//    public List<OrderDTO> getOrdersByPatientId(String patientId) {
-//        return orderRepository.findByPatient_PatientId(patientId)
-//                .map(this::convertToDTO);
-//    }
-
-//    @Transactional(readOnly = true)
-//    public Page<OrderDTO> getOrdersByStatus(EOrderStatus status, Pageable pageable) {
-//        return orderRepository.findByStatus(status, pageable)
-//                .map(this::convertToDTO);
-//    }
-
     public OrderDTO createOrder(OrderCreateRequest request) {
         // Validate patient
         Patient patient = patientRepository.findById(request.getPatientId())
@@ -67,13 +55,8 @@ public class OrderService {
         order.setCreatedAt(LocalDateTime.now());
         order.setScheduledAt(request.getScheduledAt());
         order.setPatient(patient);
+        order.setOrderCode(generateFormCode());
 
-        // Set study nếu có
-//        if (request.getStudyId() != null) {
-//            Study study = studyRepository.findById(request.getStudyId())
-//                    .orElseThrow(() -> new RuntimeException("Study không tồn tại với ID: " + request.getStudyId()));
-//            order.setStudies(study);
-//        }
         if (request.getDoctorId() != null) {
             Doctor doctor = doctorRepository.findById(request.getDoctorId())
                     .orElseThrow(() -> new RuntimeException("doctor không tồn tại với ID: " + request.getDoctorId()));
@@ -89,40 +72,37 @@ public class OrderService {
         Orders savedOrder = orderRepository.save(order);
         return convertToDTO(savedOrder);
     }
-public OrderDTO updateOrder(String orderId, OrdersRequestDTO request) {
 
-    // 1. Tìm order
-    Orders order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
+    public OrderDTO updateOrder(String orderId, OrdersRequestDTO request) {
 
-    // 2. Update các field cơ bản
-    order.setPriority(request.getPriority());
-    order.setStatus(request.getStatus());
-    order.setScheduledAt(request.getScheduledAt());
-    order.setCompletedAt(request.getCompletedAt());
+        // 1. Tìm order
+        Orders order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
+
+        // 2. Update các field cơ bản
+        order.setPriority(request.getPriority());
+        order.setStatus(request.getStatus());
+        order.setScheduledAt(request.getScheduledAt());
+        order.setCompletedAt(request.getCompletedAt());
 //    order.setStudyId(request.getStudyId());
 
-    if (request.getDoctorId() != null) {
-        Doctor doctor = doctorRepository.getDoctorById(request.getDoctorId());
-        order.setDoctor(doctor);
+        if (request.getDoctorId() != null) {
+            Doctor doctor = doctorRepository.getDoctorById(request.getDoctorId());
+            order.setDoctor(doctor);
+        }
+        // 3. Update Service Items
+        if (request.getServiceItemIds() != null) {
+
+            // Lấy danh sách service item mới
+            Set<ServiceItem> newItems =
+                    new HashSet<>(serviceItemRepository.findAllById(request.getServiceItemIds()));
+
+            // Gán lại trực tiếp (Hibernate tự clear bảng trung gian)
+            order.setServiceItems(newItems);
+        }
+        Orders saved = orderRepository.save(order);
+        return convertToDTO(saved);
     }
-    // 3. Update Service Items
-    if (request.getServiceItemIds() != null) {
-
-        // Lấy danh sách service item mới
-        Set<ServiceItem> newItems =
-                new HashSet<>(serviceItemRepository.findAllById(request.getServiceItemIds()));
-
-        // Gán lại trực tiếp (Hibernate tự clear bảng trung gian)
-        order.setServiceItems(newItems);
-    }
-
-    // 4. Lưu vào DB
-    Orders saved = orderRepository.save(order);
-
-    // 5. Convert sang DTO
-    return convertToDTO(saved);
-}
 
 
     public void deleteOrder(String orderId) {
@@ -140,7 +120,6 @@ public OrderDTO updateOrder(String orderId, OrdersRequestDTO request) {
     public void changeStatus(EOrderStatus new_status, String orderId) {
         Orders order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
-
         order.setStatus(new_status);
         order.setCompletedAt(LocalDateTime.now());
         orderRepository.save(order);
@@ -153,6 +132,12 @@ public OrderDTO updateOrder(String orderId, OrdersRequestDTO request) {
         return orderDTOS;
     }
 
+    public List<OrderDTO> findQueueByStatusOrder(EOrderStatus status) {
+        List<Orders> order = orderRepository.findQueueByStatusOrderByPriority(status);
+        List<OrderDTO> orderDTOS = order.stream().map(this::convertToDTO).toList();
+        return orderDTOS;
+    }
+
     private OrderDTO convertToDTO(Orders order) {
         OrderDTO dto = new OrderDTO();
         dto.setOrderId(order.getOrderId());
@@ -161,6 +146,7 @@ public OrderDTO updateOrder(String orderId, OrdersRequestDTO request) {
         dto.setCreatedAt(order.getCreatedAt());
         dto.setScheduledAt(order.getScheduledAt());
         dto.setCompletedAt(order.getCompletedAt());
+        dto.setOrderCode(order.getOrderCode());
         if (order.getPatient() != null) {
             dto.setPatientId(order.getPatient().getID());
             dto.setPatientName(order.getPatient().getName());
@@ -253,5 +239,41 @@ public OrderDTO updateOrder(String orderId, OrdersRequestDTO request) {
         }
 
         return result;
+    }
+
+    @Transactional
+    public String generateFormCode() {
+        LocalDate today = LocalDate.now();
+        String dateStr = today.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String prefix = "TC" + dateStr + "-";
+
+        // Find the highest sequence number for today
+        int sequenceNumber = getNextSequenceNumber(prefix);
+
+        // Format: TC + YYYYMMDD + 3-digit sequence
+        return String.format("%s%04d", prefix, sequenceNumber);
+    }
+
+    @Transactional
+    private int getNextSequenceNumber(String prefix) {
+        // Get all form codes that start with the prefix
+        String lastFormCode = orderRepository.findAll().stream()
+                .map(form -> form.getOrderCode())
+                .filter(code -> code != null && code.startsWith(prefix))
+                .max(String::compareTo)
+                .orElse(null);
+
+        if (lastFormCode == null) {
+            return 1;
+        }
+
+        // Extract the sequence number from the last code
+        try {
+            String sequenceStr = lastFormCode.substring(prefix.length());
+            int lastSequence = Integer.parseInt(sequenceStr);
+            return lastSequence + 1;
+        } catch (Exception e) {
+            return 1;
+        }
     }
 }

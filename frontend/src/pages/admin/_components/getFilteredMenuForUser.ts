@@ -9,19 +9,19 @@ export function getFilteredMenuForUser(roles: Role[]): readonly MenuItem[] {
   }
 
   if (roleNames.includes("ROLE_DOCTOR")) {
-    const doctorAllowedItems = ["Dashboard", "Worklist", "Completed examination"];
+    const doctorAllowedItems = ["Worklist", "Completed examination", "Patients"];
     return menuItems.filter(item => 
       doctorAllowedItems.includes(item.name)
     );
   }
   if (roleNames.includes("REGISTRATION_STAFF")) {
-    const doctorAllowedItems = ["Dashboard", "Receive", "Orders", "Patients"];
+    const doctorAllowedItems = ["Receive", "Orders", "Patients", "Completed examination"];
     return menuItems.filter(item => 
       doctorAllowedItems.includes(item.name)
     );
   }
   if (roleNames.includes("ROLE_USER")) {
-    const doctorAllowedItems = ["Dashboard", "Worklist", "Completed examination"];
+    const doctorAllowedItems = ["Worklist", "Completed examination"];
     return menuItems.filter(item => 
       doctorAllowedItems.includes(item.name)
     );

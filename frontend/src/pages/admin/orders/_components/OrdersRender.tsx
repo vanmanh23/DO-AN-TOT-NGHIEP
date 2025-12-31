@@ -3,6 +3,7 @@ import type { OrderResponse } from "../../../../types/order";
 import orderApis from "../../../../apis/orderApis";
 import PatientListAction from "./PatientListAction";
 import { renderSkeletonRows } from "../../../../components/renderSkeletonRows";
+import dayjs from "dayjs";
 
 type OrdersProps = {
   patientName?: string;
@@ -34,22 +35,17 @@ console.log("Rendered OrdersRender", patientName, dateCreated, order_id);
   useEffect(() => {
     const fetchOrder = async () => {
       setLoading(true);
-      const res = await orderApis.getAll();
-      const filter = res.result.content.filter(
-        (item) => item.status !== "COMPLETED"
-      );
+      const res = await orderApis.findQueueByStatusOrder("SCHEDULED");
+      const filter = res.result;
       setOrder(filter as unknown as OrderResponse[]);
       setLoading(false);
     };
     fetchOrder();
   }, []);
   useEffect(() => {
-    orderApis.getAll().then((res) => {
+    orderApis.findQueueByStatusOrder("SCHEDULED").then((res) => {
       setLoading(true);
-      let filtered = res.result.content.filter(
-        (item) => item.status !== "COMPLETED"
-      );
-      // let filtered = res.result.content as unknown as OrderResponse[];
+      let filtered = res.result;
       if (patientName?.trim()) {
         const q = patientName.toLocaleLowerCase();
         filtered = filtered.filter((patient: OrderResponse) =>
@@ -79,51 +75,51 @@ console.log("Rendered OrdersRender", patientName, dateCreated, order_id);
 
   return (
     <div className="container overflow-x-auto mx-auto w-full flex justify-center">
-      <table className="w-full min-w-[600px] table-fixed">
-        <thead className="bg-bg-secondary text-white overflow-hidden">
+      <table className="w-full  table-fixed">
+        <thead className="bg-bg-secondary text-white ">
           {headTableforPatients.isHeadTitle && (
-            <tr className=" overflow-hidden text-xs">
+            <tr className="text-xs">
               <th className="px-1 py-2 text-center" colSpan={1}>
                 No.
               </th>
               <th className="px-1 py-2 text-center" colSpan={3}>
                 Patient Name
               </th>
-              <th className="px-1 py-2 text-center" colSpan={5}>
-                order ID
+              <th className="hidden md:table-cell px-1 py-2 text-center" colSpan={3}>
+                order Code
               </th>
-              <th className="px-1 py-2 text-center" colSpan={2}>
+              <th className="hidden md:table-cell px-1 py-2 text-center" colSpan={4}>
                 Date Received
               </th>
-              <th className="px-1 py-2 text-center" colSpan={4}>
+              <th className="hidden lg:table-cell px-1 py-2 text-center" colSpan={4}>
                 Patient ID
               </th>
-              <th className="px-1 py-2 text-center" colSpan={2}>
+              <th className="hidden lg:table-cell px-1 py-2 text-center" colSpan={2}>
                 BirthDate
               </th>
               <th className="px-1 py-2 text-center" colSpan={3}>
                 status
               </th>
-              <th className="px-1 py-2 text-center" colSpan={5}>
+              <th className="hidden lg:table-cell px-1 py-2 text-center" colSpan={5}>
                 Services
               </th>
               <th className="px-1 py-2 text-center" colSpan={1}>
                 Priority
               </th>
               <th className="px-1 py-2 text-center" colSpan={1}>
-                action
+                
               </th>
             </tr>
           )}
         </thead>
         <tbody>
-          {isLoading && renderSkeletonRows({counts: [1, 3, 5, 2, 4, 2, 3, 5, 1, 1]})}
+          {isLoading && renderSkeletonRows({counts: [1, 3, 3, 4, 4, 2, 3, 5, 1, 1]})}
           {!isLoading &&
             order?.map((item: OrderResponse, index: number) => (
               <React.Fragment key={index}>
                 <tr
                   key={index}
-                  className={`overflow-hidden text-xs h-11 ${
+                  className={`overflow-x-auto text-xs h-11 ${
                     headTableforPatients.isKey === item.orderId
                       ? "bg-gray-200"
                       : ""
@@ -138,22 +134,22 @@ console.log("Rendered OrdersRender", patientName, dateCreated, order_id);
                   <td className="text-blue-700 font-medium border px-4 py-2" colSpan={3}>
                     {item.patientName}
                   </td>
-                  <td className="border px-4 py-2 truncate" colSpan={5}>
-                    {item.orderId}
+                  <td className="hidden md:table-cell border px-4 py-2 truncate" colSpan={3}>
+                    {item.orderCode}
                   </td>
-                  <td className="border px-4 py-2" colSpan={2}>
-                    {new Date(item.createdAt).toLocaleDateString("vi-VN")}
+                  <td className="hidden md:table-cell border px-4 py-2" colSpan={4}>
+                      {dayjs(item.createdAt).format("YYYY-MM-DD HH:mm")}
                   </td>
-                  <td className="border px-4 py-2" colSpan={4}>
+                  <td className="hidden lg:table-cell border px-4 py-2" colSpan={4}>
                     {item.patientId}
                   </td>
-                  <td className="border px-4 py-2" colSpan={2}>
+                  <td className="hidden lg:table-cell border px-4 py-2" colSpan={2}>
                     {new Date(item.patientBirthday).toLocaleDateString("vi-VN")}
                   </td>
                   <td className="border px-4 py-2" colSpan={3}>
                     {item.status}
                   </td>
-                  <td className="text-blue-700 font-medium border px-4 py-2" colSpan={5}>
+                  <td className="hidden lg:table-cell text-blue-700 font-medium border px-4 py-2" colSpan={5}>
                     {item.serviceItems
                       .map((service) => service.serviceName)
                       .join(", ")}

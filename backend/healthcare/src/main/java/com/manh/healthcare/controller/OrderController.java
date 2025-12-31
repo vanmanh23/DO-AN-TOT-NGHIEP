@@ -47,6 +47,13 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).body(baseResponse);
     }
 
+    @GetMapping("/queue/{status}")
+    public ResponseEntity<BaseResponse> findQueueByStatusOrder(@PathVariable EOrderStatus status) {
+        List<OrderDTO> orders = orderService.findQueueByStatusOrder(status);
+        BaseResponse baseResponse = BaseResponse.createSuccessResponse("order.success.findQueueByStatusOrder", orders);
+        return ResponseEntity.status(HttpStatus.OK).body(baseResponse);
+    }
+
     @PostMapping
     public ResponseEntity<BaseResponse> createOrder(@Valid @RequestBody OrderCreateRequest request) {
         OrderDTO createdOrder = orderService.createOrder(request);

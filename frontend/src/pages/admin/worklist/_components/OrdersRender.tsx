@@ -10,19 +10,22 @@ import {
   DialogTrigger,
 } from "../../../../components/ui/dialog";
 import { CircleArrowRight } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import dayjs from "dayjs";
 
 type OrdersProps = {
   patientName?: string;
   priority?: string;
-  order_id?: string;
+  orderCode?: string;
+  dateCreated?: string;
   getOrdersCount: (count: number) => void;
 };
 
 export default function OrdersRender({
   patientName,
   priority,
-  order_id,
+  orderCode,
+  dateCreated,
   getOrdersCount,
 }: OrdersProps) {
   const [order, setOrder] = useState<OrderResponse[]>();
@@ -30,27 +33,25 @@ export default function OrdersRender({
     isHeadTitle: true,
     isKey: "",
   });
-  const navigate = useNavigate();
   const forcusOnPatients = (orderID: string) => {
     setHeadTableforPatients({
       isHeadTitle: true,
       isKey: orderID,
     });
   };
-
-  // Fetch all patients once on mount
+  console.log("Rendered OrdersRender",  dateCreated);
   useEffect(() => {
     const fetchOrder = async () => {
-      const res = await orderApis.getAll();
-      const filter = res.result.content.filter(item => item.status !== "COMPLETED");
+      const res = await orderApis.findQueueByStatusOrder("SCHEDULED");
+      const filter = res.result;
       setOrder(filter as unknown as OrderResponse[]);
     };
     fetchOrder();
   }, []);
+  console.log("OrdersRender useEffect dateCreated", dateCreated);
   useEffect(() => {
-    orderApis.getAll().then((res) => {
-      let filtered = res.result.content.filter(item => item.status !== "COMPLETED");
-      // let filtered = res.result.content as unknown as OrderResponse[];
+    orderApis.findQueueByStatusOrder("SCHEDULED").then((res) => {
+      let filtered = res.result;
       if (patientName?.trim()) {
         const q = patientName.toLocaleLowerCase();
         filtered = filtered.filter((patient: OrderResponse) =>
@@ -64,58 +65,72 @@ export default function OrdersRender({
           patient?.priority?.toUpperCase().includes(q)
         );
       }
-      if (order_id?.trim()) {
-        const q = order_id.toUpperCase();
+      if (orderCode?.trim()) {
+        const q = orderCode.toUpperCase();
         filtered = filtered.filter((patient: OrderResponse) =>
-          patient?.orderId?.toUpperCase().includes(q)
+          patient?.orderCode?.toUpperCase().includes(q)
         );
       }
-  
+      if (dateCreated?.trim()) {
+        filtered = filtered.filter((patient: OrderResponse) =>
+          patient?.createdAt?.includes(dateCreated)
+        );
+      }
       setOrder(filtered);
     });
-  }, [patientName, priority, order_id]);
+  }, [patientName, priority, orderCode, dateCreated]);
   if (order && typeof getOrdersCount === "function") {
     getOrdersCount(order.length);
   }
-  // const proceedToTakeAPhoto = () => {
-  //   navigate("/admin/worklist/");
-  // };
   return (
     <div className="container overflow-x-auto mx-auto w-full flex justify-center">
-      <table className="w-full min-w-[600px] table-fixed">
-        <thead className="bg-bg-secondary text-white overflow-hidden">
+      <table className="w-full table-fixed">
+        <thead className="bg-bg-secondary text-white overflow-x-scroll">
           {headTableforPatients.isHeadTitle && (
             <tr className=" overflow-hidden text-xs">
               <th className="px-1 py-2 text-center" colSpan={1}>
                 No.
               </th>
-              <th className="px-1 py-2 text-center" colSpan={3}>
+              <th className="px-1 py-2 text-center" colSpan={4}>
                 Patient Name
               </th>
-              <th className="px-1 py-2 text-center" colSpan={6}>
-                order ID
+              <th
+                className="hidden lg:table-cell px-1 py-2 text-center"
+                colSpan={3}
+              >
+                order Code
               </th>
-              <th className="px-1 py-2 text-center" colSpan={2}>
+              <th
+                className="hidden lg:table-cell px-1 py-2 text-center"
+                colSpan={3}
+              >
                 Date Received
               </th>
-              <th className="px-1 py-2 text-center" colSpan={3}>
+              <th
+                className="hidden lg:table-cell px-1 py-2 text-center"
+                colSpan={3}
+              >
                 Patient ID
               </th>
-              <th className="px-1 py-2 text-center" colSpan={2}>
-                BirthDate
+              <th
+                className="hidden lg:table-cell px-1 py-2 text-center"
+                colSpan={1}
+              >
+                Age
               </th>
               <th className="px-1 py-2 text-center" colSpan={2}>
                 status
               </th>
-              <th className="px-1 py-2 text-center" colSpan={5}>
+              <th
+                className="hidden lg:table-cell px-1 py-2 text-center"
+                colSpan={5}
+              >
                 Services
               </th>
               <th className="px-1 py-2 text-center" colSpan={1}>
                 Priority
               </th>
-              <th className="px-1 py-2 text-center" colSpan={1}>
-                action
-              </th>
+              <th className="px-1 py-2 text-center" colSpan={1}></th>
             </tr>
           )}
         </thead>
@@ -140,27 +155,43 @@ export default function OrdersRender({
                         <p>{index + 1}</p>
                       </div>
                     </td>
-                    <td className="text-blue-700 font-medium border px-4 py-2" colSpan={3}>
+                    <td
+                      className="text-blue-700 font-medium border px-4 py-2 truncate"
+                      colSpan={4}
+                    >
                       {item.patientName}
                     </td>
-                    <td className="border px-4 py-2" colSpan={6}>
-                      {item.orderId}
+                    <td
+                      className="hidden lg:table-cell border px-4 py-2"
+                      colSpan={3}
+                    >
+                      {item.orderCode}
                     </td>
-                    <td className="border px-4 py-2" colSpan={2}>
-                      {new Date(item.createdAt).toLocaleDateString("vi-VN")}
+                    <td
+                      className="hidden lg:table-cell border px-4 py-2"
+                      colSpan={3}
+                    >
+                      {dayjs(item.createdAt).format("YYYY-MM-DD HH:mm")}
                     </td>
-                    <td className="border px-4 py-2" colSpan={3}>
+                    <td
+                      className="hidden lg:table-cell border px-4 py-2"
+                      colSpan={3}
+                    >
                       {item.patientId}
                     </td>
-                    <td className="border px-4 py-2" colSpan={2}>
-                      {new Date(item.patientBirthday).toLocaleDateString(
-                        "vi-VN"
-                      )}
+                    <td
+                      className="hidden lg:table-cell border px-4 py-2"
+                      colSpan={1}
+                    >
+                      {item.patient?.age}
                     </td>
                     <td className="border px-4 py-2" colSpan={2}>
                       {item.status}
                     </td>
-                    <td className="text-blue-700 font-medium border px-4 py-2" colSpan={5}>
+                    <td
+                      className="hidden lg:table-cell text-blue-700 font-medium border px-4 py-2 truncate"
+                      colSpan={5}
+                    >
                       {item.serviceItems
                         .map((service) => service.serviceName)
                         .join(", ")}
@@ -191,7 +222,7 @@ export default function OrdersRender({
                       <p>Birth Year:</p>
                       <p>Address:</p>
                       <p className="py-2"></p>
-                      <p>Order ID:</p>
+                      <p>Order Code:</p>
                       <p>Date Received:</p>
                       <p>Device:</p>
                       <p>Service Code:</p>
@@ -204,7 +235,7 @@ export default function OrdersRender({
                       <p>{item.patientBirthday}</p>
                       <p>{item.patient?.address}</p>
                       <p className="py-2"></p>
-                      <p>{item.serviceItems?.[0]?.id}</p>
+                      <p>{item.orderCode}</p>
                       <p>{new Date(item.createdAt).toLocaleString("vi-VN")}</p>
                       <p>{item.serviceItems?.[0]?.modality?.model}</p>
                       <p>{item.serviceItems?.[0]?.serviceCode}</p>
@@ -212,7 +243,10 @@ export default function OrdersRender({
                     </div>
                   </div>
                   <div className="cursor-pointer items-center text-blue-600 hover:text-blue-800">
-                      <Link to={`/admin/worklist/${item.orderId}`} className="gap-2 flex flex-row justify-end mt-4">
+                    <Link
+                      to={`/admin/worklist/${item.orderId}`}
+                      className="gap-2 flex flex-row justify-end mt-4"
+                    >
                       <p>Proceed to Scan</p>
                       <CircleArrowRight />
                     </Link>
@@ -222,9 +256,9 @@ export default function OrdersRender({
             </React.Fragment>
           ))}
           {order?.length === 0 && (
-             <tr className="block md:table-row">
+            <tr className="block md:table-row">
               <td
-                colSpan={26}
+                colSpan={24}
                 className="p-4 text-center border text-gray-500 block md:table-cell"
               >
                 Not found
