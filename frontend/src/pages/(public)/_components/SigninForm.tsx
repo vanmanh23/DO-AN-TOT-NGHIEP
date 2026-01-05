@@ -1,5 +1,9 @@
 import { Button } from "../../../components/ui/button";
-import { SignIn } from "../../../apis/authApis";
+import {
+  GetEmailFromJWT,
+  GetUserByEmail,
+  SignIn,
+} from "../../../apis/authApis";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -17,22 +21,39 @@ export default function SigninForm() {
     handleSubmit,
   } = useForm<SignInProps>();
 
+  const getUserFromJWT = async (jwt: string) => {
+    const email = await GetEmailFromJWT(jwt);
+    if (email.result) {
+      const userInf = await GetUserByEmail(email.result);
+      if (userInf.result.roles.some((role) => role.name === "ROLE_ADMIN")) {
+        navigate("/admin");
+      }
+      if (userInf.result.roles.some((role) => role.name === "ROLE_DOCTOR")) {
+        navigate("/admin/Worklist");
+      } else {
+        navigate("/admin/Receive");
+      }
+    }
+  };
+
   const onSubmit: SubmitHandler<SignInProps> = async (data) => {
     try {
       const res = await SignIn(data);
       localStorage.setItem("token", res.result.accessToken);
       if (res.result.accessToken) {
-        toast.success("Login successfully!", { duration: 2000, position: "bottom-right",richColors: true }, );
-        navigate("/admin");
+        toast.success("Login successfully!", {
+          duration: 2000,
+          position: "bottom-right",
+          richColors: true,
+        });
+        getUserFromJWT(res.result.accessToken);
       }
-      // const role = await verifyToken(res.access_tocken);
-      // if (role.role === "admin") {
-      //   window.location.href = "/admin";
-      // } else {
-      //   window.location.reload();
-      // }
     } catch (error) {
-      toast.error("Login failed!", { duration: 2000, position: "bottom-right", richColors: true }, );
+      toast.error("Login failed!", {
+        duration: 2000,
+        position: "bottom-right",
+        richColors: true,
+      });
       console.error("Login failed", error);
     }
   };
@@ -46,7 +67,9 @@ export default function SigninForm() {
         />
       </div>
       <div className="flex flex-col justify-center items-center">
-        <h3 className="md:text-xl text-lg font-semibold py-3">Login to your account</h3>
+        <h3 className="md:text-xl text-lg font-semibold py-3">
+          Login to your account
+        </h3>
       </div>
       <div>
         <form
@@ -54,7 +77,12 @@ export default function SigninForm() {
           className="flex flex-col space-y-5"
         >
           <div className="flex flex-col">
-            <label htmlFor="email" className="md:text-sm text-xs text-secondary uppercase">Email</label>
+            <label
+              htmlFor="email"
+              className="md:text-sm text-xs text-secondary uppercase"
+            >
+              Email
+            </label>
             <input
               className="rounded-sm p-1 border border-slate-200 outline-bg-secondary"
               {...register("email", {
@@ -69,7 +97,12 @@ export default function SigninForm() {
             )}
           </div>
           <div className="flex flex-col">
-            <label htmlFor="password" className="md:text-sm text-xs text-secondary uppercase">Password</label>
+            <label
+              htmlFor="password"
+              className="md:text-sm text-xs text-secondary uppercase"
+            >
+              Password
+            </label>
             <input
               type="password"
               className="rounded-sm p-1 border border-slate-200 outline-bg-secondary"

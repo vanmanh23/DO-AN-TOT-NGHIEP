@@ -34,7 +34,7 @@ export default function Navbar({
         }}
       >
         <div>
-          <div className="outline-none">
+          {/* <div className="outline-none">
             <Link
               to="/admin"
               className="outline-none"
@@ -49,7 +49,7 @@ export default function Navbar({
                 }}
               />
             </Link>
-          </div>
+          </div> */}
           <div className="flex flex-col mt-3">
             {filteredItems.map((item, key) => (
               <Link

@@ -10,6 +10,7 @@ import {
   ArrowRight,
   ChevronDown,
   ChevronUp,
+  Sun,
 } from "lucide-react";
 
 type toolsUsed = {
@@ -69,6 +70,12 @@ export default function Features({
       label: "Arrow Annotate",
       color: "cyan",
     },
+    {
+    key: "isWindowLevel",         
+    icon: Sun,                     
+    label: "Window Level",
+    color: "yellow",
+  },
   ];
   const handleToolClick = (toolName: string) => {
     setActiveTool(toolName as keyof toolsUsed);

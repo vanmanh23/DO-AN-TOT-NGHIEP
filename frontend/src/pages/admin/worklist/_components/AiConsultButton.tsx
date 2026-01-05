@@ -33,7 +33,7 @@ const AiConsultButton: React.FC<AiConsultButtonProps> = ({ onClick, isLoading = 
       />
       
       <span>
-        {isLoading ? 'Đang phân tích...' : 'AI Tư vấn dinh dưỡng'}
+        {isLoading ? 'Analyzing...' : 'AI nutritional recommendations'}
       </span>
 
       {/* Hiệu ứng Shine (vệt sáng lướt qua khi hover) - Optional */}

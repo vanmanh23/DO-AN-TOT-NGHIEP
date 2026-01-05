@@ -10,6 +10,7 @@ import {
   CircleROITool,
   ArrowAnnotateTool,
   PanTool,
+  WindowLevelTool,
 } from "@cornerstonejs/tools";
 
 export const TOOL_GROUP_ID = "myToolGroup";
@@ -24,8 +25,10 @@ export function initToolGroup() {
     addTool(CircleROITool)
     addTool(ArrowAnnotateTool)
     addTool(PanTool)
+    addTool(WindowLevelTool)
 
   // Thêm tool vào nhóm
+  toolGroup.addTool(WindowLevelTool.toolName); 
   toolGroup.addTool(BidirectionalTool.toolName);
   toolGroup.addTool(ZoomTool.toolName);
   toolGroup.addTool(EllipticalROITool.toolName);

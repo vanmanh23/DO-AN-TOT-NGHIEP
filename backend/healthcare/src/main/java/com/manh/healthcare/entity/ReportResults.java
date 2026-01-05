@@ -15,13 +15,13 @@ public class ReportResults {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "conclusion")
+    @Column(name = "conclusion", columnDefinition = "TEXT")
     private String conclusion;
 
-    @Column(name = "suggestion")
+    @Column(name = "suggestion", columnDefinition = "TEXT")
     private String suggestion;
 
     @OneToOne

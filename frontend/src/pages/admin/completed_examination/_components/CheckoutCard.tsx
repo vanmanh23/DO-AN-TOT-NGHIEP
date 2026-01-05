@@ -24,6 +24,7 @@ export default function CheckoutCard({ order }: Props) {
       if (selectedMethod === "vnpay") {
         const res = await paymentApis.vnPay(billTotal.toString(), order.payment?.id as string);
         window.open(res, "_blank");
+        window.location.reload();
       }
       if (selectedMethod === "cash") {
         await paymentApis.changeStatus(order.payment?.id as string);

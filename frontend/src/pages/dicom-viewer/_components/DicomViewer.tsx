@@ -22,11 +22,11 @@ import {
   CircleROITool,
   ArrowAnnotateTool,
   PanTool,
+  WindowLevelTool,
 } from "@cornerstonejs/tools";
 import createImageIdsAndCacheMetaData from "../../../lib/createImageIdsAndCacheMetaData";
 import Features from "./Features";
 import { initToolGroup } from "./initToolGroup";
-import { is } from "zod/v4/locales";
 
 const { ViewportType } = Enums;
 // volumeLoader.registerUnknownVolumeLoader(cornerstoneStreamingImageVolumeLoader);
@@ -42,6 +42,7 @@ export type toolsUsed = {
   isrectangleRoi: boolean;
   isCircleROITool: boolean;
   isArrowAnnotateTool: boolean;
+  isWindowLevel: boolean;
 };
 
 function DicomViewer() {
@@ -57,11 +58,13 @@ function DicomViewer() {
     isrectangleRoi: false,
     isCircleROITool: false,
     isArrowAnnotateTool: false,
+    isWindowLevel: false,
   });
   const studyInstance = localStorage.getItem("studyInstanceUID");
   const seriesInstance = localStorage.getItem("seriesInstanceUID");
   const axialRef = useRef<HTMLDivElement | null>(null);
   const running = useRef(false);
+
   useEffect(() => {
     let resizeObserver: ResizeObserver | null = null;
     // async function run() {
@@ -124,7 +127,6 @@ function DicomViewer() {
           [viewportId1]
         );
         const viewport = renderingEngine.getViewport(viewportId1);
-
         viewport.resetCamera();
         // Tự động Resize khi thẻ div thay đổi kích thước
         // Đây là lý do chính khiến ảnh bị bẹp hoặc vỡ hạt
@@ -162,6 +164,7 @@ function DicomViewer() {
     toolGroup.setToolPassive(RectangleROITool.toolName);
     toolGroup.setToolPassive(CircleROITool.toolName);
     toolGroup.setToolPassive(ArrowAnnotateTool.toolName);
+    toolGroup.setToolPassive(WindowLevelTool.toolName);
 
     switch (toolName) {
       case "isZoom":
@@ -244,6 +247,16 @@ function DicomViewer() {
       case "isArrowAnnotateTool":
         console.log("👉 isArrowAnnotateTool Activated");
         toolGroup.setToolActive(ArrowAnnotateTool.toolName, {
+          bindings: [
+            {
+              mouseButton: csToolsEnums.MouseBindings.Primary,
+            },
+          ],
+        });
+        break;
+      case "isWindowLevel":
+        console.log("👉 Window Level Activated");
+        toolGroup.setToolActive(WindowLevelTool.toolName, {
           bindings: [
             {
               mouseButton: csToolsEnums.MouseBindings.Primary,

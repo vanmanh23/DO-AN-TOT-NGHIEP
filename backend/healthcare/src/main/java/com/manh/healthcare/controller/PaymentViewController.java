@@ -45,28 +45,35 @@ public class PaymentViewController {
         if (paymentId == null) {
             throw new IllegalArgumentException("ID cannot be null");
         }
-        PaymentResponseDTO payment = paymentService.getPaymentById(paymentId);
-        payment.setStatus(EPaymentStatus.valueOf("PAID"));
-        payment.setMethod(EPaymentMethod.VNPAY);
-        payment.setPaidAt(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
-        PaymentRequestDTO paymentRequest = modelMapper.map(payment, PaymentRequestDTO.class);
-        PaymentResponseDTO paymentResponseDTO = paymentService.updatePayment(paymentId, paymentRequest);
 
-        OrderDTO order = orderService.findById(paymentResponseDTO.getOrderId());
-        if (order.getPatient().getGmail() != null){
-            String html = mailService.buildInvoiceHtml(order);
-            byte[] pdf = mailService.htmlToPdf(html);
-            mailService.sendInvoiceEmail(
-                    order.getPatient().getGmail(),
-                    pdf
-            );
+        if (paymentStatus == 1) {
+            PaymentResponseDTO payment = paymentService.getPaymentById(paymentId);
+            payment.setStatus(EPaymentStatus.valueOf("PAID"));
+            payment.setMethod(EPaymentMethod.VNPAY);
+            payment.setPaidAt(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+            PaymentRequestDTO paymentRequest = modelMapper.map(payment, PaymentRequestDTO.class);
+            PaymentResponseDTO paymentResponseDTO = paymentService.updatePayment(paymentId, paymentRequest);
+
+            OrderDTO order = orderService.findById(paymentResponseDTO.getOrderId());
+            if (order.getPatient().getGmail() != null){
+                String html = mailService.buildInvoiceHtml(order);
+                byte[] pdf = mailService.htmlToPdf(html);
+                mailService.sendInvoiceEmail(
+                        order.getPatient().getGmail(),
+                        pdf
+                );
+            }
+            model.addAttribute("totalPrice", paymentResponseDTO.getAmount());
+            model.addAttribute("paymentTime", paymentResponseDTO.getPaidAt());
+            model.addAttribute("paymentMethod", paymentResponseDTO.getMethod());
+        } else {
+            PaymentResponseDTO paymentResponseDTO = paymentService.getPaymentById(paymentId);
+            OrderDTO order = orderService.findById(paymentResponseDTO.getOrderId());
+            model.addAttribute("totalPrice", paymentResponseDTO.getAmount());
+            model.addAttribute("paymentMethod", paymentResponseDTO.getMethod());
         }
 
         model.addAttribute("paymentId", paymentId);
-        model.addAttribute("totalPrice", paymentResponseDTO.getAmount());
-        model.addAttribute("paymentTime", paymentResponseDTO.getPaidAt());
-        model.addAttribute("paymentMethod", paymentResponseDTO.getMethod());
-
         return  paymentStatus == 1 ? "payment_success" : "payment_fail";
     }
 }
